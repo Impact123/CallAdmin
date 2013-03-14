@@ -198,7 +198,7 @@ UpdateServerData()
 	if(g_hDbHandle != INVALID_HANDLE)
 	{
 		decl String:query[1024];
-		decl String:sHostName[(sizeof(g_sServerName)+1) * 2];
+		decl String:sHostName[(sizeof(g_sServerName) + 1) * 2];
 		SQL_EscapeString(g_hDbHandle, g_sServerName, sHostName, sizeof(sHostName));
 		
 		// Update the servername
@@ -271,14 +271,14 @@ public Action:Command_Call(client, args)
 ReportPlayer(client, target)
 {
 	new String:clientNameBuf[MAX_NAME_LENGTH];
-	new String:clientName[(MAX_NAME_LENGTH * 2) + 1];
+	new String:clientName[(MAX_NAME_LENGTH + 1) * 2];
 	new String:clientAuth[21];
 	
 	new String:targetNameBuf[MAX_NAME_LENGTH];
-	new String:targetName[(MAX_NAME_LENGTH * 2) + 1];
+	new String:targetName[(MAX_NAME_LENGTH + 1) * 2];
 	new String:targetAuth[21];
 	
-	new String:sReason[(48 * 2) +1];
+	new String:sReason[(48 + 1) * 2];
 	SQL_EscapeString(g_hDbHandle, g_sTargetReason[client], sReason, sizeof(sReason));
 	
 	
@@ -290,7 +290,7 @@ ReportPlayer(client, target)
 	SQL_EscapeString(g_hDbHandle, targetNameBuf, targetName, sizeof(targetName));
 	GetClientAuthString(target, targetAuth, sizeof(targetAuth));
 	
-	new String:serverName[(sizeof(g_sServerName) *2) + 1];
+	new String:serverName[(sizeof(g_sServerName) + 1) * 2];
 	SQL_EscapeString(g_hDbHandle, g_sServerName, serverName, sizeof(serverName));
 	
 	new String:query[1024];
