@@ -108,6 +108,9 @@ public OnPluginStart()
 	AutoExecConfig_CleanFile();
 	
 	
+	LoadTranslations("calladmin.phrases");
+	
+	
 	SetConVarString(g_hVersion, PLUGIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
 	
@@ -255,7 +258,7 @@ public Action:Command_Call(client, args)
 	}
 	else if(!g_bSawMesage[client])
 	{
-		PrintToChat(client, "\x03You are not allowed to use this command in the next %d seconds", 10 - ( GetTime() - g_iLastReport[client] ));
+		PrintToChat(client, "\x03 %t", "CallAdmin_CommandNotAllowed", 10 - ( GetTime() - g_iLastReport[client] ));
 		g_bSawMesage[client] = true;
 	}
 
@@ -294,7 +297,7 @@ ReportPlayer(client, target)
 	Format(query, sizeof(query), "INSERT INTO CallAdmin VALUES ('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d')", g_iServerID, serverName, targetName, targetAuth, sReason, clientName, clientAuth, GetTime());
 	SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	
-	PrintToChatAll("\x03 %s reported %s for %s", clientName, targetName, sReason);
+	PrintToChatAll("\x03 %t", "CallAdmin_HasReported", clientNameBuf, targetNameBuf, sReason);
 	g_iLastReport[client]   = GetTime();
 	g_bWasReported[target]  = true;
 }
@@ -362,7 +365,7 @@ ShowClientSelectMenu(client)
 	decl String:sID[24];
 	
 	new Handle:menu = CreateMenu(MenuHandler_ClientSelect);
-	SetMenuTitle(menu, "Select an client to report");
+	SetMenuTitle(menu, "%T", "CallAdmin_SelectClient", client);
 	
 	for(new i; i <= MaxClients; i++)
 	{
@@ -377,7 +380,7 @@ ShowClientSelectMenu(client)
 	
 	if(GetMenuItemCount(menu) < 1)
 	{
-		PrintToChat(client, "\x03There are no players you can report at this time");
+		PrintToChat(client, "\x03 %t", "CallAdmin_NoPlayers");
 		g_iLastReport[client] = GetTime();
 	}
 	else
@@ -411,7 +414,7 @@ public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
 		}
 		else
 		{
-			PrintToChat(client, "\x03Player is not ingame anymore");
+			PrintToChat(client, "\x03 %t", "CallAdmin_NotInGame");
 		}
 	}
 	else if(action == MenuAction_End)
@@ -460,7 +463,7 @@ ShowBanreasonMenu(client)
 
 	
 	new Handle:menu = CreateMenu(MenuHandler_BanReason);
-	SetMenuTitle(menu, "Select an reason to report %N", g_iTarget[client]);
+	SetMenuTitle(menu, "%T", "CallAdmin_SelectReason", client, g_iTarget[client]);
 	
 	new index;
 	for(new i; i < count; i++)
@@ -502,7 +505,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		}
 		else
 		{
-			PrintToChat(client, "Player is not ingame anymore");
+			PrintToChat(client, "\x03 %t", "CallAdmin_NotInGame");
 		}
 	}
 	else if(action == MenuAction_End)
