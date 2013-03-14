@@ -1,0 +1,36 @@
+"Phrases"
+{
+	"CallAdmin_CommandNotAllowed"
+	{
+		"#format"	"{1:d}"
+		"en"		"You are not allowed to use this command for the next {1} seconds"
+		"de"		"Du darfst diesen Command nicht innerhalb der nächsten {1} Sekunden benutzen"
+	}
+	"CallAdmin_HasReported"
+	{
+		"#format"	"{1:s},{2:s},{3:s}"
+		"en"		"{1} reported {2} for {3}"
+		"de"		"{1} hat {2} wegen {3} reported"
+	}
+	"CallAdmin_NoPlayers"
+	{
+		"en"		"There are no players you can report at this time"
+		"de"		"Es sind derzeit keine Spieler vorhanden die du reporten kannst"
+	}
+	"CallAdmin_NotInGame"
+	{
+		"en"		"Player is not on the server anymore"
+		"de"		"Spieler ist nicht mehr auf dem Server"
+	}
+	"CallAdmin_SelectClient"
+	{
+		"en"		"Select an client to report"
+		"de"		"Wähle einen Spieler zum reporten"
+	}
+	"CallAdmin_SelectReason"
+	{
+		"#format"	"{1:N}"
+		"en"		"Select an reason to report {1}"
+		"de"		"Wähle einen Grund um {1} zu reporten"
+	}
+}
