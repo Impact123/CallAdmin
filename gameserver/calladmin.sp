@@ -1,6 +1,8 @@
 #include <sourcemod>
-#include <updater>
 #include <autoexecconfig>
+
+#undef REQUIRE_PLUGIN
+#include <updater>
 #pragma semicolon 1
 
 
@@ -111,7 +113,7 @@ public OnPluginStart()
 	g_hServerID       = AutoExecConfig_CreateConVar("sm_calladmin_serverid", "-1", "Numerical unique id to use for this server, hostport will be used if value is below 0", FCVAR_PLUGIN);
 	g_hEntryPruning   = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning", "1800", "Entries older than given minuten will be deleted, 0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 3600.0);
 	g_hAdvertInterval = AutoExecConfig_CreateConVar("sm_calladmin_advert_interval", "60.0",  "Interval to advert the use of calladmin, 0.0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 1800.0);
-	g_hPublicMessage  = AutoExecConfig_CreateConVar("sm_calladmin_public_message", "1",  "Whether or not an report should be notifyed to all players or only the reporter.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_hPublicMessage  = AutoExecConfig_CreateConVar("sm_calladmin_public_message", "1",  "Whether or not an report should be notified to all players or only the reporter.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 
 	
 	
@@ -387,7 +389,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															`clientID` VARCHAR(21) NOT NULL,\
 															`reportedAt` INT(10) UNSIGNED NOT NULL,\
 															INDEX `reportedAt` (`reportedAt`))\
-														COLLATE='utf8_unicode_ci'\
+															COLLATE='utf8_unicode_ci'\
 														");
 		
 		// Prune old entries if enabled
@@ -427,7 +429,7 @@ ShowClientSelectMenu(client)
 	
 	for(new i; i <= MaxClients; i++)
 	{
-		if(client != i && !g_bWasReported[i] && IsClientValid(i) && IsFakeClient(i) && !IsClientSourceTV(i))
+		if(i != client && !g_bWasReported[i] && IsClientValid(i) && IsFakeClient(i) && !IsClientSourceTV(i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			Format(sID, sizeof(sID), "%d", GetClientSerial(i));
