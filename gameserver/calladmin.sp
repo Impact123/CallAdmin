@@ -29,12 +29,19 @@ new Handle:g_hVersion;
 new Handle:g_hHostPort;
 new g_iHostPort;
 
+new Handle:g_hHostIP;
+new g_iHostIP;
+new String:g_sHostIP[16];
+
 new Handle:g_hAdvertTimer;
 new Handle:g_hAdvertInterval;
 new Float:g_fAdvertInterval;
 
 new Handle:g_hPublicMessage;
 new bool:g_bPublicMessage;
+
+new bool:g_bLateLoad;
+new bool:g_bDBDelayedLoad;
 
 
 
@@ -78,6 +85,33 @@ public Plugin:myinfo =
 
 
 
+public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
+{
+	g_bLateLoad = late;
+	
+	if(!g_bLateLoad)
+	{
+		g_bDBDelayedLoad = true;
+	}
+	
+	return APLRes_Success;
+}
+
+
+
+public OnConfigsExecuted()
+{
+	if(g_bDBDelayedLoad)
+	{
+		InitDB();
+		g_bDBDelayedLoad = false;
+	}
+}
+
+
+
+
+
 public OnPluginStart()
 {
 	if(!SQL_CheckConfig(SQL_DB_CONF))
@@ -85,23 +119,33 @@ public OnPluginStart()
 		SetFailState("Couldn't find database config");
 	}
 	
-	SQL_TConnect(SQLT_ConnectCallback, SQL_DB_CONF);
+	
+	// We only connect directly if it was a lateload, else we connect when configs were executed to grab the cvars
+	// Configs might've not been excuted and we can't grab the hostname/hostport else
+	if(g_bLateLoad)
+	{
+		InitDB();
+	}
 	
 	
 	g_hHostPort   = FindConVar("hostport");
+	g_hHostIP     = FindConVar("hostip");
 	g_hServerName = FindConVar("hostname");
-	
 	
 	// Shouldn't happen
 	if(g_hHostPort == INVALID_HANDLE)
 	{
 		SetFailState("Couldn't find cvar 'hostport'");
 	}
+	if(g_hHostIP == INVALID_HANDLE)
+	{
+		SetFailState("Couldn't find cvar 'hostip'");
+	}
 	if(g_hServerName == INVALID_HANDLE)
 	{
 		SetFailState("Couldn't find cvar 'hostname'");
 	}
-	
+
 	
 	RegConsoleCmd("sm_call", Command_Call);
 	
@@ -140,6 +184,10 @@ public OnPluginStart()
 	g_iHostPort = GetConVarInt(g_hHostPort);
 	HookConVarChange(g_hHostPort, OnCvarChanged);
 	
+	g_iHostIP = GetConVarInt(g_hHostIP);
+	LongToIp(g_iHostIP, g_sHostIP, sizeof(g_sHostIP));
+	HookConVarChange(g_hHostIP, OnCvarChanged);
+	
 	g_iEntryPruning = GetConVarInt(g_hEntryPruning);
 	HookConVarChange(g_hEntryPruning, OnCvarChanged);
 	
@@ -163,6 +211,13 @@ public OnPluginStart()
 	}
 	
 	g_hAdvertTimer = CreateTimer(600.0, Timer_PruneEntries, _, TIMER_REPEAT);
+}
+
+
+
+InitDB()
+{
+	SQL_TConnect(SQLT_ConnectCallback, SQL_DB_CONF);
 }
 
 
@@ -234,7 +289,7 @@ UpdateServerData()
 		SQL_EscapeString(g_hDbHandle, g_sServerName, sHostName, sizeof(sHostName));
 		
 		// Update the servername
-		Format(query, sizeof(query), "UPDATE IGNORE CallAdmin SET serverName = '%s' WHERE serverID = '%d'", sHostName, g_iServerID);
+		Format(query, sizeof(query), "UPDATE IGNORE CallAdmin SET serverName = '%s', serverIP = '%s' WHERE serverID = '%d'", sHostName, g_sHostIP, g_iServerID);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	}
 }
@@ -262,6 +317,12 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	else if(cvar == g_hHostPort)
 	{
 		g_iHostPort = GetConVarInt(g_hHostPort);
+	}
+	else if(cvar == g_hHostIP)
+	{
+		g_iHostIP = GetConVarInt(g_hHostIP);
+		
+		LongToIp(g_iHostIP, g_sHostIP, sizeof(g_sHostIP));
 	}
 	else if(cvar == g_hServerName)
 	{
@@ -381,6 +442,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 		// Create Table
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "CREATE TABLE IF NOT EXISTS `CallAdmin` (\
 															`serverID` SMALLINT UNSIGNED NOT NULL,\
+															`serverIP` VARCHAR(15) NOT NULL,\
 															`serverName` VARCHAR(64) NOT NULL,\
 															`targetName` VARCHAR(32) NOT NULL,\
 															`targetID` VARCHAR(21) NOT NULL,\
@@ -585,4 +647,18 @@ stock bool:IsClientValid(id)
 	}
 	
 	return false;
+}
+
+
+
+stock LongToIp(long, String:str[], maxlen)
+{
+	new pieces[4];
+	
+	pieces[0] = (long >>> 24 & 255);
+	pieces[1] = (long >>> 16 & 255);
+	pieces[2] = (long >>> 8 & 255);
+	pieces[3] = (long & 255); 
+	
+	Format(str, maxlen, "%d.%d.%d.%d", pieces[0], pieces[1], pieces[2], pieces[3]); 
 }
