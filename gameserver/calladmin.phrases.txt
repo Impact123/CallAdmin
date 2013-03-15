@@ -12,6 +12,12 @@
 		"en"		"{1} reported {2} for {3}"
 		"de"		"{1} hat {2} wegen {3} reported"
 	}
+	"CallAdmin_YouHaveReported"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"You have reported {1} for {2}"
+		"de"		"Du hast {1} wegen {2} reported"
+	}
 	"CallAdmin_NoPlayers"
 	{
 		"en"		"There are no players you can report at this time"
@@ -32,5 +38,10 @@
 		"#format"	"{1:N}"
 		"en"		"Select an reason to report {1}"
 		"de"		"Wähle einen Grund um {1} zu reporten"
+	}
+	"CallAdmin_AdvertMessage"
+	{
+		"en"		"You can use the command !call or /call in chat to report an player, abuse will be punished"
+		"de"		"Du kannst !call oder /call im Chat eingeben um einen Spieler zu reporten, Missbrauch wird bestraft"
 	}
 }
