@@ -99,7 +99,7 @@ public OnPluginStart()
 	AutoExecConfig_SetFile("plugin.calladmin");
 	
 	g_hVersion       = AutoExecConfig_CreateConVar("sm_calladmin_version", PLUGIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hBanReasons    = AutoExecConfig_CreateConVar("sm_calladmin_banreasons", "Aimbot; Wallhack; Speedhack; Spinhack; Multihack; No-Recoil Hack", "Semicolon seperated list of banreasons (24 reasons max, 48 max length per reason)", FCVAR_PLUGIN);
+	g_hBanReasons    = AutoExecConfig_CreateConVar("sm_calladmin_banreasons", "Aimbot; Wallhack; Speedhack; Spinhack; Multihack; No-Recoil Hack; Other", "Semicolon seperated list of banreasons (24 reasons max, 48 max length per reason)", FCVAR_PLUGIN);
 	g_hServerID      = AutoExecConfig_CreateConVar("sm_calladmin_serverid", "-1", "Numerical unique id to use for this server, hostport will be used if value is below 0", FCVAR_PLUGIN);
 	g_hEntryPruning  = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning", "1800", "Entries older than given minuten will be deleted, 0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 3600.0);
 	
