@@ -329,7 +329,6 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															`reportedAt` INT(10) UNSIGNED NOT NULL,\
 															INDEX `reportedAt` (`reportedAt`))\
 														COLLATE='utf8_unicode_ci'\
-														ENGINE=MyISAM;\
 														");
 		
 		// Prune old entries if enabled
@@ -369,7 +368,7 @@ ShowClientSelectMenu(client)
 	
 	for(new i; i <= MaxClients; i++)
 	{
-		if(client != i && !g_bWasReported[i] && IsClientValid(i) )
+		if(client != i && !g_bWasReported[i] && IsClientValid(i) && IsFakeClient(i) && !IsClientSourceTV(i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			Format(sID, sizeof(sID), "%d", GetClientSerial(i));
