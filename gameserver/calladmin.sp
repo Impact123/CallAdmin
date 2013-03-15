@@ -15,9 +15,6 @@ new String:g_sBanReasonsExploded[24][48];
 
 
 // Global Stuff
-new Handle:g_hServerID;
-new g_iServerID;
-
 new Handle:g_hServerName;
 new String:g_sServerName[64];
 
@@ -154,7 +151,6 @@ public OnPluginStart()
 	
 	g_hVersion        = AutoExecConfig_CreateConVar("sm_calladmin_version", PLUGIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	g_hBanReasons     = AutoExecConfig_CreateConVar("sm_calladmin_banreasons", "Aimbot; Wallhack; Speedhack; Spinhack; Multihack; No-Recoil Hack; Other", "Semicolon seperated list of banreasons (24 reasons max, 48 max length per reason)", FCVAR_PLUGIN);
-	g_hServerID       = AutoExecConfig_CreateConVar("sm_calladmin_serverid", "-1", "Numerical unique id to use for this server, hostport will be used if value is below 0", FCVAR_PLUGIN);
 	g_hEntryPruning   = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning", "1800", "Entries older than given minuten will be deleted, 0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 3600.0);
 	g_hAdvertInterval = AutoExecConfig_CreateConVar("sm_calladmin_advert_interval", "60.0",  "Interval to advert the use of calladmin, 0.0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 1800.0);
 	g_hPublicMessage  = AutoExecConfig_CreateConVar("sm_calladmin_public_message", "1",  "Whether or not an report should be notified to all players or only the reporter.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
@@ -174,9 +170,6 @@ public OnPluginStart()
 	GetConVarString(g_hBanReasons, g_sBanReasons, sizeof(g_sBanReasons));
 	ExplodeString(g_sBanReasons, ";", g_sBanReasonsExploded, sizeof(g_sBanReasonsExploded), sizeof(g_sBanReasonsExploded[]), true);
 	HookConVarChange(g_hBanReasons, OnCvarChanged);
-	
-	g_iServerID = GetConVarInt(g_hServerID);
-	HookConVarChange(g_hServerID, OnCvarChanged);
 	
 	GetConVarString(g_hServerName, g_sServerName, sizeof(g_sServerName));
 	HookConVarChange(g_hServerName, OnCvarChanged);
@@ -201,13 +194,6 @@ public OnPluginStart()
 	if(g_fAdvertInterval != 0.0)
 	{
 		g_hAdvertTimer = CreateTimer(g_fAdvertInterval, Timer_Advert, _, TIMER_REPEAT);
-	}
-	
-	
-	// Check ServerID for default
-	if(g_iServerID < 0)
-	{
-		g_iServerID = g_iHostPort;
 	}
 	
 	g_hAdvertTimer = CreateTimer(600.0, Timer_PruneEntries, _, TIMER_REPEAT);
@@ -272,7 +258,7 @@ PruneDatabase()
 	if(g_hDbHandle != INVALID_HANDLE)
 	{
 		decl String:query[1024];
-		Format(query, sizeof(query), "DELETE FROM CallAdmin WHERE serverID = '%d' AND TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(reportedAt), FROM_UNIXTIME(%d)) > %d", g_iServerID, GetTime(), g_iEntryPruning);
+		Format(query, sizeof(query), "DELETE FROM CallAdmin WHERE serverID = '%d' AND serverIP = '%s' AND TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(reportedAt), FROM_UNIXTIME(%d)) > %d", g_iHostPort, g_sHostIP, GetTime(), g_iEntryPruning);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	}
 }
@@ -282,6 +268,7 @@ PruneDatabase()
 
 UpdateServerData()
 {
+	PrintToServer("le update");
 	if(g_hDbHandle != INVALID_HANDLE)
 	{
 		decl String:query[1024];
@@ -289,7 +276,7 @@ UpdateServerData()
 		SQL_EscapeString(g_hDbHandle, g_sServerName, sHostName, sizeof(sHostName));
 		
 		// Update the servername
-		Format(query, sizeof(query), "UPDATE IGNORE CallAdmin SET serverName = '%s', serverIP = '%s' WHERE serverID = '%d'", sHostName, g_sHostIP, g_iServerID);
+		Format(query, sizeof(query), "UPDATE IGNORE CallAdmin SET serverName = '%s', serverIP = '%s' WHERE serverID = '%d'", sHostName, g_sHostIP, g_iHostPort);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	}
 }
@@ -303,16 +290,6 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	{
 		GetConVarString(g_hBanReasons, g_sBanReasons, sizeof(g_sBanReasons));
 		ExplodeString(g_sBanReasons, ";", g_sBanReasonsExploded, sizeof(g_sBanReasonsExploded), sizeof(g_sBanReasonsExploded[]), true);
-	}
-	else if(cvar == g_hServerID)
-	{
-		g_iServerID = GetConVarInt(g_hServerID);
-		
-		// Check for empty value
-		if(g_iServerID < 0)
-		{
-			g_iServerID = g_iHostPort;
-		}
 	}
 	else if(cvar == g_hHostPort)
 	{
@@ -407,7 +384,7 @@ ReportPlayer(client, target)
 	SQL_EscapeString(g_hDbHandle, g_sServerName, serverName, sizeof(serverName));
 	
 	new String:query[1024];
-	Format(query, sizeof(query), "INSERT INTO CallAdmin VALUES ('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d')", g_iServerID, serverName, targetName, targetAuth, sReason, clientName, clientAuth, GetTime());
+	Format(query, sizeof(query), "INSERT INTO CallAdmin VALUES ('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d')", g_iHostPort, serverName, targetName, targetAuth, sReason, clientName, clientAuth, GetTime());
 	SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	
 	
