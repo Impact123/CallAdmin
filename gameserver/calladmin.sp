@@ -60,7 +60,7 @@ new Handle:g_hDbHandle;
 public Plugin:myinfo = 
 {
 	name = "CallAdmin",
-	author = "Impact",
+	author = "Impact, Popoklopsi",
 	description = "Call an Admin for help",
 	version = PLUGIN_VERSION,
 	url = "http://gugyclan.eu"
