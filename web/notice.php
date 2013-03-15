@@ -50,7 +50,7 @@ if(isset($_GET['limit']) && preg_match("/^[0-9]{1,2}+$/", $_GET['limit']))
 
 
 $result = $dbi->query("SELECT 
-							serverID, serverName, targetName, targetID, targetReason, clientName, clientID, reportedAt
+							serverID, serverIP, serverName, targetName, targetID, targetReason, clientName, clientID, reportedAt
 						FROM 
 							$table
 						WHERE
