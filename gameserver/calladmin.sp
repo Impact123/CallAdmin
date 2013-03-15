@@ -27,6 +27,14 @@ new Handle:g_hVersion;
 new Handle:g_hHostPort;
 new g_iHostPort;
 
+new Handle:g_hAdvertTimer;
+new Handle:g_hAdvertInterval;
+new Float:g_fAdvertInterval;
+
+new Handle:g_hPublicMessage;
+new bool:g_bPublicMessage;
+
+
 
 
 // User info
@@ -98,10 +106,13 @@ public OnPluginStart()
 	
 	AutoExecConfig_SetFile("plugin.calladmin");
 	
-	g_hVersion       = AutoExecConfig_CreateConVar("sm_calladmin_version", PLUGIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hBanReasons    = AutoExecConfig_CreateConVar("sm_calladmin_banreasons", "Aimbot; Wallhack; Speedhack; Spinhack; Multihack; No-Recoil Hack; Other", "Semicolon seperated list of banreasons (24 reasons max, 48 max length per reason)", FCVAR_PLUGIN);
-	g_hServerID      = AutoExecConfig_CreateConVar("sm_calladmin_serverid", "-1", "Numerical unique id to use for this server, hostport will be used if value is below 0", FCVAR_PLUGIN);
-	g_hEntryPruning  = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning", "1800", "Entries older than given minuten will be deleted, 0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 3600.0);
+	g_hVersion        = AutoExecConfig_CreateConVar("sm_calladmin_version", PLUGIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hBanReasons     = AutoExecConfig_CreateConVar("sm_calladmin_banreasons", "Aimbot; Wallhack; Speedhack; Spinhack; Multihack; No-Recoil Hack; Other", "Semicolon seperated list of banreasons (24 reasons max, 48 max length per reason)", FCVAR_PLUGIN);
+	g_hServerID       = AutoExecConfig_CreateConVar("sm_calladmin_serverid", "-1", "Numerical unique id to use for this server, hostport will be used if value is below 0", FCVAR_PLUGIN);
+	g_hEntryPruning   = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning", "1800", "Entries older than given minuten will be deleted, 0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 3600.0);
+	g_hAdvertInterval = AutoExecConfig_CreateConVar("sm_calladmin_advert_interval", "60.0",  "Interval to advert the use of calladmin, 0.0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 1800.0);
+	g_hPublicMessage  = AutoExecConfig_CreateConVar("sm_calladmin_public_message", "1",  "Whether or not an report should be notifyed to all players or only the reporter.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+
 	
 	
 	AutoExecConfig(true, "plugin.calladmin");
@@ -113,7 +124,6 @@ public OnPluginStart()
 	
 	SetConVarString(g_hVersion, PLUGIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
-	
 	
 	GetConVarString(g_hBanReasons, g_sBanReasons, sizeof(g_sBanReasons));
 	ExplodeString(g_sBanReasons, ";", g_sBanReasonsExploded, sizeof(g_sBanReasonsExploded), sizeof(g_sBanReasonsExploded[]), true);
@@ -131,6 +141,18 @@ public OnPluginStart()
 	g_iEntryPruning = GetConVarInt(g_hEntryPruning);
 	HookConVarChange(g_hEntryPruning, OnCvarChanged);
 	
+	g_fAdvertInterval = GetConVarFloat(g_hAdvertInterval);
+	HookConVarChange(g_hAdvertInterval, OnCvarChanged);
+	
+	g_bPublicMessage = GetConVarBool(g_hPublicMessage);
+	HookConVarChange(g_hPublicMessage, OnCvarChanged);
+	
+	
+	if(g_fAdvertInterval != 0.0)
+	{
+		g_hAdvertTimer = CreateTimer(g_fAdvertInterval, Timer_Advert, _, TIMER_REPEAT);
+	}
+	
 	
 	// Check ServerID for default
 	if(g_iServerID < 0)
@@ -138,9 +160,17 @@ public OnPluginStart()
 		g_iServerID = g_iHostPort;
 	}
 	
-	CreateTimer(600.0, Timer_PruneEntries, _, TIMER_REPEAT);
+	g_hAdvertTimer = CreateTimer(600.0, Timer_PruneEntries, _, TIMER_REPEAT);
 }
 
+
+
+public Action:Timer_Advert(Handle:timer)
+{
+	PrintToChatAll("\x03 %t", "CallAdmin_AdvertMessage");
+	
+	return Plugin_Handled;
+}
 
 
 
@@ -244,6 +274,26 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	{
 		SetConVarString(g_hVersion, PLUGIN_VERSION, false, false);
 	}
+	else if(cvar == g_hAdvertInterval)
+	{
+		// Close the old timer
+		if(g_hAdvertTimer != INVALID_HANDLE)
+		{
+			CloseHandle(g_hAdvertTimer);
+			g_hAdvertTimer = INVALID_HANDLE;
+		}
+		
+		g_fAdvertInterval = GetConVarFloat(g_hAdvertInterval);
+		
+		if(g_fAdvertInterval != 0.0)
+		{
+			g_hAdvertTimer = CreateTimer(g_fAdvertInterval, Timer_Advert, _, TIMER_REPEAT);
+		}
+	}
+	else if(cvar == g_hPublicMessage)
+	{
+		g_bPublicMessage = GetConVarBool(g_hPublicMessage);
+	}
 }
 
 
@@ -297,7 +347,16 @@ ReportPlayer(client, target)
 	Format(query, sizeof(query), "INSERT INTO CallAdmin VALUES ('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d')", g_iServerID, serverName, targetName, targetAuth, sReason, clientName, clientAuth, GetTime());
 	SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	
-	PrintToChatAll("\x03 %t", "CallAdmin_HasReported", clientNameBuf, targetNameBuf, sReason);
+	
+	if(g_bPublicMessage)
+	{
+		PrintToChatAll("\x03 %t", "CallAdmin_HasReported", clientNameBuf, targetNameBuf, sReason);
+	}
+	else
+	{
+		PrintToChat(client, "\x03 %t", "CallAdmin_YouHaveReported", targetNameBuf, sReason);
+	}
+	
 	g_iLastReport[client]   = GetTime();
 	g_bWasReported[target]  = true;
 }
@@ -525,4 +584,3 @@ stock bool:IsClientValid(id)
 	
 	return false;
 }
-
