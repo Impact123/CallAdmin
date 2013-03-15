@@ -24,7 +24,7 @@ $dbi = new mysqli($host, $username, $password, $database, $dbport);
 // Oh noes, we couldn't connect
 if($dbi->connect_errno != 0)
 {
-	printXmlError("DB_FAILURE #0");
+	printXmlError("DB_FAILURE");
 }
 
 
