@@ -37,6 +37,9 @@ new Float:g_fAdvertInterval;
 new Handle:g_hPublicMessage;
 new bool:g_bPublicMessage;
 
+new Handle:g_hOwnReason;
+new bool:g_bOwnReason;
+
 new bool:g_bLateLoad;
 new bool:g_bDBDelayedLoad;
 
@@ -46,6 +49,9 @@ new bool:g_bDBDelayedLoad;
 // User info
 new g_iTarget[MAXPLAYERS + 1];
 new String:g_sTargetReason[MAXPLAYERS + 1][48];
+
+// Is this player writing his own reason?
+new bool:g_bAwaitingReason[MAXPLAYERS +1];
 
 // When has this user reported the last time
 new g_iLastReport[MAXPLAYERS +1];
@@ -154,6 +160,7 @@ public OnPluginStart()
 	g_hEntryPruning   = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning", "1800", "Entries older than given minuten will be deleted, 0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 3600.0);
 	g_hAdvertInterval = AutoExecConfig_CreateConVar("sm_calladmin_advert_interval", "60.0",  "Interval to advert the use of calladmin, 0.0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 1800.0);
 	g_hPublicMessage  = AutoExecConfig_CreateConVar("sm_calladmin_public_message", "1",  "Whether or not an report should be notified to all players or only the reporter.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_hOwnReason      = AutoExecConfig_CreateConVar("sm_calladmin_own_reason", "1",  "Whether or not client can submit their own reason.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 
 	
 	
@@ -190,6 +197,9 @@ public OnPluginStart()
 	g_bPublicMessage = GetConVarBool(g_hPublicMessage);
 	HookConVarChange(g_hPublicMessage, OnCvarChanged);
 	
+	g_bOwnReason = GetConVarBool(g_hOwnReason);
+	HookConVarChange(g_hOwnReason, OnCvarChanged);
+	
 	
 	if(g_fAdvertInterval != 0.0)
 	{
@@ -197,6 +207,9 @@ public OnPluginStart()
 	}
 	
 	g_hAdvertTimer = CreateTimer(600.0, Timer_PruneEntries, _, TIMER_REPEAT);
+	
+	AddCommandListener(ChatListener, "say");
+	AddCommandListener(ChatListener, "say_team");
 }
 
 
@@ -268,7 +281,6 @@ PruneDatabase()
 
 UpdateServerData()
 {
-	PrintToServer("le update");
 	if(g_hDbHandle != INVALID_HANDLE)
 	{
 		decl String:query[1024];
@@ -334,6 +346,10 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	{
 		g_bPublicMessage = GetConVarBool(g_hPublicMessage);
 	}
+	else if(cvar == g_hOwnReason)
+	{
+		g_bOwnReason = GetConVarBool(g_hOwnReason);
+	}
 }
 
 
@@ -384,17 +400,17 @@ ReportPlayer(client, target)
 	SQL_EscapeString(g_hDbHandle, g_sServerName, serverName, sizeof(serverName));
 	
 	new String:query[1024];
-	Format(query, sizeof(query), "INSERT INTO CallAdmin VALUES ('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d')", g_iHostPort, serverName, targetName, targetAuth, sReason, clientName, clientAuth, GetTime());
+	Format(query, sizeof(query), "INSERT INTO CallAdmin VALUES ('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d')", g_iHostPort, g_sHostIP, serverName, targetName, targetAuth, sReason, clientName, clientAuth, GetTime());
 	SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	
 	
 	if(g_bPublicMessage)
 	{
-		PrintToChatAll("\x03 %t", "CallAdmin_HasReported", clientNameBuf, targetNameBuf, sReason);
+		PrintToChatAll("\x03 %t", "CallAdmin_HasReported", clientNameBuf, targetNameBuf, g_sTargetReason[client]);
 	}
 	else
 	{
-		PrintToChat(client, "\x03 %t", "CallAdmin_YouHaveReported", targetNameBuf, sReason);
+		PrintToChat(client, "\x03 %t", "CallAdmin_YouHaveReported", targetNameBuf, g_sTargetReason[client]);
 	}
 	
 	g_iLastReport[client]   = GetTime();
@@ -468,7 +484,7 @@ ShowClientSelectMenu(client)
 	
 	for(new i; i <= MaxClients; i++)
 	{
-		if(i != client && !g_bWasReported[i] && IsClientValid(i) && IsFakeClient(i) && !IsClientSourceTV(i))
+		if(i != client && !g_bWasReported[i] && IsClientValid(i) IsFakeClient(i) && !IsClientSourceTV(i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			Format(sID, sizeof(sID), "%d", GetClientSerial(i));
@@ -533,6 +549,7 @@ public OnClientDisconnect_Post(client)
 	g_iLastReport[client]      = 0;
 	g_bWasReported[client]     = false;
 	g_bSawMesage[client]       = false;
+	g_bAwaitingReason[client]  = false;
 	
 	RemoveAsTarget(client);
 }
@@ -567,7 +584,7 @@ ShowBanreasonMenu(client)
 	new index;
 	for(new i; i < count; i++)
 	{
-		if(strlen(g_sBanReasonsExploded[i]) < 1)
+		if(strlen(g_sBanReasonsExploded[i]) < 3)
 		{
 			continue;
 		}
@@ -579,6 +596,12 @@ ShowBanreasonMenu(client)
 		}
 		
 		AddMenuItem(menu, g_sBanReasonsExploded[i][index], g_sBanReasonsExploded[i][index]);
+	}
+	
+	// Own reason
+	if(g_bOwnReason)
+	{
+		AddMenuItem(menu, "Own reason", "Own reason");
 	}
 	
 	DisplayMenu(menu, client, 30);
@@ -593,6 +616,14 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 	{
 		new String:sInfo[48];
 		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
+		
+		// Own reason
+		if(StrEqual("Own reason", sInfo))
+		{
+			g_bAwaitingReason[client] = true;
+			PrintToChat(client, "\x03 %t", "CallAdmin_OwnReason");
+			return;
+		}
 		
 		Format(g_sTargetReason[client], sizeof(g_sTargetReason[]), sInfo);
 		
@@ -611,6 +642,60 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 	{
 		CloseHandle(menu);
 	}
+}
+
+
+
+
+public Action:ChatListener(client, const String:command[], argc)
+{
+	if(g_bAwaitingReason[client])
+	{
+		// 2 more for quotes
+		decl String:sReason[50];
+		
+		GetCmdArgString(sReason, sizeof(sReason));
+		StripQuotes(sReason);
+		strcopy(g_sTargetReason[client], sizeof(g_sTargetReason[]), sReason);
+		
+		g_bAwaitingReason[client] = false;
+		
+		
+		// Has aborted
+		if(StrEqual(sReason, "!noreason") || StrEqual(sReason, "!abort"))
+		{
+			PrintToChat(client, "\x03 %t", "CallAdmin_OwnReasonAborted");
+			
+			return Plugin_Handled;
+		}
+		
+		
+		// Stupid you are Õ_Õ
+		if(strlen(sReason) < 3)
+		{
+			g_bAwaitingReason[client] = true;
+			PrintToChat(client, "\x03 %t", "CallAdmin_OwnReasonTooShort");
+			
+			return Plugin_Handled;
+		}
+		
+		
+		if(IsClientValid(g_iTarget[client]))
+		{
+			// Send the report
+			ReportPlayer(client, g_iTarget[client]);
+		}
+		else
+		{
+			PrintToChat(client, "\x03 %t", "CallAdmin_NotInGame");
+		}
+		
+		
+		// Block the chatmessage
+		return Plugin_Handled;
+	}
+	
+	return Plugin_Continue;
 }
 
 
