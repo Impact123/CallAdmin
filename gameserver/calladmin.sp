@@ -465,7 +465,7 @@ ReportPlayer(client, target)
 	Format(query, sizeof(query), "INSERT INTO CallAdmin\
 												(serverIP, serverPort, serverName, targetName, targetID, targetReason, clientName, clientID, reportedAt)\
 											VALUES\
-												('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d')",
+												('%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d')",
 											g_sHostIP, g_iHostPort, serverName, targetName, targetAuth, sReason, clientName, clientAuth, GetTime());
 	SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	
