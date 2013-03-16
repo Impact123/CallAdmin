@@ -373,6 +373,57 @@ public Action:Command_Call(client, args)
 
 
 
+ConfirmCall(client)
+{
+	new Handle:menu = CreateMenu(MenuHandler_ConfirmCall);
+	SetMenuTitle(menu, "%T", "CallAdmin_ConfirmCall", client);
+	
+	decl String:sConfirm[24];
+	
+	Format(sConfirm, sizeof(sConfirm), "%T", "CallAdmin_Yes", client);
+	AddMenuItem(menu, "Yes", sConfirm);
+	
+	Format(sConfirm, sizeof(sConfirm), "%T", "CallAdmin_No", client);
+	AddMenuItem(menu, "No", sConfirm);
+	
+	DisplayMenu(menu, client, 30);
+}
+
+
+
+public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
+{
+	if(action == MenuAction_Select)
+	{
+		new String:sInfo[24];
+		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
+		
+		// Yup
+		if(StrEqual("Yes", sInfo))
+		{
+			if(IsClientValid(g_iTarget[client]))
+			{
+				// Send the report
+				ReportPlayer(client, g_iTarget[client]);
+			}
+			else
+			{
+				PrintToChat(client, "\x03 %t", "CallAdmin_NotInGame");
+			}
+		}
+		else
+		{
+			PrintToChat(client, "\x03 %t", "CallAdmin_OwnReasonAborted");
+		}
+	}
+	else if(action == MenuAction_End)
+	{
+		CloseHandle(menu);
+	}
+}
+
+
+
 
 ReportPlayer(client, target)
 {
@@ -484,7 +535,7 @@ ShowClientSelectMenu(client)
 	
 	for(new i; i <= MaxClients; i++)
 	{
-		if(i != client && !g_bWasReported[i] && IsClientValid(i) IsFakeClient(i) && !IsClientSourceTV(i))
+		if(i != client && !g_bWasReported[i] && IsClientValid(i) && IsFakeClient(i) && !IsClientSourceTV(i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			Format(sID, sizeof(sID), "%d", GetClientSerial(i));
@@ -631,7 +682,8 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		if(IsClientValid(g_iTarget[client]))
 		{
 			// Send the report
-			ReportPlayer(client, g_iTarget[client]);
+			//ReportPlayer(client, g_iTarget[client]);
+			ConfirmCall(client);
 		}
 		else
 		{
@@ -649,7 +701,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 
 public Action:ChatListener(client, const String:command[], argc)
 {
-	if(g_bAwaitingReason[client])
+	if(g_bAwaitingReason[client] && !IsChatTrigger())
 	{
 		// 2 more for quotes
 		decl String:sReason[50];
@@ -670,7 +722,7 @@ public Action:ChatListener(client, const String:command[], argc)
 		}
 		
 		
-		// Stupid you are Õ_Õ
+		// Õ_Õ
 		if(strlen(sReason) < 3)
 		{
 			g_bAwaitingReason[client] = true;
@@ -683,7 +735,8 @@ public Action:ChatListener(client, const String:command[], argc)
 		if(IsClientValid(g_iTarget[client]))
 		{
 			// Send the report
-			ReportPlayer(client, g_iTarget[client]);
+			//ReportPlayer(client, g_iTarget[client]);
+			ConfirmCall(client);
 		}
 		else
 		{
