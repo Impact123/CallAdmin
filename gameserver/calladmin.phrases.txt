@@ -44,4 +44,19 @@
 		"en"		"You can use the command !call or /call in chat to report an player, abuse will be punished"
 		"de"		"Du kannst !call oder /call im Chat eingeben um einen Spieler zu reporten, Missbrauch wird bestraft"
 	}
+	"CallAdmin_OwnReason"
+	{
+		"en"		"You now can type an own banreason in the chat, please keep it short\nType '!noreason' or '!abort' to abort"
+		"de"		"Du kannst nun einen eigenen Bangrund in den Chat schreiben, fasse dich bitte kurz\nSchreibe '!noreason' oder '!abort' um abzubrechen"
+	}
+	"CallAdmin_OwnReasonAborted"
+	{
+		"en"		"Your call has been aborted"
+		"de"		"Dein Request wurde abgebrochen"
+	}
+	"CallAdmin_OwnReasonTooShort"
+	{
+		"en"		"Your banreason was too short, try again"
+		"de"		"Dein Bangrund war zu kurz, versuche es erneut"
+	}
 }
