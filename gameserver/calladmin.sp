@@ -40,6 +40,9 @@ new bool:g_bPublicMessage;
 new Handle:g_hOwnReason;
 new bool:g_bOwnReason;
 
+new Handle:g_hConfirmCall;
+new bool:g_bConfirmCall;
+
 new bool:g_bLateLoad;
 new bool:g_bDBDelayedLoad;
 
@@ -161,6 +164,7 @@ public OnPluginStart()
 	g_hAdvertInterval = AutoExecConfig_CreateConVar("sm_calladmin_advert_interval", "60.0",  "Interval to advert the use of calladmin, 0.0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 1800.0);
 	g_hPublicMessage  = AutoExecConfig_CreateConVar("sm_calladmin_public_message", "1",  "Whether or not an report should be notified to all players or only the reporter.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_hOwnReason      = AutoExecConfig_CreateConVar("sm_calladmin_own_reason", "1",  "Whether or not client can submit their own reason.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_hConfirmCall    = AutoExecConfig_CreateConVar("sm_calladmin_confirm_call", "1",  "Whether or not an call must be confirmed by the client", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 
 	
 	
@@ -199,6 +203,9 @@ public OnPluginStart()
 	
 	g_bOwnReason = GetConVarBool(g_hOwnReason);
 	HookConVarChange(g_hOwnReason, OnCvarChanged);
+	
+	g_bConfirmCall = GetConVarBool(g_hConfirmCall);
+	HookConVarChange(g_hConfirmCall, OnCvarChanged);
 	
 	
 	if(g_fAdvertInterval != 0.0)
@@ -349,6 +356,10 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	else if(cvar == g_hOwnReason)
 	{
 		g_bOwnReason = GetConVarBool(g_hOwnReason);
+	}
+	else if(cvar == g_hConfirmCall)
+	{
+		g_bConfirmCall = GetConVarBool(g_hConfirmCall);
 	}
 }
 
@@ -682,8 +693,14 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		if(IsClientValid(g_iTarget[client]))
 		{
 			// Send the report
-			//ReportPlayer(client, g_iTarget[client]);
-			ConfirmCall(client);
+			if(g_bConfirmCall)
+			{
+				ConfirmCall(client);
+			}
+			else
+			{
+				ReportPlayer(client, g_iTarget[client]);
+			}			
 		}
 		else
 		{
@@ -735,8 +752,14 @@ public Action:ChatListener(client, const String:command[], argc)
 		if(IsClientValid(g_iTarget[client]))
 		{
 			// Send the report
-			//ReportPlayer(client, g_iTarget[client]);
-			ConfirmCall(client);
+			if(g_bConfirmCall)
+			{
+				ConfirmCall(client);
+			}
+			else
+			{
+				ReportPlayer(client, g_iTarget[client]);
+			}
 		}
 		else
 		{
