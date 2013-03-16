@@ -59,4 +59,19 @@
 		"en"		"Your banreason was too short, try again"
 		"de"		"Dein Bangrund war zu kurz, versuche es erneut"
 	}
+	"CallAdmin_ConfirmCall"
+	{
+		"en"		"Are you sure you want to call an admin?"
+		"de"		"Bist du sicher dass du einen Admin rufen willst?"
+	}
+	"CallAdmin_Yes"
+	{
+		"en"		"Yes"
+		"de"		"Ja"
+	}
+	"CallAdmin_No"
+	{
+		"en"		"No"
+		"de"		"Nein"
+	}
 }
