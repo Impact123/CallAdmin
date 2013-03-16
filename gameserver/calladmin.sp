@@ -160,7 +160,7 @@ public OnPluginStart()
 	
 	g_hVersion        = AutoExecConfig_CreateConVar("sm_calladmin_version", PLUGIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	g_hBanReasons     = AutoExecConfig_CreateConVar("sm_calladmin_banreasons", "Aimbot; Wallhack; Speedhack; Spinhack; Multihack; No-Recoil Hack; Other", "Semicolon seperated list of banreasons (24 reasons max, 48 max length per reason)", FCVAR_PLUGIN);
-	g_hEntryPruning   = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning", "1800", "Entries older than given minuten will be deleted, 0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 3600.0);
+	g_hEntryPruning   = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning", "25", "Entries older than given minutes will be deleted, 0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 1440.0);
 	g_hAdvertInterval = AutoExecConfig_CreateConVar("sm_calladmin_advert_interval", "60.0",  "Interval to advert the use of calladmin, 0.0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 1800.0);
 	g_hPublicMessage  = AutoExecConfig_CreateConVar("sm_calladmin_public_message", "1",  "Whether or not an report should be notified to all players or only the reporter.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_hOwnReason      = AutoExecConfig_CreateConVar("sm_calladmin_own_reason", "1",  "Whether or not client can submit their own reason.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
@@ -278,7 +278,7 @@ PruneDatabase()
 	if(g_hDbHandle != INVALID_HANDLE)
 	{
 		decl String:query[1024];
-		Format(query, sizeof(query), "DELETE FROM CallAdmin WHERE serverID = '%d' AND serverIP = '%s' AND TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(reportedAt), FROM_UNIXTIME(%d)) > %d", g_iHostPort, g_sHostIP, GetTime(), g_iEntryPruning);
+		Format(query, sizeof(query), "DELETE FROM CallAdmin WHERE serverIP = '%s' AND serverPort = '%d' AND TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(reportedAt), FROM_UNIXTIME(%d)) > %d", g_sHostIP, g_iHostPort, GetTime(), g_iEntryPruning);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	}
 }
@@ -295,7 +295,7 @@ UpdateServerData()
 		SQL_EscapeString(g_hDbHandle, g_sServerName, sHostName, sizeof(sHostName));
 		
 		// Update the servername
-		Format(query, sizeof(query), "UPDATE IGNORE CallAdmin SET serverName = '%s', serverIP = '%s' WHERE serverID = '%d'", sHostName, g_sHostIP, g_iHostPort);
+		Format(query, sizeof(query), "UPDATE IGNORE CallAdmin SET serverName = '%s' WHERE serverIP = '%s' AND serverPort = '%d'", sHostName, g_sHostIP, g_iHostPort);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	}
 }
@@ -462,7 +462,11 @@ ReportPlayer(client, target)
 	SQL_EscapeString(g_hDbHandle, g_sServerName, serverName, sizeof(serverName));
 	
 	new String:query[1024];
-	Format(query, sizeof(query), "INSERT INTO CallAdmin VALUES ('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d')", g_iHostPort, g_sHostIP, serverName, targetName, targetAuth, sReason, clientName, clientAuth, GetTime());
+	Format(query, sizeof(query), "INSERT INTO CallAdmin\
+												(serverIP, serverPort, serverName, targetName, targetID, targetReason, clientName, clientID, reportedAt)\
+											VALUES\
+												('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d')",
+											g_sHostIP, g_iHostPort, serverName, targetName, targetAuth, sReason, clientName, clientAuth, GetTime());
 	SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	
 	
@@ -496,8 +500,8 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 		
 		// Create Table
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "CREATE TABLE IF NOT EXISTS `CallAdmin` (\
-															`serverID` SMALLINT UNSIGNED NOT NULL,\
 															`serverIP` VARCHAR(15) NOT NULL,\
+															`serverPort` SMALLINT(5) UNSIGNED NOT NULL,\
 															`serverName` VARCHAR(64) NOT NULL,\
 															`targetName` VARCHAR(32) NOT NULL,\
 															`targetID` VARCHAR(21) NOT NULL,\
@@ -546,7 +550,7 @@ ShowClientSelectMenu(client)
 	
 	for(new i; i <= MaxClients; i++)
 	{
-		if(i != client && !g_bWasReported[i] && IsClientValid(i) && IsFakeClient(i) && !IsClientSourceTV(i))
+		if(i != client && !g_bWasReported[i] && IsClientValid(i) /*&& IsFakeClient(i)*/ && !IsClientSourceTV(i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			Format(sID, sizeof(sID), "%d", GetClientSerial(i));
