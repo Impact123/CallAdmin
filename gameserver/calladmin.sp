@@ -424,7 +424,7 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 		}
 		else
 		{
-			PrintToChat(client, "\x03 %t", "CallAdmin_OwnReasonAborted");
+			PrintToChat(client, "\x03 %t", "CallAdmin_CallAborted");
 		}
 	}
 	else if(action == MenuAction_End)
@@ -667,7 +667,10 @@ ShowBanreasonMenu(client)
 	// Own reason
 	if(g_bOwnReason)
 	{
-		AddMenuItem(menu, "Own reason", "Own reason");
+		decl String:sOwnReason[48];
+
+		Format(sOwnReason, sizeof(sOwnReason), "%T", "CallAdmin_OwnReason", client);
+		AddMenuItem(menu, "Own reason", sOwnReason);
 	}
 	
 	DisplayMenu(menu, client, 30);
@@ -687,7 +690,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		if(StrEqual("Own reason", sInfo))
 		{
 			g_bAwaitingReason[client] = true;
-			PrintToChat(client, "\x03 %t", "CallAdmin_OwnReason");
+			PrintToChat(client, "\x03 %t", "CallAdmin_TypeOwnReason");
 			return;
 		}
 		
@@ -737,7 +740,7 @@ public Action:ChatListener(client, const String:command[], argc)
 		// Has aborted
 		if(StrEqual(sReason, "!noreason") || StrEqual(sReason, "!abort"))
 		{
-			PrintToChat(client, "\x03 %t", "CallAdmin_OwnReasonAborted");
+			PrintToChat(client, "\x03 %t", "CallAdmin_CallAborted");
 			
 			return Plugin_Handled;
 		}
