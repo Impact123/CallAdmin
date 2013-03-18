@@ -41,8 +41,9 @@
 	}
 	"CallAdmin_AdvertMessage"
 	{
-		"en"		"You can use the command !call or /call in chat to report an player, abuse will be punished"
-		"de"		"Du kannst !call oder /call im Chat eingeben um einen Spieler zu reporten, Missbrauch wird bestraft"
+		"#format"	"{1:d}"
+		"en"		"There are {1} admins available for calling, type !call or /call in chat to report an player"
+		"de"		"Es sind {1} Admins verfügbar, tippe !call oder /call in den Chat um einen Spieler zu reporten"
 	}
 	"CallAdmin_OwnReason"
 	{
@@ -66,8 +67,8 @@
 	}
 	"CallAdmin_ConfirmCall"
 	{
-		"en"		"Are you sure you want to call an admin?"
-		"de"		"Bist du sicher dass du einen Admin rufen willst?"
+		"en"		"Are you sure you want to call an admin?, abuse will be punished"
+		"de"		"Bist du sicher dass du einen Admin rufen willst?, Missbrauch wird bestraft"
 	}
 	"CallAdmin_Yes"
 	{
@@ -78,5 +79,15 @@
 	{
 		"en"		"No"
 		"de"		"Nein"
+	}
+	"CallAdmin_NoTrackers"
+	{
+		"en"		"Currently there are no admins who could track your request\nYou will receive a message once one is available"
+		"de"		"Es sind derzeit keine Admins vorhanden die auf deinen Request eingehen könnten\nDu wirst eine Meldung bekommen sobald einer verfügbar ist"
+	}
+	"CallAdmin_AdminsAvailable"
+	{
+		"en"		"Admins are now available for your request!"
+		"de"		"Es sind nun Admins für deinen Request verfügbar!"
 	}
 }
