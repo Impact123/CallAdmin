@@ -47,6 +47,9 @@ new bool:g_bLateLoad;
 new bool:g_bDBDelayedLoad;
 
 
+#define PRUNE_TRACKERS_TIME 3
+new g_iCurrentTrackers;
+
 
 
 // User info
@@ -55,6 +58,9 @@ new String:g_sTargetReason[MAXPLAYERS + 1][48];
 
 // Is this player writing his own reason?
 new bool:g_bAwaitingReason[MAXPLAYERS +1];
+
+// Is this player waiting for an admin?
+new bool:g_bAwaitingAdmin[MAXPLAYERS +1];
 
 // When has this user reported the last time
 new g_iLastReport[MAXPLAYERS +1];
@@ -214,6 +220,7 @@ public OnPluginStart()
 	}
 	
 	g_hAdvertTimer = CreateTimer(600.0, Timer_PruneEntries, _, TIMER_REPEAT);
+	CreateTimer(20.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
 	
 	AddCommandListener(ChatListener, "say");
 	AddCommandListener(ChatListener, "say_team");
@@ -230,7 +237,10 @@ InitDB()
 
 public Action:Timer_Advert(Handle:timer)
 {
-	PrintToChatAll("\x03 %t", "CallAdmin_AdvertMessage");
+	if(g_iCurrentTrackers > 0)
+	{
+		PrintToChatAll("\x03 %t", "CallAdmin_AdvertMessage", g_iCurrentTrackers);
+	}
 	
 	return Plugin_Handled;
 }
@@ -278,7 +288,24 @@ PruneDatabase()
 	if(g_hDbHandle != INVALID_HANDLE)
 	{
 		decl String:query[1024];
-		Format(query, sizeof(query), "DELETE FROM CallAdmin WHERE serverIP = '%s' AND serverPort = '%d' AND TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(reportedAt), FROM_UNIXTIME(%d)) > %d", g_sHostIP, g_iHostPort, GetTime(), g_iEntryPruning);
+		
+		// Prune main table (this server)
+		Format(query, sizeof(query), "DELETE FROM CallAdmin WHERE serverIP = '%s' AND serverPort = '%d' AND TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(reportedAt), NOW()) > %d", g_sHostIP, g_iHostPort, g_iEntryPruning);
+		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
+		
+		
+		// Prune trackers table (global)
+		Format(query, sizeof(query), "DELETE FROM CallAdmin_Trackers WHERE TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(lastView), NOW()) >= %d", PRUNE_TRACKERS_TIME);
+		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
+		
+		
+		// Prune ohphaned entries (global)
+		new Float:fMaxBound;
+		new iMaxBound;
+		GetConVarBounds(g_hEntryPruning, ConVarBound_Upper, fMaxBound);
+		iMaxBound = (RoundToCeil(fMaxBound) * 3);
+		
+		Format(query, sizeof(query), "DELETE FROM CallAdmin WHERE TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(reportedAt), NOW()) > %d", iMaxBound);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	}
 }
@@ -371,6 +398,17 @@ public Action:Command_Call(client, args)
 	if(g_iLastReport[client] == 0 || g_iLastReport[client] <= ( GetTime() - 10 ))
 	{
 		g_bSawMesage[client] = false;
+		
+		// Oh noes, no admins
+		if(g_iCurrentTrackers < 1)
+		{
+			PrintToChat(client, "\x03 %t", "CallAdmin_NoTrackers");
+			g_bAwaitingAdmin[client] = true;
+			g_iLastReport[client] = GetTime();
+			
+			return Plugin_Handled;
+		}
+		
 		ShowClientSelectMenu(client);
 	}
 	else if(!g_bSawMesage[client])
@@ -465,8 +503,8 @@ ReportPlayer(client, target)
 	Format(query, sizeof(query), "INSERT INTO CallAdmin\
 												(serverIP, serverPort, serverName, targetName, targetID, targetReason, clientName, clientID, reportedAt)\
 											VALUES\
-												('%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d')",
-											g_sHostIP, g_iHostPort, serverName, targetName, targetAuth, sReason, clientName, clientAuth, GetTime());
+												('%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', UNIX_TIMESTAMP())",
+											g_sHostIP, g_iHostPort, serverName, targetName, targetAuth, sReason, clientName, clientAuth);
 	SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	
 	
@@ -498,7 +536,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 		g_hDbHandle = hndl;
 		
 		
-		// Create Table
+		// Create main Table
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "CREATE TABLE IF NOT EXISTS `CallAdmin` (\
 															`serverIP` VARCHAR(15) NOT NULL,\
 															`serverPort` SMALLINT(5) UNSIGNED NOT NULL,\
@@ -512,12 +550,24 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															INDEX `reportedAt` (`reportedAt`))\
 															COLLATE='utf8_unicode_ci'\
 														");
+														
+		// Create tracker Table
+		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "CREATE TABLE IF NOT EXISTS `CallAdmin_Trackers` (\
+															`trackerIP` VARCHAR(15) NOT NULL,\
+															`lastView` SMALLINT(5) UNSIGNED NOT NULL,\
+															INDEX `lastView` (`lastView`),\
+															UNIQUE INDEX `trackerIP` (`trackerIP`))\
+															COLLATE='utf8_unicode_ci'\
+														");
 		
 		// Prune old entries if enabled
 		if(g_iEntryPruning > 0)
 		{
 			PruneDatabase();
 		}
+		
+		// Get Current trackers
+		GetCurrentTrackers();
 		
 		// Update Serverdata
 		UpdateServerData();
@@ -536,6 +586,62 @@ public SQLT_ErrorCheckCallback(Handle:owner, Handle:hndl, const String:error[], 
 	}
 }
 
+
+
+public Action:Timer_UpdateTrackersCount(Handle:timer)
+{
+	// Get current trackers
+	if(GetRealClientCount() > 0)
+	{
+		GetCurrentTrackers();
+	}
+	
+	return Plugin_Continue;
+}
+
+
+
+
+GetCurrentTrackers()
+{
+	if(g_hDbHandle != INVALID_HANDLE)
+	{
+		decl String:query[1024];
+		
+		// Get current trackers
+		Format(query, sizeof(query), "SELECT \
+											COUNT(*) as currentTrackers \
+										FROM \
+											CallAdmin_Trackers \
+										WHERE \
+											TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(lastView), NOW()) < 2");
+		SQL_TQuery(g_hDbHandle, SQLT_CurrentTrackersCallback, query);
+	}
+}
+
+
+
+
+public SQLT_CurrentTrackersCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
+{
+	if(hndl == INVALID_HANDLE)
+	{
+		SetFailState("CurrentTrackersErr: %s", error);
+	}
+	else
+	{
+		if(SQL_FetchRow(hndl))
+		{
+			g_iCurrentTrackers = SQL_FetchInt(hndl, 0);
+			
+			// Notify the waiters
+			if(g_iCurrentTrackers > 0)
+			{
+				NotifyAdminAwaiters();
+			}
+		}
+	}
+}
 
 
 
@@ -616,6 +722,7 @@ public OnClientDisconnect_Post(client)
 	g_bWasReported[client]     = false;
 	g_bSawMesage[client]       = false;
 	g_bAwaitingReason[client]  = false;
+	g_bAwaitingAdmin[client]   = false;
 	
 	RemoveAsTarget(client);
 }
@@ -784,6 +891,21 @@ public Action:ChatListener(client, const String:command[], argc)
 
 
 
+NotifyAdminAwaiters()
+{
+	for(new i; i <= MaxClients; i++)
+	{
+		if(IsClientValid(i) && g_bAwaitingAdmin[i])
+		{
+			PrintToChat(i, "\x03 %t", "CallAdmin_AdminsAvailable");
+			g_bAwaitingAdmin[i] = false;
+		}
+	}
+}
+
+
+
+
 stock bool:IsClientValid(id)
 {
 	if(id > 0 && id <= MaxClients && IsClientInGame(id))
@@ -792,6 +914,23 @@ stock bool:IsClientValid(id)
 	}
 	
 	return false;
+}
+
+
+
+stock GetRealClientCount()
+{
+	new count;
+	
+	for(new i; i <= MaxClients; i++)
+	{
+		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i))
+		{
+			count++;
+		}
+	}
+	
+	return count;
 }
 
 
