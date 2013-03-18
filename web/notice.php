@@ -10,7 +10,7 @@ require_once('app.config.php');
 
 
 
-// Access management
+// Key set and no key given or key is wrong
 if(!empty($access_key) && ( !isset($_GET['key']) || $_GET['key'] !== $access_key ) )
 {
 	printXmlError("AUTHENTICATION_FAILURE");
@@ -49,7 +49,7 @@ if(isset($_GET['limit']) && preg_match("/^[0-9]{1,2}+$/", $_GET['limit']))
 }
 
 
-$result = $dbi->query("SELECT 
+$fetchresult = $dbi->query("SELECT 
 							serverIP, serverPort, CONCAT(serverIP, ':', serverPort) as fullIP, serverName, targetName, targetID, targetReason, clientName, clientID, reportedAt
 						FROM 
 							$table
@@ -58,19 +58,42 @@ $result = $dbi->query("SELECT
 						ORDER BY
 							reportedAt DESC
 						LIMIT 0, $limit");
-$dbi->close();
-
 
 // Retrieval failed
-if($result === FALSE)
+if($fetchresult === FALSE)
 {
+	$dbi->close();
 	printXmlError("DB_RETRIEVE_FAILURE");
 }
+
+
+// Save this tracker if key is set, key was given, we have an valid remote address and the client sends an store (save him as available)
+if( (!empty($access_key) && isset($_GET['key']) ) && isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
+{
+	$trackerIP = $dbi->escape_string($_SERVER['REMOTE_ADDR']);
+	
+	$insertresult = $dbi->query("INSERT IGNORE INTO CallAdmin_Trackers
+						(trackerIP, lastView)
+					VALUES
+						('$trackerIP', UNIX_TIMESTAMP())
+					ON DUPLICATE KEY
+						UPDATE lastView = UNIX_TIMESTAMP()");
+	
+	// Insert failed
+	if($insertresult === FALSE)
+	{
+		$dbi->close();
+		printXmlError("DB_UPDATE_FAILURE");
+	}
+}
+
+
+$dbi->close();
 					
 
 $xml = new SimpleXMLElement("<CallAdmin/>");
 
-while(($row = $result->fetch_assoc()))
+while(($row = $fetchresult->fetch_assoc()))
 {
 	$child = $xml->addChild("singleReport");
 	
@@ -80,7 +103,7 @@ while(($row = $result->fetch_assoc()))
 		$value = _xmlentities($value);
 		
 		
-		// This shouldn't happen, but is used for the tool
+		// This shouldn't happen, but is used for the client
 		if(strlen($value) < 1)
 		{
 			$value = "NULL";
@@ -90,7 +113,7 @@ while(($row = $result->fetch_assoc()))
 	}
 }
 
-echo($xml->asXML());
+echo $xml->asXML();
 	
 	
 
