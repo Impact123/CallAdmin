@@ -11,7 +11,7 @@ require_once('app.config.php');
 
 
 // Key set and no key given or key is wrong
-if(!empty($access_key) && ( !isset($_GET['key']) || $_GET['key'] !== $access_key ) )
+if( ( !empty($access_key) && !isset($_GET['key']) ) || $_GET['key'] !== $access_key )
 {
 	printXmlError("AUTHENTICATION_FAILURE");
 }
@@ -33,7 +33,7 @@ if($dbi->connect_errno != 0)
 $from = $data_from;
 if(isset($_GET['from']) && preg_match("/^[0-9]{1,11}+$/", $_GET['from']))
 {
-	$from = $_GET['from'];
+	$from = $dbi->escape_string($_GET['from']);
 }
 
 
@@ -44,7 +44,7 @@ if(isset($_GET['limit']) && preg_match("/^[0-9]{1,2}+$/", $_GET['limit']))
 {
 	if($_GET['limit'] > 0 && $_GET['limit'] <= $data_limit)
 	{
-		$limit = $_GET['limit'];
+		$limit = $dbi->escape_string($_GET['limit']);
 	}
 }
 
@@ -58,6 +58,9 @@ if(isset($_GET['sort']) && preg_match("/^[a-zA-Z]{3,4}+$/", $_GET['sort']))
 		$sort = strtoupper($dbi->escape_string($_GET['sort']));
 	}
 }
+
+
+
 $fetchresult = $dbi->query("SELECT 
 							serverIP, serverPort, CONCAT(serverIP, ':', serverPort) as fullIP, serverName, targetName, targetID, targetReason, clientName, clientID, reportedAt
 						FROM 
@@ -77,7 +80,7 @@ if($fetchresult === FALSE)
 
 
 // Save this tracker if key is set, key was given, we have an valid remote address and the client sends an store (save him as available)
-if( (!empty($access_key) && isset($_GET['key']) ) && isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
+if( ( !empty($access_key) && isset($_GET['key']) ) && isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
 {
 	$trackerIP = $dbi->escape_string($_SERVER['REMOTE_ADDR']);
 	
