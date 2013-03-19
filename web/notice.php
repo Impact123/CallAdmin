@@ -49,6 +49,15 @@ if(isset($_GET['limit']) && preg_match("/^[0-9]{1,2}+$/", $_GET['limit']))
 }
 
 
+// Safety
+$sort = strtoupper("desc");
+if(isset($_GET['sort']) && preg_match("/^[a-zA-Z]{3,4}+$/", $_GET['sort']))
+{
+	if(strcasecmp($_GET['sort'], "desc") === 0 || strcasecmp($_GET['sort'], "asc") === 0)
+	{
+		$sort = strtoupper($dbi->escape_string($_GET['sort']));
+	}
+}
 $fetchresult = $dbi->query("SELECT 
 							serverIP, serverPort, CONCAT(serverIP, ':', serverPort) as fullIP, serverName, targetName, targetID, targetReason, clientName, clientID, reportedAt
 						FROM 
@@ -56,7 +65,7 @@ $fetchresult = $dbi->query("SELECT
 						WHERE
 							reportedAt > $from
 						ORDER BY
-							reportedAt DESC
+							reportedAt $sort
 						LIMIT 0, $limit");
 
 // Retrieval failed
