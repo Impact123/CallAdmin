@@ -239,7 +239,7 @@ public Action:Timer_Advert(Handle:timer)
 {
 	if(g_iCurrentTrackers > 0)
 	{
-		PrintToChatAll("\x03%t", "CallAdmin_AdvertMessage", g_iCurrentTrackers);
+		PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_AdvertMessage", g_iCurrentTrackers);
 	}
 	
 	return Plugin_Handled;
@@ -402,7 +402,7 @@ public Action:Command_Call(client, args)
 		// Oh noes, no admins
 		if(g_iCurrentTrackers < 1)
 		{
-			PrintToChat(client, "\x03%t", "CallAdmin_NoTrackers");
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoTrackers");
 			g_bAwaitingAdmin[client] = true;
 			g_iLastReport[client] = GetTime();
 			
@@ -413,7 +413,7 @@ public Action:Command_Call(client, args)
 	}
 	else if(!g_bSawMesage[client])
 	{
-		PrintToChat(client, "\x03%t", "CallAdmin_CommandNotAllowed", 10 - ( GetTime() - g_iLastReport[client] ));
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_CommandNotAllowed", 10 - ( GetTime() - g_iLastReport[client] ));
 		g_bSawMesage[client] = true;
 	}
 
@@ -457,12 +457,12 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 			}
 			else
 			{
-				PrintToChat(client, "\x03%t", "CallAdmin_NotInGame");
+				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
 			}
 		}
 		else
 		{
-			PrintToChat(client, "\x03%t", "CallAdmin_CallAborted");
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_CallAborted");
 		}
 	}
 	else if(action == MenuAction_End)
@@ -510,11 +510,11 @@ ReportPlayer(client, target)
 	
 	if(g_bPublicMessage)
 	{
-		PrintToChatAll("\x03%t", "CallAdmin_HasReported", clientNameBuf, targetNameBuf, g_sTargetReason[client]);
+		PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_HasReported", clientNameBuf, targetNameBuf, g_sTargetReason[client]);
 	}
 	else
 	{
-		PrintToChat(client, "\x03%t", "CallAdmin_YouHaveReported", targetNameBuf, g_sTargetReason[client]);
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_YouHaveReported", targetNameBuf, g_sTargetReason[client]);
 	}
 	
 	g_iLastReport[client]   = GetTime();
@@ -667,7 +667,7 @@ ShowClientSelectMenu(client)
 	
 	if(GetMenuItemCount(menu) < 1)
 	{
-		PrintToChat(client, "\x03%t", "CallAdmin_NoPlayers");
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoPlayers");
 		g_iLastReport[client] = GetTime();
 	}
 	else
@@ -701,7 +701,7 @@ public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
 		}
 		else
 		{
-			PrintToChat(client, "\x03%t", "CallAdmin_NotInGame");
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
 		}
 	}
 	else if(action == MenuAction_End)
@@ -797,7 +797,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		if(StrEqual("Own reason", sInfo))
 		{
 			g_bAwaitingReason[client] = true;
-			PrintToChat(client, "\x03%t", "CallAdmin_TypeOwnReason");
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_TypeOwnReason");
 			return;
 		}
 		
@@ -818,7 +818,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		}
 		else
 		{
-			PrintToChat(client, "\x03%t", "CallAdmin_NotInGame");
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
 		}
 	}
 	else if(action == MenuAction_End)
@@ -847,7 +847,7 @@ public Action:ChatListener(client, const String:command[], argc)
 		// Has aborted
 		if(StrEqual(sReason, "!noreason") || StrEqual(sReason, "!abort"))
 		{
-			PrintToChat(client, "\x03%t", "CallAdmin_CallAborted");
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_CallAborted");
 			
 			return Plugin_Handled;
 		}
@@ -857,7 +857,7 @@ public Action:ChatListener(client, const String:command[], argc)
 		if(strlen(sReason) < 3)
 		{
 			g_bAwaitingReason[client] = true;
-			PrintToChat(client, "\x03%t", "CallAdmin_OwnReasonTooShort");
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_OwnReasonTooShort");
 			
 			return Plugin_Handled;
 		}
@@ -877,7 +877,7 @@ public Action:ChatListener(client, const String:command[], argc)
 		}
 		else
 		{
-			PrintToChat(client, "\x03%t", "CallAdmin_NotInGame");
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
 		}
 		
 		
@@ -897,7 +897,7 @@ NotifyAdminAwaiters()
 	{
 		if(IsClientValid(i) && g_bAwaitingAdmin[i])
 		{
-			PrintToChat(i, "\x03%t", "CallAdmin_AdminsAvailable");
+			PrintToChat(i, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AdminsAvailable");
 			g_bAwaitingAdmin[i] = false;
 		}
 	}
