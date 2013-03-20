@@ -82,7 +82,7 @@ if($fetchresult === FALSE)
 // Save this tracker if key is set, key was given, we have an valid remote address and the client sends an store (save him as available)
 if( ( !empty($access_key) && isset($_GET['key']) ) && isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
 {
-	$trackerIP = $dbi->escape_string($_SERVER['REMOTE_ADDR']);
+	$trackerIP = $dbi->escape_string(AnonymizeIP($_SERVER['REMOTE_ADDR']));
 	
 	$insertresult = $dbi->query("INSERT IGNORE INTO CallAdmin_Trackers
 						(trackerIP, lastView)
@@ -133,6 +133,14 @@ function _xmlentities($input)
 {
 	return str_replace(array("&", "<", ">", "\"", "'"), array("&amp;", "&lt;", "&gt;", "&quot;", "&apos;"), $input);
 }
+
+
+
+function AnonymizeIP($ip)
+{
+	return preg_replace("/[0-9]{1,3}+\z/", '0', $ip);
+}
+
 
 
 function printXmlError($error)
