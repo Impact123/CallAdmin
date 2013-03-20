@@ -30,19 +30,19 @@
 	}
 	"CallAdmin_SelectClient"
 	{
-		"en"		"Select an client to report"
+		"en"		"Select a client to report"
 		"de"		"Wähle einen Spieler zum reporten"
 	}
 	"CallAdmin_SelectReason"
 	{
 		"#format"	"{1:N}"
-		"en"		"Select an reason to report {1}"
+		"en"		"Select a reason to report {1}"
 		"de"		"Wähle einen Grund um {1} zu reporten"
 	}
 	"CallAdmin_AdvertMessage"
 	{
 		"#format"	"{1:d}"
-		"en"		"There are {1} admins available for calling, type !call or /call in chat to report an player"
+		"en"		"There are {1} admins available for calling, type !call or /call in chat to report a player"
 		"de"		"Es sind {1} Admins verfügbar, tippe !call oder /call in den Chat um einen Spieler zu reporten"
 	}
 	"CallAdmin_OwnReason"
