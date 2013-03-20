@@ -1,6 +1,6 @@
 /**
  * -----------------------------------------------------
- * File        notice.php
+ * File        calladmin.sp
  * Authors     Impact, David <popoklopsi> Ordnung
  * License     GPLv3
  * Web         http://gugyclan.eu, http://popoklopsi.de
