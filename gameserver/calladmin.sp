@@ -244,7 +244,7 @@ public OnPluginStart()
 		g_hAdvertTimer = CreateTimer(g_fAdvertInterval, Timer_Advert, _, TIMER_REPEAT);
 	}
 	
-	g_hAdvertTimer = CreateTimer(600.0, Timer_PruneEntries, _, TIMER_REPEAT);
+	CreateTimer(600.0, Timer_PruneEntries, _, TIMER_REPEAT);
 	CreateTimer(20.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
 	
 	AddCommandListener(ChatListener, "say");
