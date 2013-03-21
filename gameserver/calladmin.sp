@@ -572,6 +572,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															`clientName` VARCHAR(32) NOT NULL,\
 															`clientID` VARCHAR(21) NOT NULL,\
 															`reportedAt` INT(10) UNSIGNED NOT NULL,\
+															INDEX `serverIP_serverPort` (`serverIP`, `serverPort`)\
 															INDEX `reportedAt` (`reportedAt`))\
 															COLLATE='utf8_unicode_ci'\
 														");
