@@ -587,6 +587,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 		// Create tracker Table
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "CREATE TABLE IF NOT EXISTS `CallAdmin_Trackers` (\
 															`trackerIP` VARCHAR(15) NOT NULL,\
+															`trackerID` VARCHAR(21) NOT NULL,\
 															`lastView` SMALLINT(5) UNSIGNED NOT NULL,\
 															INDEX `lastView` (`lastView`),\
 															UNIQUE INDEX `trackerIP` (`trackerIP`))\
