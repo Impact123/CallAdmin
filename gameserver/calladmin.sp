@@ -71,6 +71,10 @@ new bool:g_bOwnReason;
 new Handle:g_hConfirmCall;
 new bool:g_bConfirmCall;
 
+new Handle:g_hSpamTime;
+new g_iSpamTime;
+
+
 new bool:g_bLateLoad;
 new bool:g_bDBDelayedLoad;
 
@@ -225,7 +229,8 @@ public OnPluginStart()
 	g_hPublicMessage          = AutoExecConfig_CreateConVar("sm_calladmin_public_message", "1",  "Whether or not an report should be notified to all players or only the reporter.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_hOwnReason              = AutoExecConfig_CreateConVar("sm_calladmin_own_reason", "1",  "Whether or not client can submit their own reason.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_hConfirmCall            = AutoExecConfig_CreateConVar("sm_calladmin_confirm_call", "1",  "Whether or not an call must be confirmed by the client", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-
+	g_hSpamTime               = AutoExecConfig_CreateConVar("sm_calladmin_spamtime", "25", "An user must wait this many seconds after an report before he can issue a new one", FCVAR_PLUGIN, true, 0.0);
+	
 	
 	
 	AutoExecConfig(true, "plugin.calladmin");
@@ -269,6 +274,9 @@ public OnPluginStart()
 	
 	g_bConfirmCall = GetConVarBool(g_hConfirmCall);
 	HookConVarChange(g_hConfirmCall, OnCvarChanged);
+	
+	g_iSpamTime = GetConVarInt(g_hSpamTime);
+	HookConVarChange(g_hSpamTime, OnCvarChanged);
 	
 	
 	if(g_fAdvertInterval != 0.0)
@@ -517,6 +525,10 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	{
 		g_bConfirmCall = GetConVarBool(g_hConfirmCall);
 	}
+	else if(cvar == g_hSpamTime)
+	{
+		g_iSpamTime = GetConVarInt(g_hSpamTime);
+	}
 }
 
 
@@ -524,7 +536,7 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 
 public Action:Command_Call(client, args)
 {
-	if(g_iLastReport[client] == 0 || g_iLastReport[client] <= ( GetTime() - 10 ))
+	if(g_iLastReport[client] == 0 || g_iLastReport[client] <= ( GetTime() - g_iSpamTime ))
 	{
 		g_bSawMesage[client] = false;
 		
@@ -542,7 +554,7 @@ public Action:Command_Call(client, args)
 	}
 	else if(!g_bSawMesage[client])
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_CommandNotAllowed", 10 - ( GetTime() - g_iLastReport[client] ));
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_CommandNotAllowed", g_iSpamTime - ( GetTime() - g_iLastReport[client] ));
 		g_bSawMesage[client] = true;
 	}
 
