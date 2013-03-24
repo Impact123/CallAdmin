@@ -104,6 +104,14 @@ new bool:g_bSawMesage[MAXPLAYERS +1];
 new Handle:g_hDbHandle;
 
 
+
+// Api
+new Handle:g_hOnReportPostForward;
+new Handle:g_hOnDrawOwnReasonForward;
+new Handle:g_hOnTrackerCountChangedForward;
+new Handle:g_hOnDrawTargetForward;
+
+
 #define PLUGIN_VERSION "0.1.0A"
 #define SQL_DB_CONF "CallAdmin"
 
@@ -111,7 +119,6 @@ new Handle:g_hDbHandle;
 
 // Updater
 #define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin.txt"
-
 
 
 public Plugin:myinfo = 
@@ -134,8 +141,26 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 		g_bDBDelayedLoad = true;
 	}
 	
+	RegPluginLibrary("calladmin");
+	
+	
+	// Api
+	CreateNative("CallAdmin_GetTrackersCount", Native_GetCurrentTrackers);
+	
+	
 	return APLRes_Success;
 }
+
+
+
+
+
+public Native_GetCurrentTrackers(Handle:plugin, numParams)
+{
+	return g_iCurrentTrackers;
+}
+
+
 
 
 
@@ -233,7 +258,6 @@ public OnPluginStart()
 	g_iOhphanedEntryPruning = GetConVarInt(g_hOhphanedEntryPruning);
 	HookConVarChange(g_hOhphanedEntryPruning, OnCvarChanged);
 	
-	
 	g_fAdvertInterval = GetConVarFloat(g_hAdvertInterval);
 	HookConVarChange(g_hAdvertInterval, OnCvarChanged);
 	
@@ -257,7 +281,78 @@ public OnPluginStart()
 	
 	AddCommandListener(ChatListener, "say");
 	AddCommandListener(ChatListener, "say_team");
+	
+	
+	// Api
+	g_hOnReportPostForward          = CreateGlobalForward("CallAdmin_OnReportPost", ET_Ignore, Param_Cell, Param_Cell, Param_String);
+	g_hOnDrawOwnReasonForward       = CreateGlobalForward("CallAdmin_OnDrawOwnReason", ET_Event, Param_Cell);
+	g_hOnTrackerCountChangedForward = CreateGlobalForward("CallAdmin_OnTrackerCountChanged", ET_Ignore, Param_Cell, Param_Cell);
+	g_hOnDrawTargetForward          = CreateGlobalForward("CallAdmin_OnDrawTarget", ET_Event, Param_Cell, Param_Cell);
 }
+
+
+
+
+Forward_OnReportPost(client, target, const String:reason[])
+{
+	Call_StartForward(g_hOnReportPostForward);
+	Call_PushCell(client);
+	Call_PushCell(target);
+	Call_PushString(reason);
+	
+	Call_Finish();
+}
+
+
+
+bool:Forward_OnDrawOwnReason(client)
+{
+	new Action:result;
+	
+	Call_StartForward(g_hOnDrawOwnReasonForward);
+	Call_PushCell(client);
+	
+	Call_Finish(result);
+	
+	if(result == Plugin_Continue)
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+
+
+Forward_OnTrackerCountChanged(oldVal, newVal)
+{
+	Call_StartForward(g_hOnTrackerCountChangedForward);
+	Call_PushCell(oldVal);
+	Call_PushCell(newVal);
+	
+	Call_Finish();
+}
+
+
+
+bool:Forward_OnDrawTarget(client, target)
+{
+	new Action:result;
+	
+	Call_StartForward(g_hOnDrawTargetForward);
+	Call_PushCell(client);
+	Call_PushCell(target);
+	
+	Call_Finish(result);
+	
+	if(result == Plugin_Continue)
+	{
+		return true;
+	}
+	
+	return false;
+}
+
 
 
 
@@ -265,6 +360,7 @@ InitDB()
 {
 	SQL_TConnect(SQLT_ConnectCallback, SQL_DB_CONF);
 }
+
 
 
 
@@ -277,6 +373,7 @@ public Action:Timer_Advert(Handle:timer)
 	
 	return Plugin_Handled;
 }
+
 
 
 
@@ -551,8 +648,11 @@ ReportPlayer(client, target)
 	
 	g_iLastReport[client]   = GetTime();
 	g_bWasReported[target]  = true;
+	
+	
+	// Call the forward
+	Forward_OnReportPost(client, target, g_sTargetReason[client]);
 }
-
 
 
 
@@ -622,6 +722,7 @@ public SQLT_ErrorCheckCallback(Handle:owner, Handle:hndl, const String:error[], 
 
 
 
+
 public Action:Timer_UpdateTrackersCount(Handle:timer)
 {
 	// Get current trackers
@@ -666,7 +767,17 @@ public SQLT_CurrentTrackersCallback(Handle:owner, Handle:hndl, const String:erro
 	{
 		if(SQL_FetchRow(hndl))
 		{
+			new temp = g_iCurrentTrackers;
+			
 			g_iCurrentTrackers = SQL_FetchInt(hndl, 0);
+			
+			
+			// Call the forward
+			if(temp != g_iCurrentTrackers)
+			{
+				Forward_OnTrackerCountChanged(temp, g_iCurrentTrackers);
+			}
+			
 			
 			// Notify the waiters
 			if(g_iCurrentTrackers > 0)
@@ -690,7 +801,7 @@ ShowClientSelectMenu(client)
 	
 	for(new i; i <= MaxClients; i++)
 	{
-		if(i != client && !g_bWasReported[i] && IsClientValid(i) /*&& IsFakeClient(i)*/ && !IsClientSourceTV(i))
+		if(i != client && !g_bWasReported[i] && IsClientValid(i) /*&& IsFakeClient(i)*/ && !IsClientSourceTV(i) && Forward_OnDrawTarget(client, i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			Format(sID, sizeof(sID), "%d", GetClientSerial(i));
@@ -743,7 +854,6 @@ public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
 		CloseHandle(menu);
 	}
 }
-
 
 
 
@@ -805,8 +915,8 @@ ShowBanreasonMenu(client)
 		AddMenuItem(menu, g_sBanReasonsExploded[i][index], g_sBanReasonsExploded[i][index]);
 	}
 	
-	// Own reason
-	if(g_bOwnReason)
+	// Own reason, call the forward
+	if(g_bOwnReason && Forward_OnDrawOwnReason(client))
 	{
 		decl String:sOwnReason[48];
 
