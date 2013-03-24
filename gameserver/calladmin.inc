@@ -8,7 +8,6 @@
 
 /**
  * Called when own reason is enabled and the selection for it is about to be drawn for an client.
- * Note: Data is not sanitized.
  *
  * @param client        Client index of the caller.
  * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
@@ -19,7 +18,7 @@ forward Action:CallAdmin_OnDrawOwnReason(client);
 
 /**
  * Called when the client selection menu for an client is aboub to be drawn for an client.
- * Note: Called *n-1 where n is the amount of valid players.
+ * Note: Called *n-1 times for each selection where n is the amount of valid players.
  *
  * @param client        Client index of the caller.
  * @param client        Client index of the target about to be drawed.
@@ -31,7 +30,7 @@ forward Action:CallAdmin_OnDrawTarget(client, target);
 
 
 /**
- * Called when the trackercount was updated.
+ * Called when the trackercount was Changed.
  *
  * @param oldVal        Trackercount before update.
  * @param newVal        Trackercount after update.
