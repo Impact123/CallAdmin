@@ -679,6 +679,8 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 	{
 		g_hDbHandle = hndl;
 		
+		// Set utf-8 encodings
+		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "SET NAMES 'utf8'");
 		
 		// Create main Table
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "CREATE TABLE IF NOT EXISTS `CallAdmin` (\
