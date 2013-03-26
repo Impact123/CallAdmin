@@ -53,6 +53,9 @@ if($dbi->connect_errno != 0)
 }
 
 
+// Set utf-8 encodings
+$dbi->set_charset("utf8")
+		
 
 // Safety
 $from = $data_from;
