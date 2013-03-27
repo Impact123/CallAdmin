@@ -24,7 +24,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-header("Content-type: text/xml");
+header("Content-type: text/xml; charset=utf-8");
 
 
 // Errors destroy the xmlvalidity
@@ -175,7 +175,7 @@ function printXmlError($error)
 {
 	if(!headers_sent())
 	{
-		header("Content-type: text/xml"); 
+		header("Content-type: text/xml; charset=utf-8"); 
 	}
 
 	$xml = new SimpleXMLElement("<CallAdmin/>");
