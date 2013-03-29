@@ -684,6 +684,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 		
 		// Create main Table
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "CREATE TABLE IF NOT EXISTS `CallAdmin` (\
+															`callID` INT(10) UNSIGNED NOT NULL,\
 															`serverIP` VARCHAR(15) NOT NULL,\
 															`serverPort` SMALLINT(5) UNSIGNED NOT NULL,\
 															`serverName` VARCHAR(64) NOT NULL,\
@@ -694,7 +695,8 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															`clientID` VARCHAR(21) NOT NULL,\
 															`reportedAt` INT(10) UNSIGNED NOT NULL,\
 															INDEX `serverIP_serverPort` (`serverIP`, `serverPort`),\
-															INDEX `reportedAt` (`reportedAt`))\
+															INDEX `reportedAt` (`reportedAt`),\
+															PRIMARY KEY (`callID`))\
 															COLLATE='utf8_unicode_ci'\
 														");
 														
@@ -757,9 +759,9 @@ GetCurrentTrackers()
 	{
 		decl String:query[1024];
 		
-		// Get current trackers
+		// Get current trackers (last 2 minutes)
 		Format(query, sizeof(query), "SELECT \
-											COUNT(*) as currentTrackers \
+											COUNT(`trackerID`) as currentTrackers \
 										FROM \
 											CallAdmin_Trackers \
 										WHERE \
