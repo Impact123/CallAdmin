@@ -684,7 +684,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 		
 		// Create main Table
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "CREATE TABLE IF NOT EXISTS `CallAdmin` (\
-															`callID` INT(10) UNSIGNED NOT NULL,\
+															`callID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,\
 															`serverIP` VARCHAR(15) NOT NULL,\
 															`serverPort` SMALLINT(5) UNSIGNED NOT NULL,\
 															`serverName` VARCHAR(64) NOT NULL,\
