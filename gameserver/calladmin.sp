@@ -693,9 +693,11 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															`targetReason` VARCHAR(48) NOT NULL,\
 															`clientName` VARCHAR(32) NOT NULL,\
 															`clientID` VARCHAR(21) NOT NULL,\
+															`callHandled` TINYINT(1) UNSIGNED NOT NULL,\
 															`reportedAt` INT(10) UNSIGNED NOT NULL,\
 															INDEX `serverIP_serverPort` (`serverIP`, `serverPort`),\
 															INDEX `reportedAt` (`reportedAt`),\
+															INDEX `callHandled` (`callHandled`),\
 															PRIMARY KEY (`callID`))\
 															COLLATE='utf8_unicode_ci'\
 														");
