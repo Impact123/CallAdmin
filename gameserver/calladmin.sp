@@ -168,7 +168,7 @@ public Native_GetCurrentTrackers(Handle:plugin, numParams)
 
 
 
-public Native_GetCurrentTrackers(Handle:plugin, numParams)
+public Native_RequestTrackersCountRefresh(Handle:plugin, numParams)
 {
 	GetCurrentTrackers();
 }
