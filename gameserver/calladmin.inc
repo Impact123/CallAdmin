@@ -17,12 +17,12 @@ forward Action:CallAdmin_OnDrawOwnReason(client);
 
 
 /**
- * Called when the client selection menu for an client is aboub to be drawn for an client.
+ * Called when the target selection menu for an client is about to be drawn for an client.
  * Note: Called *n-1 times for each selection where n is the amount of valid players.
  *
  * @param client        Client index of the caller.
- * @param client        Client index of the target about to be drawed.
- * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
+ * @param target        Client index of the target about to be drawed.
+ * @return              Plugin_Continue to allow the target to be drawn, Plugin_Handled otherwise.
  */
 forward Action:CallAdmin_OnDrawTarget(client, target);
 
@@ -65,6 +65,16 @@ native CallAdmin_GetTrackersCount();
 
 
 
+/**
+ * Requests an forced refresh of the trackers count.
+ *
+ * @noreturn
+ */
+native CallAdmin_RequestTrackersCountRefresh();
+
+
+
+
 /* 
 	To be implemented 
 	------------------
@@ -95,5 +105,6 @@ public SharedPlugin:__pl_calladmin =
 public __pl_calladmin_SetNTVOptional()
 {
 	MarkNativeAsOptional("CallAdmin_GetTrackersCount");
+	MarkNativeAsOptional("CallAdmin_RequestTrackersCountRefresh");
 }
 #endif

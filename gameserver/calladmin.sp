@@ -150,6 +150,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 	
 	// Api
 	CreateNative("CallAdmin_GetTrackersCount", Native_GetCurrentTrackers);
+	CreateNative("CallAdmin_RequestTrackersCountRefresh", Native_RequestTrackersCountRefresh);
 	
 	
 	return APLRes_Success;
@@ -162,6 +163,14 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 public Native_GetCurrentTrackers(Handle:plugin, numParams)
 {
 	return g_iCurrentTrackers;
+}
+
+
+
+
+public Native_GetCurrentTrackers(Handle:plugin, numParams)
+{
+	GetCurrentTrackers();
 }
 
 
