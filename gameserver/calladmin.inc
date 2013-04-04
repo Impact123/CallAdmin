@@ -56,6 +56,17 @@ forward CallAdmin_OnReportPost(client, target, const String:reason[]);
 
 
 /**
+ * Called when this player is added to the inGame admincount.
+ *
+ * @param client        Client index of the admin.
+ * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
+ */
+forward Action:CallAdmin_OnAddToAdminCount(client);
+
+
+
+
+/**
  * Retrieves the count of current trackers.
  *
  * @return              Count of current trackers.
