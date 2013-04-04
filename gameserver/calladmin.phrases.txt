@@ -104,6 +104,6 @@
 	{
 		"#format"	"{1:N},{2:N},{3:s}"
 		"en"		"Player {1} reported {2} for {3}"
-		"de"		"Spieler {1} hat {2} wegen {2} reported {3}"
+		"de"		"Spieler {1} hat {2} wegen {3} reported"
 	}
 }
