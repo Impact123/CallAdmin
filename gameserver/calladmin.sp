@@ -74,6 +74,13 @@ new bool:g_bConfirmCall;
 new Handle:g_hSpamTime;
 new g_iSpamTime;
 
+new Handle:g_hAdminAction;
+new g_iAdminAction;
+
+
+#define ADMIN_ACTION_PASS          0
+#define ADMIN_ACTION_BLOCK_MESSAGE 1
+
 
 new bool:g_bLateLoad;
 new bool:g_bDBDelayedLoad;
@@ -240,7 +247,8 @@ public OnPluginStart()
 	g_hOwnReason              = AutoExecConfig_CreateConVar("sm_calladmin_own_reason", "1",  "Whether or not client can submit their own reason.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_hConfirmCall            = AutoExecConfig_CreateConVar("sm_calladmin_confirm_call", "1",  "Whether or not an call must be confirmed by the client", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_hSpamTime               = AutoExecConfig_CreateConVar("sm_calladmin_spamtime", "25", "An user must wait this many seconds after an report before he can issue a new one", FCVAR_PLUGIN, true, 0.0);
-	
+	g_hAdminAction            = AutoExecConfig_CreateConVar("sm_calladmin_admin_action", "1", "What happens when admins are ingame on report\n0 - Do nothing, let the report pass, 1 - Block the report and notify the caller and admins", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+
 	
 	
 	AutoExecConfig(true, "plugin.calladmin");
@@ -287,6 +295,9 @@ public OnPluginStart()
 	
 	g_iSpamTime = GetConVarInt(g_hSpamTime);
 	HookConVarChange(g_hSpamTime, OnCvarChanged);
+	
+	g_iAdminAction = GetConVarInt(g_hAdminAction);
+	HookConVarChange(g_hAdminAction, OnCvarChanged);
 	
 	
 	if(g_fAdvertInterval != 0.0)
@@ -559,6 +570,10 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	{
 		g_iSpamTime = GetConVarInt(g_hSpamTime);
 	}
+	else if(cvar == g_hAdminAction)
+	{
+		g_iAdminAction = GetConVarInt(g_hAdminAction);
+	}
 }
 
 
@@ -570,8 +585,8 @@ public Action:Command_Call(client, args)
 	{
 		g_bSawMesage[client] = false;
 		
-		// Oh noes, no admins
-		if(g_iCurrentTrackers < 1)
+		// Oh noes, no trackers, and no admins ingame
+		if(g_iCurrentTrackers < 1 && GetAdminCount() < 1)
 		{
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoTrackers");
 			g_bAwaitingAdmin[client] = true;
@@ -629,6 +644,15 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
 					
 					return;					
+				}
+				
+				// You should not pass!
+				if(g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+				{
+					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
+					PrintNotifyMessageToAdmins(client, g_iTarget[client]);
+					
+					return;
 				}
 				
 				// Send the report
@@ -1029,6 +1053,23 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 			}
 			else
 			{
+				// Already reported (race condition)
+				if(g_bWasReported[g_iTarget[client]])
+				{
+					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
+					
+					return;					
+				}
+				
+				// You should not pass!
+				if(g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+				{
+					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
+					PrintNotifyMessageToAdmins(client, g_iTarget[client]);
+					
+					return;
+				}
+				
 				ReportPlayer(client, g_iTarget[client]);
 			}			
 		}
@@ -1088,6 +1129,15 @@ public Action:ChatListener(client, const String:command[], argc)
 			}
 			else
 			{
+				// You should not pass!
+				if(g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+				{
+					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
+					PrintNotifyMessageToAdmins(client, g_iTarget[client]);
+					
+					return Plugin_Handled;
+				}
+				
 				ReportPlayer(client, g_iTarget[client]);
 			}
 		}
@@ -1164,6 +1214,18 @@ stock GetAdminCount()
 	}
 	
 	return count;
+}
+
+
+stock PrintNotifyMessageToAdmins(client, target)
+{
+	for(new i; i <= MaxClients; i++)
+	{
+		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false) && Forward_OnAddToAdminCount(i)) 
+		{
+			PrintToChat(i, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AdminNotification", client, target, g_sTargetReason[client]);
+		}
+	}	
 }
 
 
