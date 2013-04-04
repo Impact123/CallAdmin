@@ -114,6 +114,7 @@ new Handle:g_hOnReportPostForward;
 new Handle:g_hOnDrawOwnReasonForward;
 new Handle:g_hOnTrackerCountChangedForward;
 new Handle:g_hOnDrawTargetForward;
+new Handle:g_hOnAddToAdminCountForward;
 
 
 #define PLUGIN_VERSION "0.1.0A"
@@ -305,6 +306,7 @@ public OnPluginStart()
 	g_hOnDrawOwnReasonForward       = CreateGlobalForward("CallAdmin_OnDrawOwnReason", ET_Event, Param_Cell);
 	g_hOnTrackerCountChangedForward = CreateGlobalForward("CallAdmin_OnTrackerCountChanged", ET_Ignore, Param_Cell, Param_Cell);
 	g_hOnDrawTargetForward          = CreateGlobalForward("CallAdmin_OnDrawTarget", ET_Event, Param_Cell, Param_Cell);
+	g_hOnAddToAdminCountForward     = CreateGlobalForward("CallAdmin_OnAddToAdminCount", ET_Event, Param_Cell);
 }
 
 
@@ -327,6 +329,25 @@ bool:Forward_OnDrawOwnReason(client)
 	new Action:result;
 	
 	Call_StartForward(g_hOnDrawOwnReasonForward);
+	Call_PushCell(client);
+	
+	Call_Finish(result);
+	
+	if(result == Plugin_Continue)
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+
+
+bool:Forward_OnAddToAdminCount(client)
+{
+	new Action:result;
+	
+	Call_StartForward(g_hOnAddToAdminCountForward);
 	Call_PushCell(client);
 	
 	Call_Finish(result);
@@ -1120,6 +1141,23 @@ stock GetRealClientCount()
 	for(new i; i <= MaxClients; i++)
 	{
 		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i))
+		{
+			count++;
+		}
+	}
+	
+	return count;
+}
+
+
+
+stock GetAdminCount()
+{
+	new count;
+	
+	for(new i; i <= MaxClients; i++)
+	{
+		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false) && Forward_OnAddToAdminCount(i)) 
 		{
 			count++;
 		}
