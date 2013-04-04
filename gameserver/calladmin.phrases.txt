@@ -90,4 +90,9 @@
 		"en"		"Admins are now available for your request!"
 		"de"		"Es sind nun Admins für deinen Request verfügbar!"
 	}
+	"CallAdmin_AlreadyReported"
+	{
+		"en"		"Player was already reported"
+		"de"		"Spieler wurde bereits reported"
+	}
 }
