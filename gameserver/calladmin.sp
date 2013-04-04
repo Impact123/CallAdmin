@@ -602,6 +602,14 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 		{
 			if(IsClientValid(g_iTarget[client]))
 			{
+				// Already reported (race condition)
+				if(g_bWasReported[g_iTarget[client]])
+				{
+					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
+					
+					return;					
+				}
+				
 				// Send the report
 				ReportPlayer(client, g_iTarget[client]);
 			}
@@ -869,6 +877,14 @@ public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
 		{
 			g_iTarget[client] = iID;
 			
+			// Already reported (race condition)
+			if(g_bWasReported[g_iTarget[client]])
+			{
+				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
+				
+				return;					
+			}
+			
 			ShowBanreasonMenu(client);
 		}
 		else
@@ -977,6 +993,14 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		
 		if(IsClientValid(g_iTarget[client]))
 		{
+			// Already reported (race condition)
+			if(g_bWasReported[g_iTarget[client]])
+			{
+				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
+				
+				return;					
+			}
+				
 			// Send the report
 			if(g_bConfirmCall)
 			{
