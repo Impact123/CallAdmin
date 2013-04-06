@@ -417,7 +417,14 @@ public Action:Timer_Advert(Handle:timer)
 {
 	if(g_iCurrentTrackers > 0)
 	{
-		PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_AdvertMessage", g_iCurrentTrackers);
+		if(g_iCurrentTrackers == 1)
+		{
+			PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_AdvertMessageSingular", g_iCurrentTrackers);
+		}
+		else
+		{
+			PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_AdvertMessagePlural", g_iCurrentTrackers);
+		}
 	}
 	
 	return Plugin_Handled;
