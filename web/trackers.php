@@ -1,8 +1,7 @@
 <?php
-
 /**
  * -----------------------------------------------------
- * File        notice.php
+ * File        trackers.php
  * Authors     Impact, David <popoklopsi> Ordnung
  * License     GPLv3
  * Web         http://gugyclan.eu, http://popoklopsi.de
@@ -24,18 +23,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  */
-$methods = array('notice', 'trackers');
-
-
-$method = 'notice';
-if(isset($_GET['method']))
-{
-	if(in_array($_GET['method'], $methods))
-	{
-		$method = $_GET['method'];
-	}
-}
-
 header("Content-type: text/xml; charset=utf-8"); 
 
 
@@ -50,10 +37,11 @@ require_once('autoload.php');
 $helpers = new CallAdmin_Helpers();
 
 
+
 // Key set and no key given or key is wrong
 if((!empty($access_key) && !isset($_GET['key']) ) || $_GET['key'] !== $access_key)
 {
-	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Notice");
+	$helpers->printXmlError("AUTHENTICATION_FAILURE", "CallAdmin_Trackers");
 }
 
 
@@ -64,7 +52,7 @@ $dbi = new mysqli($host, $username, $password, $database, $dbport);
 // Oh noes, we couldn't connect
 if($dbi->connect_errno != 0)
 {
-	$helpers->printXmlError("DB_CONNECT_FAILURE", "CallAdmin_Notice");
+	$helpers->printXmlError("DB_FAILURE", "CallAdmin_Trackers");
 }
 
 
@@ -74,14 +62,14 @@ $dbi->set_charset("utf8");
 
 // Safety
 $from = $data_from;
-$from_query = "reportedAt > $from";
+$from_query = "lastView > $from";
 if(isset($_GET['from']) && preg_match("/^[0-9]{1,11}+$/", $_GET['from']))
 {
 	$from = $dbi->escape_string($_GET['from']);
 	
 	
 	$from_type = "unixtime";
-	$from_query = "reportedAt > $from";
+	$from_query = "lastView > $from";
 	
 	// We use the global mysqltime in all tables and columns, the client however can have an different time
 	// Thus most times it's better to range the last results in seconds (max 120 seconds ago, etc) thus this option is introduced
@@ -89,14 +77,14 @@ if(isset($_GET['from']) && preg_match("/^[0-9]{1,11}+$/", $_GET['from']))
 	{
 		if(strcasecmp($_GET['from_type'], "unixtime") === 0)
 		{
-			$from_query = "reportedAt > $from";
+			$from_query = "lastView > $from";
 		}
 		else if(strcasecmp($_GET['from_type'], "interval") === 0)
 		{
-			$from_query = "TIMESTAMPDIFF(SECOND, FROM_UNIXTIME(reportedAt), NOW()) <= $from";
+			$from_query = "TIMESTAMPDIFF(SECOND, FROM_UNIXTIME(lastView), NOW()) <= $from";
 		}
 	}
-	
+
 	// Just to be sure ;)
 	$from_type = $dbi->escape_string($from_type);
 }
@@ -127,62 +115,30 @@ if(isset($_GET['sort']) && preg_match("/^[a-zA-Z]{3,4}+$/", $_GET['sort']))
 
 
 $fetchresult = $dbi->query("SELECT 
-							callID, serverIP, serverPort, CONCAT(serverIP, ':', serverPort) as fullIP, serverName, targetName, targetID, targetReason, clientName, clientID, reportedAt, callHandled
+							trackerIP, trackerID, lastView, TIMESTAMPDIFF(SECOND, FROM_UNIXTIME(lastView), NOW()) AS lastViewDiff
 						FROM 
-							$table
+							$trackers_table
 						WHERE
-							callHandled != 1 AND $from_query
+							$from_query
 						ORDER BY
-							reportedAt $sort
+							lastView $sort
 						LIMIT 0, $limit");
 
 // Retrieval failed
 if($fetchresult === FALSE)
 {
 	$dbi->close();
-	$helpers->printXmlError("DB_RETRIEVE_FAILURE", "CallAdmin_Notice");
+	$helpers->printXmlError("DB_RETRIEVE_FAILURE", "CallAdmin_Trackers");
 }
-
-
-// Save this tracker if key is set, key was given, we have an valid remote address and the client sends an store (save him as available)
-if((!empty($access_key) && isset($_GET['key']) ) && isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
-{
-	$trackerIP = $dbi->escape_string($helpers->AnonymizeIP($_SERVER['REMOTE_ADDR']));
-	$trackerID = "";
-
-
-	// Steamid was submitted, this must have come from the client
-	if(isset($_GET['steamid']) && $helpers->IsValidSteamID($_GET['steamid']))
-	{
-		$trackerID = $dbi->escape_string($_GET['steamid']);
-	}
-
-
-	$insertresult = $dbi->query("INSERT IGNORE INTO CallAdmin_Trackers
-						(trackerIP, trackerID, lastView)
-					VALUES
-						('$trackerIP', '$trackerID', UNIX_TIMESTAMP())
-					ON DUPLICATE KEY
-						UPDATE lastView = UNIX_TIMESTAMP(), trackerID = '$trackerID'");
-
-	// Insert failed
-	if($insertresult === FALSE)
-	{
-		$dbi->close();
-		$helpers->printXmlError("DB_UPDATE_FAILURE", "CallAdmin_Notice");
-	}
-}
-
 
 $dbi->close();
 
 
-$xml = new SimpleXMLElement("<CallAdmin/>");
+$xml = new SimpleXMLElement("<CallAdmin_Trackers/>");
 
-$counter = 0;
 while(($row = $fetchresult->fetch_assoc()))
 {
-	$child = $xml->addChild("singleReport");
+	$child = $xml->addChild("singleTracker");
 
 	foreach($row as $key => $value)
 	{
@@ -198,10 +154,7 @@ while(($row = $fetchresult->fetch_assoc()))
 
 		$child->addChild($key, $value);
 	}
-	
-	$counter++;
 }
-$child = $xml->addChild("foundRows", $counter);
 
 echo $xml->asXML();
-// End of file: notice.php
+// End of file: trackers.php

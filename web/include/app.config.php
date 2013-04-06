@@ -6,7 +6,7 @@
 */
 
 // This key must be sent in order to view reports, leave empty to disable
-$access_key = "apitest";
+$access_key = '';
 
 
 
@@ -31,10 +31,11 @@ $data_from  = (time() - 3600);
  * DATABASE SETTINGS
  *---------------------------------------------------------------
 */
-$host     = "";
-$username = "";
-$password = "";
-$database = "";
-$table    = "CallAdmin";
-$dbport   = "3306";
-?>
+$host              = '';
+$username          = '';
+$password          = '';
+$database          = '';
+$table             = 'CallAdmin';
+$trackers_table    = 'CallAdmin_Trackers';
+$dbport            = '3306';
+// End of file
