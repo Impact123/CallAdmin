@@ -39,11 +39,18 @@
 		"en"		"Select a reason to report {1}"
 		"de"		"Wähle einen Grund um {1} zu reporten"
 	}
-	"CallAdmin_AdvertMessage"
+	// Used when exactly 1 admins is available
+	"CallAdmin_AdvertMessageSingular"
+	{
+		"#format"	"{1:d}"
+		"en"		"There is {1} admin available for calling, type !call or /call in chat to report a player"
+		"de"		"Es ist {1} Admin zum reporten verfügbar, tippe !call oder /call in den Chat um einen Spieler zu reporten"
+	}
+	"CallAdmin_AdvertMessagePlural"
 	{
 		"#format"	"{1:d}"
 		"en"		"There are {1} admins available for calling, type !call or /call in chat to report a player"
-		"de"		"Es sind {1} Admins verfügbar, tippe !call oder /call in den Chat um einen Spieler zu reporten"
+		"de"		"Es sind {1} Admins zum reporten verfügbar, tippe !call oder /call in den Chat um einen Spieler zu reporten"
 	}
 	"CallAdmin_OwnReason"
 	{
