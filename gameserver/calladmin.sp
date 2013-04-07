@@ -313,7 +313,7 @@ public OnPluginStart()
 	
 	
 	// Api
-	g_hOnReportPostForward          = CreateGlobalForward("CallAdmin_OnReportPost", ET_Ignore, Param_Cell, Param_Cell, Param_String);
+	g_hOnReportPostForward          = CreateGlobalForward("CallAdmin_OnReportPost", ET_Ignore, Param_Cell, Param_Cell, Param_String, Param_String);
 	g_hOnDrawOwnReasonForward       = CreateGlobalForward("CallAdmin_OnDrawOwnReason", ET_Event, Param_Cell);
 	g_hOnTrackerCountChangedForward = CreateGlobalForward("CallAdmin_OnTrackerCountChanged", ET_Ignore, Param_Cell, Param_Cell);
 	g_hOnDrawTargetForward          = CreateGlobalForward("CallAdmin_OnDrawTarget", ET_Event, Param_Cell, Param_Cell);
@@ -323,12 +323,13 @@ public OnPluginStart()
 
 
 
-Forward_OnReportPost(client, target, const String:reason[])
+Forward_OnReportPost(client, target, const String:reasonRaw[], const String:reasonSanitized[])
 {
 	Call_StartForward(g_hOnReportPostForward);
 	Call_PushCell(client);
 	Call_PushCell(target);
-	Call_PushString(reason);
+	Call_PushString(reasonRaw);
+	Call_PushString(reasonSanitized);
 	
 	Call_Finish();
 }
@@ -732,7 +733,7 @@ ReportPlayer(client, target)
 	
 	
 	// Call the forward
-	Forward_OnReportPost(client, target, g_sTargetReason[client]);
+	Forward_OnReportPost(client, target, g_sTargetReason[client], sReason);
 }
 
 
