@@ -6,7 +6,7 @@
 */
 
 // This key must be sent in order to send reports
-$access_key = 'apitest';
+$access_key = '';
 
 
 
