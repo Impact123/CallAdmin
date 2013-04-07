@@ -220,8 +220,6 @@ public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const St
 
 public OnSocketConnect(Handle:socket, any:pack)
 {
-	PrintToServer("Socket Connected");
-	
 	// If socket is connected, should be since this is the callback that is called if it is connected
 	if(SocketIsConnected(socket))
 	{
@@ -289,10 +287,6 @@ public OnSocketConnect(Handle:socket, any:pack)
 		
 		// Send the request
 		SocketSend(socket, sRequestString);
-		
-		
-		PrintToServer("Socket Sent");
-		PrintToServer("Request: %s", sRequestString);
 	}
 }
 
