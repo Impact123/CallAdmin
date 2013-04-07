@@ -43,7 +43,6 @@ forward CallAdmin_OnTrackerCountChanged(oldVal, newVal);
 
 /**
  * Called after an client has reported an player and the report was sent to the database.
- * Note: Data is not sanitized.
  *
  * @param client        Client index of the caller.
  * @param target        Client index of the target.
