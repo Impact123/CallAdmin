@@ -268,6 +268,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 		URLEncode(sClientName, sizeof(sClientName));
 		URLEncode(sTargetName, sizeof(sTargetName));
 		URLEncode(sReason, sizeof(sReason));
+		URLEncode(sServerName, sizeof(sServerName));
 		
 		
 		// Temp, for bots
