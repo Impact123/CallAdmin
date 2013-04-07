@@ -1,10 +1,10 @@
 # CallAdmin  
-CallAdmin is an multilingual system to allow inGame reports for HL2-Games and Mods.  
+CallAdmin is an multilingual, modular and extendable system to allow inGame reports for HL2-Games and Mods.  
 
 The system is based on 3 parts.  
-* An sourcemod-plugin to report players inGame  
+* An extendable sourcemod-plugin to report players inGame  
 * [An Desktopclient](https://github.com/popoklopsi/CallAdmin-Client) to notify admins  when a new report was made  
-* An webscript to fetch data from the database for the client  
+* An webscript to interact with data from the database for the client  
 
 
 ## Installation #Plugin
@@ -22,18 +22,19 @@ You can download the full package with the compiled plugin [here](http://vs.gugy
 
 
 ## Installation #Webscript
-1. Put the notice.php and the app.config file somewhere you can refer to, this can be an subdomain for example  
-2. Open the app.config file and edit the database settings
+1. Put all files into an subfolder in your webspace  
+2. Open the app.config file, edit the database settings and set an key
+
+
+### Download #Webscript
+You can download the full package [here](http://vs.gugyclan.eu:8000/job/CallAdmin/) (grab the webserver package).
 
 
 ## Installation #Client
 1. Download the client including all files into some folder  
-2. Open up the `calladmin-client_settings.ini` file and set the url to where your notice.php is reachable (http://example.com/notice.php)  
-3. Open the client and wait for new reports  
+2. Setup the client in the settings tab  
+3. Wait for new reports  
 
-
-### Requirements #Client
-The client is written for python 3.x, therefore you need to install it.
 
 
 ## Notes
