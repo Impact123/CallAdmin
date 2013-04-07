@@ -49,7 +49,38 @@ class CallAdmin_Helpers
 	{
 		return preg_match("/^STEAM_[0-1]:[0-1]:[0-9]{3,11}+$/", $steamID);
 	}
+	
+	
+	
+	
+	/**
+	 * Converts an steamid to an friendid
+	 * 
+	 * @var       string
+	 * @return    string
+	 */
+	function SteamIDToComm($steamId)
+	{
+		//Example SteamID: "STEAM_X:Y:ZZZZZZZZ"
+		$gameType   = 0; //This is X.  It's either 0 or 1 depending on which game you are playing (CSS, L4D, TF2, etc)
+		$authServer = 0; //This is Y.  Some people have a 0, some people have a 1
+		$clientId   = ''; //This is ZZZZZZZZ.
 
+		//Remove the "STEAM_"
+		$steamId = str_replace('STEAM_', '' ,$steamId);
+
+		//Split steamId into parts
+		$parts      = explode(':', $steamId);
+		$gameType   = $parts[0];
+		$authServer = $parts[1];
+		$clientId   = $parts[2];
+
+		//Calculate friendId
+		$result = bcadd((bcadd('76561197960265728', $authServer)), (bcmul($clientId, '2')));
+		return $result;
+	}
+	
+	
 
 	
 	/**
