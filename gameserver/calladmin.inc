@@ -47,10 +47,11 @@ forward CallAdmin_OnTrackerCountChanged(oldVal, newVal);
  *
  * @param client        Client index of the caller.
  * @param target        Client index of the target.
- * @param reason        Reason selected by the client for the report.
+ * @param reason        Raw reason selected by the client for the report.
+ * @param reason        Sanitized reason selected by the client for the report.
  * @noreturn
  */
-forward CallAdmin_OnReportPost(client, target, const String:reason[]);
+forward CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const String:reasonSanitized[]);
 
 
 
