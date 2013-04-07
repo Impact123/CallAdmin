@@ -86,6 +86,40 @@ native CallAdmin_RequestTrackersCountRefresh();
 
 
 
+/**
+ * Returns the servers hostname.
+ *
+ * @param buffer        String to copy to
+ * @param max_size      Maximum size of buffer
+ * @noreturn
+ */
+native CallAdmin_GetHostName(String:buffer[], max_size);
+
+
+
+
+/**
+ * Returns the servers IP String.
+ *
+ * @param buffer        String to copy to
+ * @param max_size      Maximum size of buffer
+ * @noreturn
+ */
+native CallAdmin_GetHostIP(String:buffer[], max_size);
+
+
+
+
+/**
+ * Returns the servers HostPort.
+ *
+ * @return              Hostport
+ */
+native CallAdmin_GetHostPort();
+
+
+
+
 /* 
 	To be implemented 
 	------------------
@@ -117,5 +151,8 @@ public __pl_calladmin_SetNTVOptional()
 {
 	MarkNativeAsOptional("CallAdmin_GetTrackersCount");
 	MarkNativeAsOptional("CallAdmin_RequestTrackersCountRefresh");
+	MarkNativeAsOptional("CallAdmin_GetHostName");
+	MarkNativeAsOptional("CallAdmin_GetHostIP");
+	MarkNativeAsOptional("CallAdmin_GetHostPort");
 }
 #endif

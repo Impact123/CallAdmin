@@ -159,6 +159,9 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 	// Api
 	CreateNative("CallAdmin_GetTrackersCount", Native_GetCurrentTrackers);
 	CreateNative("CallAdmin_RequestTrackersCountRefresh", Native_RequestTrackersCountRefresh);
+	CreateNative("CallAdmin_GetHostName", Native_GetHostName);
+	CreateNative("CallAdmin_GetHostIP", Native_GetHostIP);
+	CreateNative("CallAdmin_GetHostPort", Native_GetHostPort);
 	
 	
 	return APLRes_Success;
@@ -181,6 +184,30 @@ public Native_RequestTrackersCountRefresh(Handle:plugin, numParams)
 	GetCurrentTrackers();
 }
 
+
+
+
+public Native_GetHostName(Handle:plugin, numParams)
+{
+	new max_size = GetNativeCell(2);
+	SetNativeString(1, g_sServerName, max_size);
+}
+
+
+
+
+public Native_GetHostIP(Handle:plugin, numParams)
+{
+	new max_size = GetNativeCell(2);
+	SetNativeString(1, g_sHostIP, max_size);
+}
+
+
+
+public Native_GetHostPort(Handle:plugin, numParams)
+{
+	return g_iHostPort;
+}
 
 
 
