@@ -27,6 +27,9 @@
 #include <autoexecconfig>
 #include "calladmin"
 #include <socket>
+
+#undef REQUIRE_PLUGIN
+#include <updater>
 #pragma semicolon 1
 
 
@@ -48,6 +51,11 @@ new String:g_sKey[PLATFORM_MAX_PATH];
 
 
 #define PLUGIN_VERSION "0.1.0A"
+
+
+
+// Updater
+#define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_ts3.txt"
 
 
 public Plugin:myinfo = 
@@ -161,6 +169,21 @@ public OnAllPluginsLoaded()
 	{
 		SetFailState("CallAdmin not found");
 	}
+	
+    if(LibraryExists("updater"))
+    {
+        Updater_AddPlugin(UPDATER_URL);
+    }
+}
+
+
+
+public OnLibraryAdded(const String:name[])
+{
+    if(StrEqual(name, "updater"))
+    {
+        Updater_AddPlugin(UPDATER_URL);
+    }
 }
 
 
