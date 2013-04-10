@@ -131,7 +131,7 @@ PreFormatUrl()
 		
 		// Strip the slash of the path if there is one
 		new len = strlen(g_sRealPath);
-		if(len > 0 && g_sRealPath[len -1] == '/')
+		if(len > 0 && g_sRealPath[len - 1] == '/')
 		{
 			g_sRealPath[len -1] = '\0';
 		}
@@ -205,7 +205,7 @@ public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const St
 	new Handle:pack = CreateDataPack();
 	
 	
-	// Write the data to the pack
+	// Buffers
 	decl String:sClientID[21];
 	decl String:sClientName[MAX_NAME_LENGTH];
 	
@@ -221,6 +221,7 @@ public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const St
 	GetClientName(target, sTargetName, sizeof(sTargetName));
 	
 	
+	// Write the data to the pack
 	WritePackString(pack, sClientID);
 	WritePackString(pack, sClientName);
 	

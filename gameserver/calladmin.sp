@@ -687,6 +687,10 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
 					PrintNotifyMessageToAdmins(client, g_iTarget[client]);
 					
+					// States
+					g_iLastReport[client]   = GetTime();
+					g_bWasReported[g_iTarget[client]]  = true;
+					
 					return;
 				}
 				
@@ -755,6 +759,7 @@ ReportPlayer(client, target)
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_YouHaveReported", targetNameBuf, g_sTargetReason[client]);
 	}
 	
+	// States
 	g_iLastReport[client]   = GetTime();
 	g_bWasReported[target]  = true;
 	
@@ -1102,6 +1107,10 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
 					PrintNotifyMessageToAdmins(client, g_iTarget[client]);
 					
+					// States
+					g_iLastReport[client]   = GetTime();
+					g_bWasReported[g_iTarget[client]]  = true;
+					
 					return;
 				}
 				
@@ -1169,6 +1178,10 @@ public Action:ChatListener(client, const String:command[], argc)
 				{
 					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
 					PrintNotifyMessageToAdmins(client, g_iTarget[client]);
+					
+					// States
+					g_iLastReport[client]   = GetTime();
+					g_bWasReported[g_iTarget[client]]  = true;
 					
 					return Plugin_Handled;
 				}
