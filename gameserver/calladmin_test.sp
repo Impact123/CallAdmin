@@ -28,15 +28,13 @@
 #pragma semicolon 1
 
 
-#define PLUGIN_VERSION "0.1.0A"
-
 
 public Plugin:myinfo = 
 {
 	name = "CallAdmin: Test",
 	author = "Impact, Popoklopsi",
 	description = "Tests the calladmin plugin",
-	version = PLUGIN_VERSION,
+	version = CALLADMIN_VERSION,
 	url = "http://gugyclan.eu"
 }
 

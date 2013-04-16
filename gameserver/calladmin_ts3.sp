@@ -50,10 +50,6 @@ new String:g_sKey[PLATFORM_MAX_PATH];
 
 
 
-#define PLUGIN_VERSION "0.1.0A"
-
-
-
 // Updater
 #define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_ts3.txt"
 
@@ -63,7 +59,7 @@ public Plugin:myinfo =
 	name = "CallAdmin: Ts3 module",
 	author = "Impact, Popoklopsi",
 	description = "Sends reports to an ts3server",
-	version = PLUGIN_VERSION,
+	version = CALLADMIN_VERSION,
 	url = "http://gugyclan.eu"
 }
 
@@ -75,7 +71,7 @@ public OnPluginStart()
 {
 	AutoExecConfig_SetFile("plugin.calladmin_ts3");
 	
-	g_hVersion = AutoExecConfig_CreateConVar("sm_calladmin_ts3_version", PLUGIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hVersion = AutoExecConfig_CreateConVar("sm_calladmin_ts3_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	g_hUrl     = AutoExecConfig_CreateConVar("sm_calladmin_ts3_url", "http://calladmin.yourclan.eu/subfolder", "Url to the ts3script path", FCVAR_PLUGIN);
 	g_hKey     = AutoExecConfig_CreateConVar("sm_calladmin_ts3_key", "SomeSecureKeyNobodyKnows", "Key of your ts3script", FCVAR_PLUGIN);
 	
@@ -84,7 +80,7 @@ public OnPluginStart()
 	AutoExecConfig_CleanFile();
 	
 	
-	SetConVarString(g_hVersion, PLUGIN_VERSION, false, false);
+	SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
 	
 	GetConVarString(g_hUrl, g_sUrl, sizeof(g_sUrl));
@@ -148,7 +144,7 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 {
 	if(cvar == g_hVersion)
 	{
-		SetConVarString(g_hVersion, PLUGIN_VERSION, false, false);
+		SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
 	}
 	else if(cvar == g_hUrl)
 	{
@@ -170,10 +166,10 @@ public OnAllPluginsLoaded()
 		SetFailState("CallAdmin not found");
 	}
 	
-    if(LibraryExists("updater"))
-    {
-        Updater_AddPlugin(UPDATER_URL);
-    }
+	if(LibraryExists("updater"))
+	{
+		Updater_AddPlugin(UPDATER_URL);
+	}
 }
 
 

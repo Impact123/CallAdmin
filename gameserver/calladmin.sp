@@ -25,6 +25,7 @@
  
 #include <sourcemod>
 #include <autoexecconfig>
+#include "calladmin"
 
 #undef REQUIRE_PLUGIN
 #include <updater>
@@ -124,7 +125,7 @@ new Handle:g_hOnDrawTargetForward;
 new Handle:g_hOnAddToAdminCountForward;
 
 
-#define PLUGIN_VERSION "0.1.0A"
+
 #define SQL_DB_CONF "CallAdmin"
 
 
@@ -138,7 +139,7 @@ public Plugin:myinfo =
 	name = "CallAdmin",
 	author = "Impact, Popoklopsi",
 	description = "Call an Admin for help",
-	version = PLUGIN_VERSION,
+	version = CALLADMIN_VERSION,
 	url = "http://gugyclan.eu"
 }
 
@@ -265,7 +266,7 @@ public OnPluginStart()
 	
 	AutoExecConfig_SetFile("plugin.calladmin");
 	
-	g_hVersion                = AutoExecConfig_CreateConVar("sm_calladmin_version", PLUGIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hVersion                = AutoExecConfig_CreateConVar("sm_calladmin_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	g_hBanReasons             = AutoExecConfig_CreateConVar("sm_calladmin_banreasons", "Aimbot; Wallhack; Speedhack; Spinhack; Multihack; No-Recoil Hack; Other", "Semicolon seperated list of banreasons (24 reasons max, 48 max length per reason)", FCVAR_PLUGIN);
 	g_hEntryPruning           = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning", "25", "Entries older than given minutes will be deleted, 0 deactivates the feature", FCVAR_PLUGIN, true, 0.0);
 	g_hOhphanedEntryPruning   = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning_ohphaned", "4320", "Entries older than given minutes will be recognized as orphaned and will be deleted globally (serverIP and serverPort won't be checked)", FCVAR_PLUGIN, true, 0.0, true, 0.0);
@@ -285,7 +286,7 @@ public OnPluginStart()
 	LoadTranslations("calladmin.phrases");
 	
 	
-	SetConVarString(g_hVersion, PLUGIN_VERSION, false, false);
+	SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
 	
 	GetConVarString(g_hBanReasons, g_sBanReasons, sizeof(g_sBanReasons));
@@ -571,7 +572,7 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	}
 	else if(cvar == g_hVersion)
 	{
-		SetConVarString(g_hVersion, PLUGIN_VERSION, false, false);
+		SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
 	}
 	else if(cvar == g_hAdvertInterval)
 	{

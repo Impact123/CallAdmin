@@ -6,6 +6,12 @@
 
 
 
+// Do not touch
+#define CALLADMIN_VERSION	"0.1.0A"
+
+
+
+
 /**
  * Called when own reason is enabled and the selection for it is about to be drawn for an client.
  *
