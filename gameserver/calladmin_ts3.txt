@@ -1,0 +1,16 @@
+"Updater"
+{
+	"Information"
+	{
+		"Version"
+		{
+			"Latest"	"0.1.0A"
+		}
+	}
+	
+	"Files"
+	{
+		"Plugin"	"Path_SM/plugins/calladmin_ts3.smx"
+		"Source"	"Path_SM/scripting/calladmin_ts3.sp"
+	}
+}

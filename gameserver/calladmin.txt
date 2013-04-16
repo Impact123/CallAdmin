@@ -1,0 +1,18 @@
+"Updater"
+{
+	"Information"
+	{
+		"Version"
+		{
+			"Latest"	"0.1.0A"
+		}
+	}
+	
+	"Files"
+	{
+		"Plugin"	"Path_SM/plugins/calladmin.smx"
+		"Plugin"	"Path_SM/translations/calladmin.phrases.txt"
+		"Source"	"Path_SM/scripting/calladmin.sp"
+		"Source"	"Path_SM/scripting/include/calladmin.inc"
+	}
+}
