@@ -41,7 +41,7 @@ $helpers = new CallAdmin_Helpers();
 // Key set and no key given or key is wrong
 if((!empty($access_key) && !isset($_GET['key']) ) || $_GET['key'] !== $access_key)
 {
-	$helpers->printXmlError("AUTHENTICATION_FAILURE", "CallAdmin_Trackers");
+	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Trackers");
 }
 
 
@@ -52,7 +52,7 @@ $dbi = new mysqli($host, $username, $password, $database, $dbport);
 // Oh noes, we couldn't connect
 if($dbi->connect_errno != 0)
 {
-	$helpers->printXmlError("DB_FAILURE", "CallAdmin_Trackers");
+	$helpers->printXmlError("DB_CONNECT_FAILURE", "CallAdmin_Trackers");
 }
 
 
