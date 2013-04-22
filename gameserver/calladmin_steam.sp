@@ -170,7 +170,7 @@ SetupRecipients()
 	
 	new steamIDArraySize     = GetArraySize(g_hSteamIDAdt);
 	new communityIDArraySize = GetArraySize(g_hCommunityIDAdt);
-	new index                = 0;
+	new count                = 0;
 	
 	new String:sBuffer[21];
 	
@@ -179,10 +179,10 @@ SetupRecipients()
 	{
 		GetArrayString(g_hSteamIDAdt, i, sBuffer, sizeof(sBuffer));
 		MessageBot_AddRecipient(sBuffer);
-		index++;
+		count++;
 		
 		// Limitation
-		if(index >= MAX_ITEMS)
+		if(count >= MAX_ITEMS)
 		{
 			break;
 		}
@@ -192,10 +192,11 @@ SetupRecipients()
 	for(new i; i < communityIDArraySize; i++)
 	{
 		GetArrayString(g_hCommunityIDAdt, i, sBuffer, sizeof(sBuffer));
-		index++;
+		MessageBot_AddRecipient(sBuffer);
+		count++;
 		
 		// Limitation
-		if(index >= (MAX_ITEMS * 2) )
+		if(count >= (MAX_ITEMS * 2) )
 		{
 			break;
 		}
