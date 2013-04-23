@@ -66,13 +66,6 @@ new String:g_sSteamIDConfigFile[PLATFORM_MAX_PATH];
 new String:g_sGroupIDConfigFile[PLATFORM_MAX_PATH];
 
 
-// Steamids will be stored here
-new Handle:g_hSteamIDAdt;
-
-// Communityids will be stored here
-new Handle:g_hCommunityIDAdt;
-
-
 
 enum AuthStringType
 {
@@ -120,13 +113,14 @@ public OnPluginStart()
 	}
 	
 	
+	// Just for simple validation usage
 	g_hSteamIDRegex     = CompileRegex("^STEAM_[0-1]{1}:[0-1]{1}:[0-9]+$");
 	g_hCommunityIDRegex = CompileRegex("^[0-9]{4,17}+$");
 	
 	
-	g_hSteamIDAdt     = CreateArray(21);
-	g_hCommunityIDAdt = CreateArray(17);
 	
+	// Clear the recipients
+	MessageBot_ClearRecipients();
 	
 	// Read in all those steamids
 	ParseSteamIDList();
@@ -134,8 +128,7 @@ public OnPluginStart()
 	// Read in all those groupids
 	ParseGroupIDList();
 	
-	// Setup the recipients
-	SetupRecipients();
+
 	
 	
 	AutoExecConfig_SetFile("plugin.calladmin_steam");
@@ -161,51 +154,6 @@ public OnPluginStart()
 
 
 
-
-SetupRecipients()
-{
-	// Clear all
-	MessageBot_ClearRecipients();
-	
-	
-	new steamIDArraySize     = GetArraySize(g_hSteamIDAdt);
-	new communityIDArraySize = GetArraySize(g_hCommunityIDAdt);
-	new count                = 0;
-	
-	new String:sBuffer[21];
-	
-	// SteamID array
-	for(new i; i < steamIDArraySize; i++)
-	{
-		GetArrayString(g_hSteamIDAdt, i, sBuffer, sizeof(sBuffer));
-		MessageBot_AddRecipient(sBuffer);
-		count++;
-		
-		// Limitation
-		if(count >= MAX_ITEMS)
-		{
-			break;
-		}
-	}
-	
-	// CommunityID array
-	for(new i; i < communityIDArraySize; i++)
-	{
-		GetArrayString(g_hCommunityIDAdt, i, sBuffer, sizeof(sBuffer));
-		MessageBot_AddRecipient(sBuffer);
-		count++;
-		
-		// Limitation
-		if(count >= (MAX_ITEMS * 2) )
-		{
-			break;
-		}
-	}
-}
-
-
-
-
 public OnMessageResultReceived(MessageBotResult:result, error)
 {
 	if(result != RESULT_NO_ERROR)
@@ -228,7 +176,7 @@ CreateSteamIDList()
 		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for writing");
 	}
 	
-	WriteFileLine(hFile, "// List of steamID's, seperated by a new line");
+	WriteFileLine(hFile, "// List of steamID's or communityid's, seperated by a new line");
 	
 	CloseHandle(hFile);
 }
@@ -264,19 +212,28 @@ ParseSteamIDList()
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\n", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
 		
+		
+		new AuthStringType:type = GetAuthIDType(sReadBuffer);
+		
+		// Is a steamid
+		if(type == AuthString_SteamID)
+		{
+			GetRegexSubString(g_hSteamIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
+		}
+		// Is a communityid
+		else if(type == AuthString_CommunityID)
+		{
+			GetRegexSubString(g_hCommunityIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
+		}
 		// No match :(
-		if(MatchRegex(g_hSteamIDRegex, sReadBuffer) != 1)
+		else
 		{
 			continue;
 		}
 		
-		// Just for security
-		GetRegexSubString(g_hSteamIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
 		
-		if(FindStringInArray(g_hSteamIDAdt, sReadBuffer) == -1)
-		{
-			PushArrayString(g_hSteamIDAdt, sReadBuffer);
-		}
+		// Add as recipient
+		MessageBot_AddRecipient(sReadBuffer);
 	}
 	
 	CloseHandle(hFile);
@@ -558,7 +515,6 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any:pack)
 					Split[i][index] = '\0';
 				}
 				
-				
 				// No match :(
 				if(MatchRegex(g_hCommunityIDRegex, Split[i]) != 1)
 				{
@@ -568,10 +524,8 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any:pack)
 				// We might have a use for this later
 				strcopy(sTempID, sizeof(sTempID), Split[i]);
 				
-				if(FindStringInArray(g_hCommunityIDAdt, sTempID) != -1)
-				{
-					PushArrayString(g_hCommunityIDAdt, sTempID);
-				}
+				// Add as recipient
+				MessageBot_AddRecipient(sTempID);
 			}
 		}
 		
