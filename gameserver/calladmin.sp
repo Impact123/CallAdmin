@@ -228,7 +228,8 @@ public OnConfigsExecuted()
 
 public OnPluginStart()
 {
-	if(!SQL_CheckConfig(SQL_DB_CONF))
+	// Fallback for default if possible
+	if(!SQL_CheckConfig(SQL_DB_CONF) && !SQL_CheckConfig("default"))
 	{
 		SetFailState("Couldn't find database config");
 	}
@@ -436,7 +437,7 @@ bool:Forward_OnDrawTarget(client, target)
 
 InitDB()
 {
-	SQL_TConnect(SQLT_ConnectCallback, SQL_DB_CONF);
+	SQL_TConnect(SQLT_ConnectCallback, SQL_CheckConfig(SQL_DB_CONF) ? SQL_DB_CONF : "default");
 }
 
 
