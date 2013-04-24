@@ -922,7 +922,7 @@ ShowClientSelectMenu(client)
 	
 	for(new i; i <= MaxClients; i++)
 	{
-		if(i != client && !g_bWasReported[i] && IsClientValid(i) /*&& IsFakeClient(i)*/ && !IsClientSourceTV(i) && Forward_OnDrawTarget(client, i))
+		if(i != client && !g_bWasReported[i] && IsClientValid(i) IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && Forward_OnDrawTarget(client, i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			Format(sID, sizeof(sID), "%d", GetClientSerial(i));
@@ -1239,7 +1239,7 @@ stock GetRealClientCount()
 	
 	for(new i; i <= MaxClients; i++)
 	{
-		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i))
+		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i))
 		{
 			count++;
 		}
@@ -1256,7 +1256,7 @@ stock GetAdminCount()
 	
 	for(new i; i <= MaxClients; i++)
 	{
-		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false) && Forward_OnAddToAdminCount(i)) 
+		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false) && Forward_OnAddToAdminCount(i)) 
 		{
 			count++;
 		}
@@ -1270,7 +1270,7 @@ stock PrintNotifyMessageToAdmins(client, target)
 {
 	for(new i; i <= MaxClients; i++)
 	{
-		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false) && Forward_OnAddToAdminCount(i)) 
+		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false) && Forward_OnAddToAdminCount(i)) 
 		{
 			PrintToChat(i, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AdminNotification", client, target, g_sTargetReason[client]);
 		}
