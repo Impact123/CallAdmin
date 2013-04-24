@@ -682,8 +682,8 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 					return;					
 				}
 				
-				// You should not pass!
-				if(g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+				// Admins available and we want to notify them instead of send the report
+				if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
 				{
 					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
 					PrintNotifyMessageToAdmins(client, g_iTarget[client]);
@@ -922,7 +922,7 @@ ShowClientSelectMenu(client)
 	
 	for(new i; i <= MaxClients; i++)
 	{
-		if(i != client && !g_bWasReported[i] && IsClientValid(i) IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && Forward_OnDrawTarget(client, i))
+		if(i != client && !g_bWasReported[i] && IsClientValid(i) && IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && Forward_OnDrawTarget(client, i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			Format(sID, sizeof(sID), "%d", GetClientSerial(i));
@@ -1102,8 +1102,8 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 					return;					
 				}
 				
-				// You should not pass!
-				if(g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+				// Admins available and we want to notify them instead of send the report
+				if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
 				{
 					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
 					PrintNotifyMessageToAdmins(client, g_iTarget[client]);
@@ -1174,8 +1174,8 @@ public Action:ChatListener(client, const String:command[], argc)
 			}
 			else
 			{
-				// You should not pass!
-				if(g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+				// Admins available and we want to notify them instead of send the report
+				if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
 				{
 					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
 					PrintNotifyMessageToAdmins(client, g_iTarget[client]);
