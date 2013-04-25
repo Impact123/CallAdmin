@@ -7,7 +7,7 @@
 
 
 // Do not touch
-#define CALLADMIN_VERSION	"0.1.0A"
+#define CALLADMIN_VERSION	"0.1.1A"
 
 
 
