@@ -923,7 +923,7 @@ ShowClientSelectMenu(client)
 	
 	for(new i; i <= MaxClients; i++)
 	{
-		if(i != client && !g_bWasReported[i] && IsClientValid(i) && IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && Forward_OnDrawTarget(client, i))
+		if(i != client && !g_bWasReported[i] && IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && Forward_OnDrawTarget(client, i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			Format(sID, sizeof(sID), "%d", GetClientSerial(i));
@@ -1156,7 +1156,7 @@ public Action:ChatListener(client, const String:command[], argc)
 		}
 		
 		
-		// Õ_Õ
+		// ï¿½_ï¿½
 		if(strlen(sReason) < 3)
 		{
 			g_bAwaitingReason[client] = true;
