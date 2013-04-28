@@ -105,8 +105,8 @@ new bool:g_bAwaitingAdmin[MAXPLAYERS +1];
 // When has this user reported the last time
 new g_iLastReport[MAXPLAYERS +1];
 
-// When was this user reported the last time
-new g_bWasReported[MAXPLAYERS +1];
+// Was this user reported already?
+new bool:g_bWasReported[MAXPLAYERS +1];
 
 // Player saw the antispam message
 new bool:g_bSawMesage[MAXPLAYERS +1];
@@ -263,6 +263,7 @@ public OnPluginStart()
 
 	
 	RegConsoleCmd("sm_call", Command_Call);
+	RegConsoleCmd("sm_calladmin", Command_Call);
 	
 	
 	AutoExecConfig_SetFile("plugin.calladmin");
@@ -329,6 +330,7 @@ public OnPluginStart()
 	HookConVarChange(g_hAdminAction, OnCvarChanged);
 	
 	
+	// We only create a timer if interval > 0.0
 	if(g_fAdvertInterval != 0.0)
 	{
 		g_hAdvertTimer = CreateTimer(g_fAdvertInterval, Timer_Advert, _, TIMER_REPEAT);
@@ -337,6 +339,7 @@ public OnPluginStart()
 	CreateTimer(600.0, Timer_PruneEntries, _, TIMER_REPEAT);
 	CreateTimer(20.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
 	
+	// Used for the own reason
 	AddCommandListener(ChatListener, "say");
 	AddCommandListener(ChatListener, "say_team");
 	
@@ -447,6 +450,7 @@ public Action:Timer_Advert(Handle:timer)
 {
 	if(g_iCurrentTrackers > 0)
 	{
+		// Spelling is different (0 admins, 1 admin, 2 admins, 3 admins...), we account for that :)
 		if(g_iCurrentTrackers == 1)
 		{
 			PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_AdvertMessageSingular", g_iCurrentTrackers);
@@ -670,7 +674,7 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 		new String:sInfo[24];
 		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 		
-		// Yup
+		// Client has chosen to cinfirm the call
 		if(StrEqual("Yes", sInfo))
 		{
 			if(IsClientValid(g_iTarget[client]))
@@ -683,7 +687,7 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 					return;					
 				}
 				
-				// Admins available and we want to notify them instead of send the report
+				// Admins available and we want to notify them instead of sending the report
 				if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
 				{
 					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
@@ -806,7 +810,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															COLLATE='utf8_unicode_ci'\
 														");
 														
-		// Create tracker Table
+		// Create trackers Table
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "CREATE TABLE IF NOT EXISTS `CallAdmin_Trackers` (\
 															`trackerIP` VARCHAR(15) NOT NULL,\
 															`trackerID` VARCHAR(21) NOT NULL,\
@@ -1103,7 +1107,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 					return;					
 				}
 				
-				// Admins available and we want to notify them instead of send the report
+				// Admins available and we want to notify them instead of sending the report
 				if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
 				{
 					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
@@ -1156,7 +1160,7 @@ public Action:ChatListener(client, const String:command[], argc)
 		}
 		
 		
-		// �_�
+		// Reason was too short
 		if(strlen(sReason) < 3)
 		{
 			g_bAwaitingReason[client] = true;
