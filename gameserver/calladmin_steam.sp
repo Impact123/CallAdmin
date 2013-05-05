@@ -355,7 +355,7 @@ public OnLibraryAdded(const String:name[])
 
 
 
-public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const String:reasonSanitized[])
+public CallAdmin_OnReportPost(client, target, const String:reason[])
 {
 	MessageBot_SetLoginData(g_sSteamUsername, g_sSteamPassword);
 	
@@ -380,7 +380,7 @@ public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const St
 	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
 	
 	decl String:sMessage[4096];
-	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s", sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, reasonRaw);
+	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s", sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, reason);
 							 
 	MessageBot_SendMessage(OnMessageResultReceived, sMessage);
 }
