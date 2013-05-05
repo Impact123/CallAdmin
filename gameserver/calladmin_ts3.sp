@@ -185,7 +185,7 @@ public OnLibraryAdded(const String:name[])
 
 
 
-public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const String:reasonSanitized[])
+public CallAdmin_OnReportPost(client, target, const String:reason[])
 {
 	// Create a new socket
 	new Handle:Socket = SocketCreate(SOCKET_TCP, OnSocketError);
@@ -224,7 +224,7 @@ public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const St
 	WritePackString(pack, sTargetID);
 	WritePackString(pack, sTargetName);
 	
-	WritePackString(pack, reasonRaw);
+	WritePackString(pack, reason);
 	
 	
 	// Set the pack as argument to the callbacks, so we can read it out later
