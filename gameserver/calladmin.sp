@@ -788,7 +788,7 @@ ShowClientSelectMenu(client)
 	
 	for(new i; i <= MaxClients; i++)
 	{
-		if(i != client && !LastReportedTimeCheck(i) && IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && Forward_OnDrawTarget(client, i))
+		if(i != client && LastReportedTimeCheck(i) && IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && Forward_OnDrawTarget(client, i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			Format(sID, sizeof(sID), "%d", GetClientSerial(i));
