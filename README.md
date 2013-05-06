@@ -1,5 +1,5 @@
 # CallAdmin  
-CallAdmin is an multilingual, modular and extendable system to allow inGame reports for HL2-Games and Mods.  
+CallAdmin is a multilingual, modular and extendable system to allow inGame reports for HL2-Games and Mods.  
 
 The system is based on 3 parts.  
 * A multilingual, extendable sourcemod-plugin to report players inGame  
