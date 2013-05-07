@@ -11,7 +11,7 @@
 
 
 
-// Pass this as a clientindex to the ReportPlayer if you don't have a client, eg report automatically
+// Pass this as a clientindex to the ReportPlayer native if you don't have a client, eg report from server automatically
 #define REPORTER_CONSOLE 1679124
 
 
