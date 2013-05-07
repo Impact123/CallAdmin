@@ -83,8 +83,31 @@ public CallAdmin_OnTrackerCountChanged(oldVal, newVal)
 }
 
 
+public Action:CallAdmin_OnAddToAdminCount(client)
+{
+	PrintToServer("Client %N is being added to admin count", client);
+	
+	return Plugin_Continue;
+}
+
+
 
 public CallAdmin_OnReportPost(client, target, const String:reason[])
 {
 	PrintToServer("%N was reported by %N for %s", target, client, reason);
 }
+
+
+
+public forward CallAdmin_OnRequestTrackersCountRefresh(&trackers)
+{
+	PrintToServer("Base plugin requested a tracker count from us");
+}
+
+
+
+public CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const String:oldVal[], const String:newVal[])
+{
+	PrintToServer("Convar: %x (type: %d) was changed from '%s' to '%s'", convar, type, oldVal, newVal);
+}
+
