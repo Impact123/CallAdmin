@@ -316,10 +316,19 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	SQL_EscapeString(g_hDbHandle, reason, sReason, sizeof(sReason));
 	
 	
+	// Reporter wasn't a real client (initiated by a module)
+	if(client == REPORTER_CONSOLE)
+	{
+		strcopy(clientName, sizeof(clientName), "Server/Console");
+		strcopy(clientAuth, sizeof(clientAuth), "Server/Console");
+	}
+	else
+	{
+		GetClientName(client, clientNameBuf, sizeof(clientNameBuf));
+		SQL_EscapeString(g_hDbHandle, clientNameBuf, clientName, sizeof(clientName));
+		GetClientAuthString(client, clientAuth, sizeof(clientAuth));
+	}
 	
-	GetClientName(client, clientNameBuf, sizeof(clientNameBuf));
-	SQL_EscapeString(g_hDbHandle, clientNameBuf, clientName, sizeof(clientName));
-	GetClientAuthString(client, clientAuth, sizeof(clientAuth));
 	
 	GetClientName(target, targetNameBuf, sizeof(targetNameBuf));
 	SQL_EscapeString(g_hDbHandle, targetNameBuf, targetName, sizeof(targetName));

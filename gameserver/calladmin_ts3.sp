@@ -209,12 +209,21 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	decl String:sTargetName[MAX_NAME_LENGTH];
 	
 	
-	// We don't have to verify clients, calladmin does this for us
-	GetClientAuthString(client, sClientID, sizeof(sClientID));
-	GetClientName(client, sClientName, sizeof(sClientName));
+	// Reporter wasn't a real client (initiated by a module)
+	if(client == REPORTER_CONSOLE)
+	{
+		strcopy(sClientName, sizeof(sClientName), "Server/Console");
+		strcopy(sClientID, sizeof(sClientID), "Server/Console");
+	}
+	else
+	{
+		GetClientName(client, sClientName, sizeof(sClientName));
+		GetClientAuthString(client, sClientID, sizeof(sClientID));
+	}
+
 	
-	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
 	GetClientName(target, sTargetName, sizeof(sTargetName));
+	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
 	
 	
 	// Write the data to the pack

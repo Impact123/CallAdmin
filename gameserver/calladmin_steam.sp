@@ -373,8 +373,17 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	serverPort = CallAdmin_GetHostPort();
 	CallAdmin_GetHostName(sServerName, sizeof(sServerName));
 	
-	GetClientName(client, sClientName, sizeof(sClientName));
-	GetClientAuthString(client, sClientID, sizeof(sClientID));
+	// Reporter wasn't a real client (initiated by a module)
+	if(client == REPORTER_CONSOLE)
+	{
+		strcopy(sClientName, sizeof(sClientName), "Server/Console");
+		strcopy(sClientID, sizeof(sClientID), "Server/Console");
+	}
+	else
+	{
+		GetClientName(client, sClientName, sizeof(sClientName));
+		GetClientAuthString(client, sClientID, sizeof(sClientID));
+	}
 	
 	GetClientName(target, sTargetName, sizeof(sTargetName));
 	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
