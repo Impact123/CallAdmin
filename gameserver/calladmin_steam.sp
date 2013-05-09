@@ -210,6 +210,8 @@ ParseSteamIDList()
 		}
 		
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\n", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\r", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\t", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
 		
 		
@@ -288,6 +290,8 @@ ParseGroupIDList()
 		}
 		
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\n", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\r", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\t", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
 		
 		len = strlen(sReadBuffer);
