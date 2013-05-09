@@ -227,14 +227,7 @@ public Native_ReportClient(Handle:plugin, numParams)
 	{
 		return false;
 	}
-	
 
-	// This must be checked by the function and modules on release
-	if(client == REPORTER_CONSOLE)
-	{
-		client = 0;
-	}
-	
 
 	// Call the forward
 	Forward_OnReportPost(client, target, sReason);
