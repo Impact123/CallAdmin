@@ -360,7 +360,7 @@ public OnPluginStart()
 	if(CLIENTPREFS_AVAILABLE())
 	{
 		g_hLastReportCookie   = RegClientCookie("CallAdmin_LastReport", "Contains a timestamp when this user has reported the last time", CookieAccess_Private);
-		g_hLastReportedCookie = RegClientCookie("CallAdmin_LastReport", "Contains a timestamp when this user was reported the last time", CookieAccess_Private);
+		g_hLastReportedCookie = RegClientCookie("CallAdmin_LastReported", "Contains a timestamp when this user was reported the last time", CookieAccess_Private);
 		
 		FetchClientCookies();
 	}
