@@ -29,8 +29,11 @@
 
 #undef REQUIRE_PLUGIN
 #include <updater>
+#include <clientprefs>
 #pragma semicolon 1
 
+
+#define CLIENTPREFS_AVAILABLE()      (LibraryExists("clientprefs"))
 
 
 
@@ -107,6 +110,10 @@ new g_iLastReported[MAXPLAYERS +1];
 // Player saw the antispam message
 new bool:g_bSawMesage[MAXPLAYERS +1];
 
+
+// Cookies, yummy
+new Handle:g_hLastReportCookie;
+new Handle:g_hLastReportedCookie;
 
 
 // Api
@@ -347,6 +354,55 @@ public OnPluginStart()
 	g_hOnDrawTargetForward          = CreateGlobalForward("CallAdmin_OnDrawTarget", ET_Event, Param_Cell, Param_Cell);
 	g_hOnAddToAdminCountForward     = CreateGlobalForward("CallAdmin_OnAddToAdminCount", ET_Event, Param_Cell);
 	g_hOnServerDataChangedForward   = CreateGlobalForward("CallAdmin_OnServerDataChanged", ET_Ignore, Param_Cell, Param_Cell, Param_String, Param_String);
+	
+	
+	// Cookeys
+	if(CLIENTPREFS_AVAILABLE())
+	{
+		g_hLastReportCookie   = RegClientCookie("CallAdmin_LastReport", "Contains a timestamp when this user has reported the last time", CookieAccess_Private);
+		g_hLastReportedCookie = RegClientCookie("CallAdmin_LastReport", "Contains a timestamp when this user was reported the last time", CookieAccess_Private);
+		
+		FetchClientCookies();
+	}
+}
+
+
+
+
+public OnClientCookiesCached(client)
+{
+	new String:sCookieBuf[24];
+	GetClientCookie(client, g_hLastReportCookie, sCookieBuf, sizeof(sCookieBuf));
+	
+	if(strlen(sCookieBuf) > 0)
+	{
+		g_iLastReport[client] = StringToInt(sCookieBuf);
+	}
+	
+	
+	// Just to be safe
+	sCookieBuf[0] = '\0';
+	
+	GetClientCookie(client, g_hLastReportedCookie, sCookieBuf, sizeof(sCookieBuf));
+	
+	if(strlen(sCookieBuf) > 0)
+	{
+		g_iLastReported[client] = StringToInt(sCookieBuf);
+	}
+}
+
+
+
+
+FetchClientCookies()
+{
+	for(new i; i <= MaxClients; i++)
+	{
+		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && AreClientCookiesCached(i))
+		{
+			OnClientCookiesCached(i);
+		}
+	}
 }
 
 
@@ -660,6 +716,12 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 					g_iLastReport[client]               = GetTime();
 					g_iLastReported[g_iTarget[client]]  = GetTime();
 					
+					if(CLIENTPREFS_AVAILABLE())
+					{
+						SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
+						SetClientCookieEx(g_iTarget[client], g_hLastReportedCookie, "%d", GetTime());
+					}
+					
 					return;
 				}
 				
@@ -706,6 +768,11 @@ ReportPlayer(client, target, String:sReason[])
 	g_iLastReport[client]   = GetTime();
 	g_iLastReported[target] = GetTime();
 	
+	if(CLIENTPREFS_AVAILABLE())
+	{
+		SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
+		SetClientCookieEx(target, g_hLastReportedCookie, "%d", GetTime());
+	}
 	
 	// Call the forward
 	Forward_OnReportPost(client, target, sReason);
@@ -801,6 +868,11 @@ ShowClientSelectMenu(client)
 	{
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoPlayers");
 		g_iLastReport[client] = GetTime();
+		
+		if(CLIENTPREFS_AVAILABLE())
+		{
+			SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
+		}
 	}
 	else
 	{
@@ -970,6 +1042,12 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 					g_iLastReport[client]               = GetTime();
 					g_iLastReported[g_iTarget[client]]  = GetTime();
 					
+					if(CLIENTPREFS_AVAILABLE())
+					{
+						SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
+						SetClientCookieEx(g_iTarget[client], g_hLastReportedCookie, "%d", GetTime());
+					}
+					
 					return;
 				}
 				
@@ -1041,6 +1119,12 @@ public Action:ChatListener(client, const String:command[], argc)
 					// States
 					g_iLastReport[client]               = GetTime();
 					g_iLastReported[g_iTarget[client]]  = GetTime();
+					
+					if(CLIENTPREFS_AVAILABLE())
+					{
+						SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
+						SetClientCookieEx(g_iTarget[client], g_hLastReportedCookie, "%d", GetTime());
+					}
 					
 					return Plugin_Handled;
 				}
@@ -1132,4 +1216,15 @@ stock LongToIp(long, String:str[], maxlen)
 	pieces[3] = (long & 255); 
 	
 	Format(str, maxlen, "%d.%d.%d.%d", pieces[0], pieces[1], pieces[2], pieces[3]); 
+}
+
+
+
+// Gnah, this should be the default behavior
+stock SetClientCookieEx(client, Handle:cookie, const String:format[], any:...)
+{
+	decl String:sFormatBuf[1024];
+	VFormat(sFormatBuf, sizeof(sFormatBuf), format, 4);
+	
+	SetClientCookie(client, cookie, sFormatBuf);
 }
