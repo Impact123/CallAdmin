@@ -53,7 +53,7 @@ public Action:Command_Test(client, args)
 {
 	PrintToServer("Current trackercount: %d", CallAdmin_GetTrackersCount());
 	
-	return Plugin_Continue;
+	return Plugin_Handled;
 }
 
 
@@ -94,12 +94,20 @@ public Action:CallAdmin_OnAddToAdminCount(client)
 
 public CallAdmin_OnReportPost(client, target, const String:reason[])
 {
-	PrintToServer("%N was reported by %N for %s", target, client, reason);
+	// Reporter wasn't a real client (initiated by a module)
+	if(client == REPORTER_CONSOLE)
+	{
+		PrintToServer("%N was reported by Server for %s", target, reason);
+	}
+	else
+	{
+		PrintToServer("%N was reported by %N for %s", target, client, reason);
+	}
 }
 
 
 
-public forward CallAdmin_OnRequestTrackersCountRefresh(&trackers)
+public CallAdmin_OnRequestTrackersCountRefresh(&trackers)
 {
 	PrintToServer("Base plugin requested a tracker count from us");
 }
