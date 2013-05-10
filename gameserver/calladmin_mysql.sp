@@ -132,7 +132,7 @@ public OnPluginStart()
 	AutoExecConfig_SetFile("plugin.calladmin_mysql");
 	
 	g_hVersion                = AutoExecConfig_CreateConVar("sm_calladmin_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hTableName              = AutoExecConfig_CreateConVar("sm_calladmin_table", "CallAdmin", "Name of the CallAdmin table", FCVAR_PLUGIN);
+	g_hTableName              = AutoExecConfig_CreateConVar("sm_calladmin_table_name", "CallAdmin", "Name of the CallAdmin table", FCVAR_PLUGIN);
 	g_hServerKey              = AutoExecConfig_CreateConVar("sm_calladmin_server_key", "", "Server key to identify this server", FCVAR_PLUGIN);
 	g_hEntryPruning           = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning", "25", "Entries older than given minutes will be deleted, 0 deactivates the feature", FCVAR_PLUGIN, true, 0.0);
 	g_hOhphanedEntryPruning   = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning_ohphaned", "4320", "Entries older than given minutes will be recognized as orphaned and will be deleted globally (serverIP and serverPort won't be checked)", FCVAR_PLUGIN, true, 0.0, true, 0.0);
