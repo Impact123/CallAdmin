@@ -37,6 +37,12 @@
 new Handle:g_hEntryPruning;
 new g_iEntryPruning;
 
+new Handle:g_hTableName;
+new String:g_sTableName[32];
+
+new Handle:g_hServerKey;
+new String:g_sServerKey[32];
+
 new Handle:g_hOhphanedEntryPruning;
 new g_iOhphanedEntryPruning;
 
@@ -126,6 +132,8 @@ public OnPluginStart()
 	AutoExecConfig_SetFile("plugin.calladmin_mysql");
 	
 	g_hVersion                = AutoExecConfig_CreateConVar("sm_calladmin_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hTableName              = AutoExecConfig_CreateConVar("sm_calladmin_table", "CallAdmin", "Name of the CallAdmin table", FCVAR_PLUGIN);
+	g_hServerKey              = AutoExecConfig_CreateConVar("sm_calladmin_server_key", "", "Server key to identify this server", FCVAR_PLUGIN);
 	g_hEntryPruning           = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning", "25", "Entries older than given minutes will be deleted, 0 deactivates the feature", FCVAR_PLUGIN, true, 0.0);
 	g_hOhphanedEntryPruning   = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning_ohphaned", "4320", "Entries older than given minutes will be recognized as orphaned and will be deleted globally (serverIP and serverPort won't be checked)", FCVAR_PLUGIN, true, 0.0, true, 0.0);
 	
@@ -139,9 +147,14 @@ public OnPluginStart()
 	
 	SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
-	
+
 	g_iEntryPruning = GetConVarInt(g_hEntryPruning);
 	HookConVarChange(g_hEntryPruning, OnCvarChanged);
+
+	GetConVarString(g_hTableName, g_sTableName, sizeof(g_sTableName));
+
+	GetConVarString(g_hServerKey, g_sServerKey, sizeof(g_sServerKey));
+	HookConVarChange(g_hServerKey, OnCvarChanged);
 	
 	g_iOhphanedEntryPruning = GetConVarInt(g_hOhphanedEntryPruning);
 	HookConVarChange(g_hOhphanedEntryPruning, OnCvarChanged);
@@ -245,17 +258,17 @@ PruneDatabase()
 		CallAdmin_GetHostIP(sHostIP, sizeof(sHostIP));
 		
 		// Prune main table (this server)
-		Format(query, sizeof(query), "DELETE FROM CallAdmin WHERE serverIP = '%s' AND serverPort = '%d' AND TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(reportedAt), NOW()) > %d", sHostIP, iHostPort, g_iEntryPruning);
+		Format(query, sizeof(query), "DELETE FROM `%s` WHERE serverIP = '%s' AND serverPort = '%d' AND TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(reportedAt), NOW()) > %d", g_sTableName, sHostIP, iHostPort, g_iEntryPruning);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 		
 		
 		// Prune trackers table (global)
-		Format(query, sizeof(query), "DELETE FROM CallAdmin_Trackers WHERE TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(lastView), NOW()) >= %d", PRUNE_TRACKERS_TIME);
+		Format(query, sizeof(query), "DELETE FROM `%s_Trackers` WHERE TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(lastView), NOW()) >= %d", g_sTableName, PRUNE_TRACKERS_TIME);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 		
 		
 		// Prune ohphaned entries (global)
-		Format(query, sizeof(query), "DELETE FROM CallAdmin WHERE TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(reportedAt), NOW()) > %d", g_iOhphanedEntryPruning);
+		Format(query, sizeof(query), "DELETE FROM `%s` WHERE TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(reportedAt), NOW()) > %d", g_sTableName, g_iOhphanedEntryPruning);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	}
 }
@@ -273,7 +286,7 @@ UpdateServerData()
 		SQL_EscapeString(g_hDbHandle, g_sServerName, sHostName, sizeof(sHostName));
 		
 		// Update the servername
-		Format(query, sizeof(query), "UPDATE IGNORE CallAdmin SET serverName = '%s' WHERE serverIP = '%s' AND serverPort = '%d'", sHostName, g_sHostIP, g_iHostPort);
+		Format(query, sizeof(query), "UPDATE IGNORE `%s` SET serverName = '%s' WHERE serverIP = '%s' AND serverPort = '%d'", g_sTableName, sHostName, g_sHostIP, g_iHostPort);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	}
 }
@@ -286,6 +299,10 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	if(cvar == g_hEntryPruning)
 	{
 		g_iEntryPruning = GetConVarInt(g_hEntryPruning);
+	}
+	else if(cvar == g_hServerKey)
+	{
+		GetConVarString(g_hServerKey, g_sServerKey, sizeof(g_sServerKey));
 	}
 	else if(cvar == g_hOhphanedEntryPruning)
 	{
@@ -338,11 +355,11 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	SQL_EscapeString(g_hDbHandle, g_sServerName, serverName, sizeof(serverName));
 	
 	new String:query[1024];
-	Format(query, sizeof(query), "INSERT INTO CallAdmin\
-												(serverIP, serverPort, serverName, targetName, targetID, targetReason, clientName, clientID, reportedAt)\
+	Format(query, sizeof(query), "INSERT INTO `%s`\
+												(serverIP, serverPort, serverName, serverKey, targetName, targetID, targetReason, clientName, clientID, callHandled, reportedAt)\
 											VALUES\
-												('%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', UNIX_TIMESTAMP())",
-											g_sHostIP, g_iHostPort, serverName, targetName, targetAuth, sReason, clientName, clientAuth);
+												('%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', 0, UNIX_TIMESTAMP())",
+											g_sTableName, g_sHostIP, g_iHostPort, serverName, g_sServerKey, targetName, targetAuth, sReason, clientName, clientAuth);
 	SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 }
 
@@ -363,11 +380,13 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "SET NAMES 'utf8'");
 		
 		// Create main Table
-		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "CREATE TABLE IF NOT EXISTS `CallAdmin` (\
+		new String:query[1024];
+		Format(query, sizeof(query), "CREATE TABLE IF NOT EXISTS `%s` (\
 															`callID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,\
 															`serverIP` VARCHAR(15) NOT NULL,\
 															`serverPort` SMALLINT(5) UNSIGNED NOT NULL,\
 															`serverName` VARCHAR(64) NOT NULL,\
+															`serverKey` VARCHAR(32) NOT NULL,\
 															`targetName` VARCHAR(32) NOT NULL,\
 															`targetID` VARCHAR(21) NOT NULL,\
 															`targetReason` VARCHAR(48) NOT NULL,\
@@ -380,18 +399,20 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															INDEX `callHandled` (`callHandled`),\
 															PRIMARY KEY (`callID`))\
 															COLLATE='utf8_unicode_ci'\
-														");
+														", g_sTableName);
+		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 														
 		// Create trackers Table
-		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "CREATE TABLE IF NOT EXISTS `CallAdmin_Trackers` (\
+		Format(query, sizeof(query), "CREATE TABLE IF NOT EXISTS `%s_Trackers` (\
 															`trackerIP` VARCHAR(15) NOT NULL,\
 															`trackerID` VARCHAR(21) NOT NULL,\
 															`lastView` INT(10) UNSIGNED NOT NULL,\
 															INDEX `lastView` (`lastView`),\
 															UNIQUE INDEX `trackerIP` (`trackerIP`))\
 															COLLATE='utf8_unicode_ci'\
-														");
-		
+														", g_sTableName);
+		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
+
 		// Prune old entries if enabled
 		if(g_iEntryPruning > 0)
 		{
@@ -441,9 +462,9 @@ GetCurrentTrackers()
 		Format(query, sizeof(query), "SELECT \
 											COUNT(`trackerID`) as currentTrackers \
 										FROM \
-											CallAdmin_Trackers \
+											`%s_Trackers` \
 										WHERE \
-											TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(lastView), NOW()) < 2");
+											TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(lastView), NOW()) < 2", g_sTableName);
 		SQL_TQuery(g_hDbHandle, SQLT_CurrentTrackersCallback, query);
 	}
 }
