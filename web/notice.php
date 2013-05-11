@@ -51,7 +51,7 @@ $helpers = new CallAdmin_Helpers();
 
 
 // Key set and no key given or key is wrong
-if((!empty($access_key) && !isset($_GET['key']) ) || $_GET['key'] !== $access_key)
+if(!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
 	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Notice");
 }
@@ -125,13 +125,16 @@ if(isset($_GET['sort']) && preg_match("/^[a-zA-Z]{3,4}+$/", $_GET['sort']))
 }
 
 
+// Server Key clause
+$server_key_clause = 'serverKey IN ('.$helpers->keyToServerKeys($access_keys, $_GET['key']).') OR LENGTH(serverKey) < 1'
+
 
 $fetchresult = $dbi->query("SELECT 
 							callID, serverIP, serverPort, CONCAT(serverIP, ':', serverPort) as fullIP, serverName, targetName, targetID, targetReason, clientName, clientID, reportedAt, callHandled
 						FROM 
-							$table
+							`$table`
 						WHERE
-							callHandled != 1 AND $from_query
+							callHandled != 1 AND $from_query AND $server_key_clause
 						ORDER BY
 							reportedAt $sort
 						LIMIT 0, $limit");
@@ -145,7 +148,7 @@ if($fetchresult === FALSE)
 
 
 // Save this tracker if key is set, key was given, we have an valid remote address and the client sends an store (save him as available)
-if((!empty($access_key) && isset($_GET['key']) ) && isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
+if(isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
 {
 	$trackerIP = $dbi->escape_string($helpers->AnonymizeIP($_SERVER['REMOTE_ADDR']));
 	$trackerID = "";
@@ -158,7 +161,7 @@ if((!empty($access_key) && isset($_GET['key']) ) && isset($_SERVER['REMOTE_ADDR'
 	}
 
 
-	$insertresult = $dbi->query("INSERT IGNORE INTO CallAdmin_Trackers
+	$insertresult = $dbi->query("INSERT IGNORE INTO `".$table."_Trackers`
 						(trackerIP, trackerID, lastView)
 					VALUES
 						('$trackerIP', '$trackerID', UNIX_TIMESTAMP())

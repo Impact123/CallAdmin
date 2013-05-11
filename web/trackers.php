@@ -39,7 +39,7 @@ $helpers = new CallAdmin_Helpers();
 
 
 // Key set and no key given or key is wrong
-if((!empty($access_key) && !isset($_GET['key']) ) || $_GET['key'] !== $access_key)
+if(!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
 	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Trackers");
 }
@@ -117,7 +117,7 @@ if(isset($_GET['sort']) && preg_match("/^[a-zA-Z]{3,4}+$/", $_GET['sort']))
 $fetchresult = $dbi->query("SELECT 
 							trackerIP, trackerID, lastView, TIMESTAMPDIFF(SECOND, FROM_UNIXTIME(lastView), NOW()) AS lastViewDiff
 						FROM 
-							$trackers_table
+							`".$table."_Trackers`
 						WHERE
 							$from_query
 						ORDER BY
