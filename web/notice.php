@@ -78,7 +78,7 @@ $uniqueArray = $helpers->keysToArray($access_keys);
 
 if($uniqueArray)
 {
-	$deleteresult = $dbi->query("TRUNCATE `".$table."_Access`");
+	$deleteresult = $dbi->query("TRUNCATE `" .$table. "_Access`");
 
 	// delete failed
 	if($deleteresult === FALSE)
@@ -92,9 +92,9 @@ if($uniqueArray)
 	
 	foreach($uniqueArray as $serverKey)
 	{
-		$bit = 1 << $current;
+		$bit = (1 << $current);
 		
-		$insertresult = $dbi->query("INSERT IGNORE INTO `".$table."_Access`
+		$insertresult = $dbi->query("INSERT IGNORE INTO `" .$table. "_Access`
 							(serverKey, accessBit)
 						VALUES
 							('$serverKey', $bit)");
@@ -106,7 +106,7 @@ if($uniqueArray)
 			$helpers->printXmlError("DB_UPDATE_FAILURE", "CallAdmin_Notice");
 		}
 		
-		if($current + 1 == 64)
+		if($current + 1 >= 64)
 		{
 			$dbi->close();
 			$helpers->printXmlError("DB_MAX_ACCESS_REACHED", "CallAdmin_Notice");
@@ -172,7 +172,7 @@ if(isset($_GET['sort']) && preg_match("/^[a-zA-Z]{3,4}+$/", $_GET['sort']))
 
 
 // Server Key clause
-$server_key_clause = 'serverKey IN ('.$helpers->keyToServerKeys($access_keys, $_GET['key']).') OR LENGTH(serverKey) < 1';
+$server_key_clause = 'serverKey IN (' .$helpers->keyToServerKeys($access_keys, $_GET['key']). ') OR LENGTH(serverKey) < 1';
 
 
 $fetchresult = $dbi->query("SELECT 
@@ -208,10 +208,10 @@ if(isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
 	
 	
 	// Access query
-	$access_query = '(SELECT SUM(`accessBit`) FROM `'.$table.'_Access` WHERE serverKey IN ('.$helpers->keyToServerKeys($access_keys, $_GET['key']).'))';
+	$access_query = '(SELECT SUM(`accessBit`) FROM `' .$table. '_Access` WHERE serverKey IN (' .$helpers->keyToServerKeys($access_keys, $_GET['key']). '))';
 
 
-	$insertresult = $dbi->query("INSERT IGNORE INTO `".$table."_Trackers`
+	$insertresult = $dbi->query("INSERT IGNORE INTO `" .$table. "_Trackers`
 						(trackerIP, trackerID, lastView, accessID)
 					VALUES
 						('$trackerIP', '$trackerID', UNIX_TIMESTAMP(), $access_query)

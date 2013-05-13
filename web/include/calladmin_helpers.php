@@ -132,7 +132,7 @@ class CallAdmin_Helpers
 		$result = '';
 		
 		// Key is in array and a server key is set for it
-		if(!is_array($serverKeys) || !array_key_exists($access_key, $serverKeys) || !isset($serverKeys[$access_key]) || (count($serverKeys[$access_key]) < 1))
+		if(!is_array($serverKeys) || !array_key_exists($access_key, $serverKeys) || !isset($serverKeys[$access_key]) || count($serverKeys[$access_key]) < 1)
 		{
 			return false;
 		}
@@ -140,9 +140,9 @@ class CallAdmin_Helpers
 		// Loop through server keys
 		foreach($serverKeys[$access_key] as $serverKey)
 		{
-			if($serverKey != '')
+			if(strlen($serverKey) > 0)
 			{
-				if($result == '')
+				if(strlen($result) < 1)
 				{
 					$result = '\''.$serverKey.'\'';
 				}
@@ -154,7 +154,7 @@ class CallAdmin_Helpers
 		}
 
 		// Valid result?
-		if($result == '')
+		if(strlen($result) < 1)
 		{
 			return false;
 		}

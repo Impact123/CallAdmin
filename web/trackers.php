@@ -115,13 +115,13 @@ if(isset($_GET['sort']) && preg_match("/^[a-zA-Z]{3,4}+$/", $_GET['sort']))
 
 
 // Access query
-$access_query = '`accessID` & (SELECT SUM(`accessBit`) FROM `'.$table.'_Access` WHERE serverKey IN ('.$helpers->keyToServerKeys($access_keys, $_GET['key']).'))';
+$access_query = '`accessID` & (SELECT SUM(`accessBit`) FROM `' .$table. '_Access` WHERE serverKey IN (' .$helpers->keyToServerKeys($access_keys, $_GET['key']). '))';
 
 
 $fetchresult = $dbi->query("SELECT 
 							trackerIP, trackerID, lastView, TIMESTAMPDIFF(SECOND, FROM_UNIXTIME(lastView), NOW()) AS lastViewDiff
 						FROM 
-							`".$table."_Trackers`
+							`" .$table ."_Trackers`
 						WHERE
 							$from_query AND $access_query
 						ORDER BY

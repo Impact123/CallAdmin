@@ -8,6 +8,7 @@
 
 /*
 Define for each key the server keys to assign to.
+You can have a maximum of 64 different ServerKeys
 Just use like this:
 
 $access_keys = array
