@@ -61,7 +61,7 @@ $dbi->set_charset("utf8");
 
 
 // Server Key clause
-$server_key_clause = 'serverKey IN ('.$helpers->keyToServerKeys($access_keys, $_GET['key']).') OR LENGTH(serverKey) < 1'
+$server_key_clause = 'serverKey IN ('.$helpers->keyToServerKeys($access_keys, $_GET['key']).') OR LENGTH(serverKey) < 1';
 
 
 // Safety

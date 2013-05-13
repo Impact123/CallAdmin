@@ -148,6 +148,16 @@ if(isset($_GET['from']) && preg_match("/^[0-9]{1,11}+$/", $_GET['from']))
 }
 
 
+// Safety
+$from_query2 = "";
+if(isset($_GET['handled']) && preg_match("/^[0-9]{1,11}+$/", $_GET['handled']))
+{
+	$from = $dbi->escape_string($_GET['handled']);
+
+	$from_query2 = "OR callHandled = 1 AND TIMESTAMPDIFF(SECOND, FROM_UNIXTIME(reportedAt), NOW()) <= $from";
+}
+
+
 
 // Safety
 $limit = $data_limit;
@@ -180,10 +190,11 @@ $fetchresult = $dbi->query("SELECT
 						FROM 
 							`$table`
 						WHERE
-							callHandled != 1 AND $from_query AND $server_key_clause
+							($from_query $from_query2) AND $server_key_clause
 						ORDER BY
 							reportedAt $sort
 						LIMIT 0, $limit");
+
 
 // Retrieval failed
 if($fetchresult === FALSE)
