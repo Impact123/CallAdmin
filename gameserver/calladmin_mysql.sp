@@ -133,7 +133,7 @@ public OnPluginStart()
 	
 	g_hVersion                = AutoExecConfig_CreateConVar("sm_calladmin_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	g_hTableName              = AutoExecConfig_CreateConVar("sm_calladmin_table_name", "CallAdmin", "Name of the CallAdmin table", FCVAR_PLUGIN);
-	g_hServerKey              = AutoExecConfig_CreateConVar("sm_calladmin_server_key", "", "Server key to identify this server", FCVAR_PLUGIN);
+	g_hServerKey              = AutoExecConfig_CreateConVar("sm_calladmin_server_key", "", "Server key to identify this server (Max. 64 allowed!)", FCVAR_PLUGIN);
 	g_hEntryPruning           = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning", "25", "Entries older than given minutes will be deleted, 0 deactivates the feature", FCVAR_PLUGIN, true, 0.0);
 	g_hOhphanedEntryPruning   = AutoExecConfig_CreateConVar("sm_calladmin_entrypruning_ohphaned", "4320", "Entries older than given minutes will be recognized as orphaned and will be deleted globally (serverIP and serverPort won't be checked)", FCVAR_PLUGIN, true, 0.0, true, 0.0);
 	
@@ -220,8 +220,8 @@ public Action:Timer_PruneEntries(Handle:timer)
 
 
 
-// Pseudo forward
-public CallAdmin_OnTrackerCountRefresh(&trackers)
+// Pseudo forward CallAdmin_OnRequestTrackersCountRefresh
+public CallAdmin_OnRequestTrackersCountRefresh(&trackers)
 {
 	trackers = g_iCurrentTrackers;
 }
@@ -382,9 +382,9 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 		// Create main Table
 		new String:query[1024];
 		Format(query, sizeof(query), "CREATE TABLE IF NOT EXISTS `%s` (\
-															`callID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,\
+															`callID` INT UNSIGNED NOT NULL AUTO_INCREMENT,\
 															`serverIP` VARCHAR(15) NOT NULL,\
-															`serverPort` SMALLINT(5) UNSIGNED NOT NULL,\
+															`serverPort` SMALLINT UNSIGNED NOT NULL,\
 															`serverName` VARCHAR(64) NOT NULL,\
 															`serverKey` VARCHAR(32) NOT NULL,\
 															`targetName` VARCHAR(32) NOT NULL,\
@@ -392,8 +392,8 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															`targetReason` VARCHAR(48) NOT NULL,\
 															`clientName` VARCHAR(32) NOT NULL,\
 															`clientID` VARCHAR(21) NOT NULL,\
-															`callHandled` TINYINT(1) UNSIGNED NOT NULL,\
-															`reportedAt` INT(10) UNSIGNED NOT NULL,\
+															`callHandled` TINYINT UNSIGNED NOT NULL,\
+															`reportedAt` INT UNSIGNED NOT NULL,\
 															INDEX `serverIP_serverPort` (`serverIP`, `serverPort`),\
 															INDEX `reportedAt` (`reportedAt`),\
 															INDEX `callHandled` (`callHandled`),\
@@ -406,12 +406,23 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 		Format(query, sizeof(query), "CREATE TABLE IF NOT EXISTS `%s_Trackers` (\
 															`trackerIP` VARCHAR(15) NOT NULL,\
 															`trackerID` VARCHAR(21) NOT NULL,\
-															`lastView` INT(10) UNSIGNED NOT NULL,\
+															`lastView` INT UNSIGNED NOT NULL,\
+															`accessID` BIGINT UNSIGNED NOT NULL,\
 															INDEX `lastView` (`lastView`),\
 															UNIQUE INDEX `trackerIP` (`trackerIP`))\
 															COLLATE='utf8_unicode_ci'\
 														", g_sTableName);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
+														
+		// Create Access Table
+		Format(query, sizeof(query), "CREATE TABLE IF NOT EXISTS `%s_Access` (\
+															`serverKey` VARCHAR(32) NOT NULL,\
+															`accessBit` BIGINT UNSIGNED NOT NULL,\
+															UNIQUE INDEX `serverKey` (`serverKey`))\
+															COLLATE='utf8_unicode_ci'\
+														", g_sTableName);
+		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
+
 
 		// Prune old entries if enabled
 		if(g_iEntryPruning > 0)
@@ -464,7 +475,8 @@ GetCurrentTrackers()
 										FROM \
 											`%s_Trackers` \
 										WHERE \
-											TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(lastView), NOW()) < 2", g_sTableName);
+											TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(lastView), NOW()) < 2 AND \
+											`accessID` & (SELECT `accessBit` FROM `%s_Access` WHERE `serverKey`='%s')", g_sTableName, g_sTableName, g_sServerKey);
 		SQL_TQuery(g_hDbHandle, SQLT_CurrentTrackersCallback, query);
 	}
 }

@@ -144,17 +144,62 @@ class CallAdmin_Helpers
 			{
 				if($result == '')
 				{
-					$result = '`'.$serverKey.'`';
+					$result = '\''.$serverKey.'\'';
 				}
 				else
 				{
-					$result .= ', `'.$serverKey.'`';
+					$result .= ', \''.$serverKey.'\'';
 				}
 			}
 		}
 
 		// Valid result?
 		if($result == '')
+		{
+			return false;
+		}
+		
+
+		// Return result
+		return $result;
+	}
+	
+	
+	/**
+	 * Filter all serverkeys to one unique array
+	 * 
+	 * @var    array
+	 * @return array | bool on error
+	 */
+	public function keysToArray($serverKeys)
+	{
+		// Empty array
+		$result = array();
+		
+		// serverKeys is array
+		if(!is_array($serverKeys))
+		{
+			return false;
+		}
+		
+		
+		// Loop through server keys
+		foreach($serverKeys as $key => $value)
+		{
+			if(is_array($value))
+			{
+				foreach($value as $serverKey)
+				{
+					if($serverKey != '' && !in_array($serverKey, $result))
+					{
+						$result[] = $serverKey;
+					}
+				}
+			}
+		}
+
+		// Valid result?
+		if(empty($result))
 		{
 			return false;
 		}

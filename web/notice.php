@@ -72,6 +72,52 @@ if($dbi->connect_errno != 0)
 $dbi->set_charset("utf8");
 
 
+
+// Updated serverKey Access list
+$uniqueArray = $helpers->keysToArray($access_keys);
+
+if($uniqueArray)
+{
+	$deleteresult = $dbi->query("TRUNCATE `".$table."_Access`");
+
+	// delete failed
+	if($deleteresult === FALSE)
+	{
+		$dbi->close();
+		$helpers->printXmlError("DB_DELETE_FAILURE", "CallAdmin_Notice");
+	}
+	
+	// Start with zero
+	$current = 0; 
+	
+	foreach($uniqueArray as $serverKey)
+	{
+		$bit = 1 << $current;
+		
+		$insertresult = $dbi->query("INSERT IGNORE INTO `".$table."_Access`
+							(serverKey, accessBit)
+						VALUES
+							('$serverKey', $bit)");
+
+		// Insert failed
+		if($insertresult === FALSE)
+		{
+			$dbi->close();
+			$helpers->printXmlError("DB_UPDATE_FAILURE", "CallAdmin_Notice");
+		}
+		
+		if($current + 1 == 64)
+		{
+			$dbi->close();
+			$helpers->printXmlError("DB_MAX_ACCESS_REACHED", "CallAdmin_Notice");
+		}
+		
+		// Update current
+		$current++;
+	}
+}
+
+
 // Safety
 $from = $data_from;
 $from_query = "reportedAt > $from";
@@ -126,7 +172,7 @@ if(isset($_GET['sort']) && preg_match("/^[a-zA-Z]{3,4}+$/", $_GET['sort']))
 
 
 // Server Key clause
-$server_key_clause = 'serverKey IN ('.$helpers->keyToServerKeys($access_keys, $_GET['key']).') OR LENGTH(serverKey) < 1'
+$server_key_clause = 'serverKey IN ('.$helpers->keyToServerKeys($access_keys, $_GET['key']).') OR LENGTH(serverKey) < 1';
 
 
 $fetchresult = $dbi->query("SELECT 
@@ -159,14 +205,18 @@ if(isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
 	{
 		$trackerID = $dbi->escape_string($_GET['steamid']);
 	}
+	
+	
+	// Access query
+	$access_query = '(SELECT SUM(`accessBit`) FROM `'.$table.'_Access` WHERE serverKey IN ('.$helpers->keyToServerKeys($access_keys, $_GET['key']).'))';
 
 
 	$insertresult = $dbi->query("INSERT IGNORE INTO `".$table."_Trackers`
-						(trackerIP, trackerID, lastView)
+						(trackerIP, trackerID, lastView, accessID)
 					VALUES
-						('$trackerIP', '$trackerID', UNIX_TIMESTAMP())
+						('$trackerIP', '$trackerID', UNIX_TIMESTAMP(), $access_query)
 					ON DUPLICATE KEY
-						UPDATE lastView = UNIX_TIMESTAMP(), trackerID = '$trackerID'");
+						UPDATE lastView = UNIX_TIMESTAMP(), trackerID = '$trackerID', accessID = $access_query");
 
 	// Insert failed
 	if($insertresult === FALSE)
