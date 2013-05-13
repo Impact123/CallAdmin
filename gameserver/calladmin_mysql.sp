@@ -208,7 +208,7 @@ public Action:Timer_PruneEntries(Handle:timer)
 
 
 // Pseudo forward
-public CallAdmin_OnTrackerCountRefresh(&trackers)
+public CallAdmin_OnRequestTrackersCountRefresh(&trackers)
 {
 	trackers = g_iCurrentTrackers;
 }

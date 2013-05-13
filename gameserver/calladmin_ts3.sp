@@ -218,7 +218,7 @@ public OnLibraryAdded(const String:name[])
 
 
 // Pseudo forward
-public CallAdmin_OnTrackerCountRefresh(&trackers)
+public CallAdmin_OnRequestTrackersCountRefresh(&trackers)
 {
 	trackers = g_iCurrentTrackers;
 }
