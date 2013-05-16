@@ -73,6 +73,20 @@ $dbi->set_charset("utf8");
 
 
 
+// Escape server keys
+foreach($access_keys as $key => $value)
+{
+	if(is_array($value))
+	{
+		foreach($value as $serverKey)
+		{
+			$access_keys[$key][$serverKey] = $dbi->escape_string($serverKey);
+		}
+	}
+}
+
+
+
 // Updated serverKey Access list
 $uniqueArray = $helpers->keysToArray($access_keys);
 

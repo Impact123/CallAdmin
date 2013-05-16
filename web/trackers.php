@@ -60,6 +60,20 @@ if($dbi->connect_errno != 0)
 $dbi->set_charset("utf8");
 
 
+
+// Escape server keys
+foreach($access_keys as $key => $value)
+{
+	if(is_array($value))
+	{
+		foreach($value as $serverKey)
+		{
+			$access_keys[$key][$serverKey] = $dbi->escape_string($serverKey);
+		}
+	}
+}
+
+
 // Safety
 $from = $data_from;
 $from_query = "lastView > $from";
@@ -161,4 +175,6 @@ while(($row = $fetchresult->fetch_assoc()))
 }
 
 echo $xml->asXML();
+
+?>
 // End of file: trackers.php

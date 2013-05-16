@@ -60,8 +60,23 @@ if($dbi->connect_errno != 0)
 $dbi->set_charset("utf8");
 
 
+
+// Escape server keys
+foreach($access_keys as $key => $value)
+{
+	if(is_array($value))
+	{
+		foreach($value as $serverKey)
+		{
+			$access_keys[$key][$serverKey] = $dbi->escape_string($serverKey);
+		}
+	}
+}
+
+
+
 // Server Key clause
-$server_key_clause = 'serverKey IN ('.$helpers->keyToServerKeys($access_keys, $_GET['key']).') OR LENGTH(serverKey) < 1';
+$server_key_clause = 'serverKey IN (' .$helpers->keyToServerKeys($access_keys, $_GET['key']). ') OR LENGTH(serverKey) < 1';
 
 
 // Safety

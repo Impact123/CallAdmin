@@ -328,7 +328,10 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	new String:targetNameBuf[MAX_NAME_LENGTH];
 	new String:targetName[(MAX_NAME_LENGTH + 1) * 2];
 	new String:targetAuth[21];
-	
+
+	new String:sKey[(32 + 1) * 2];
+	SQL_EscapeString(g_hDbHandle, g_sServerKey, sKey, sizeof(sKey));
+
 	new String:sReason[(48 + 1) * 2];
 	SQL_EscapeString(g_hDbHandle, reason, sReason, sizeof(sReason));
 	
@@ -359,7 +362,7 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 												(serverIP, serverPort, serverName, serverKey, targetName, targetID, targetReason, clientName, clientID, callHandled, reportedAt)\
 											VALUES\
 												('%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', 0, UNIX_TIMESTAMP())",
-											g_sTableName, g_sHostIP, g_iHostPort, serverName, g_sServerKey, targetName, targetAuth, sReason, clientName, clientAuth);
+											g_sTableName, g_sHostIP, g_iHostPort, serverName, sKey, targetName, targetAuth, sReason, clientName, clientAuth);
 	SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 }
 
@@ -468,6 +471,9 @@ GetCurrentTrackers()
 	if(g_hDbHandle != INVALID_HANDLE)
 	{
 		decl String:query[1024];
+
+		new String:sKey[(32 + 1) * 2];
+		SQL_EscapeString(g_hDbHandle, g_sServerKey, sKey, sizeof(sKey));
 		
 		// Get current trackers (last 2 minutes)
 		Format(query, sizeof(query), "SELECT \
@@ -476,7 +482,7 @@ GetCurrentTrackers()
 											`%s_Trackers` \
 										WHERE \
 											TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(lastView), NOW()) < 2 AND \
-											`accessID` & (SELECT `accessBit` FROM `%s_Access` WHERE `serverKey`='%s')", g_sTableName, g_sTableName, g_sServerKey);
+											`accessID` & (SELECT `accessBit` FROM `%s_Access` WHERE `serverKey`='%s')", g_sTableName, g_sTableName, sKey);
 		SQL_TQuery(g_hDbHandle, SQLT_CurrentTrackersCallback, query);
 	}
 }
