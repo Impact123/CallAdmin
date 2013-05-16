@@ -175,6 +175,4 @@ while(($row = $fetchresult->fetch_assoc()))
 }
 
 echo $xml->asXML();
-
-?>
 // End of file: trackers.php
