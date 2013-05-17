@@ -687,45 +687,48 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 		new String:sInfo[24];
 		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 		
-		// Client has chosen to cinfirm the call
+		// Client has chosen to confirm the call
 		if(StrEqual("Yes", sInfo))
 		{
-			if(IsClientValid(g_iTarget[client]))
-			{
-				// Already reported (race condition)
-				if(!LastReportedTimeCheck(g_iTarget[client]) )
-				{
-					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
-					
-					return;					
-				}
-				
-				// Admins available and we want to notify them instead of sending the report
-				if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
-				{
-					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
-					PrintNotifyMessageToAdmins(client, g_iTarget[client]);
-					
-					// States
-					g_iLastReport[client]               = GetTime();
-					g_iLastReported[g_iTarget[client]]  = GetTime();
-					
-					if(CLIENTPREFS_AVAILABLE())
-					{
-						SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
-						SetClientCookieEx(g_iTarget[client], g_hLastReportedCookie, "%d", GetTime());
-					}
-					
-					return;
-				}
-				
-				// Send the report
-				ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
-			}
-			else
+			// Selected target isn't valid anymore
+			if(!IsClientValid(g_iTarget[client]))
 			{
 				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
+				
+				return;
 			}
+			
+			
+			// Already reported (race condition)
+			if(!LastReportedTimeCheck(g_iTarget[client]) )
+			{
+				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
+				
+				return;					
+			}
+			
+			
+			// Admins available and we want to notify them instead of sending the report
+			if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+			{
+				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
+				PrintNotifyMessageToAdmins(client, g_iTarget[client]);
+				
+				// States
+				g_iLastReport[client]               = GetTime();
+				g_iLastReported[g_iTarget[client]]  = GetTime();
+				
+				if(CLIENTPREFS_AVAILABLE())
+				{
+					SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
+					SetClientCookieEx(g_iTarget[client], g_hLastReportedCookie, "%d", GetTime());
+				}
+				
+				return;
+			}
+			
+			// Send the report
+			ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
 		}
 		else
 		{
@@ -891,24 +894,24 @@ public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
 		iID     = GetClientFromSerial(iSerial);
 		
 		
-		if(IsClientValid(iID))
-		{
-			g_iTarget[client] = iID;
-			
-			// Already reported (race condition)
-			if(!LastReportedTimeCheck(g_iTarget[client]) )
-			{
-				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
-				
-				return;					
-			}
-			
-			ShowBanreasonMenu(client);
-		}
-		else
+		// Selected target isn't valid anymore
+		if(!IsClientValid(iID))
 		{
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
 		}
+		
+		
+		g_iTarget[client] = iID;
+		
+		// Already reported (race condition)
+		if(!LastReportedTimeCheck(g_iTarget[client]) )
+		{
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
+			
+			return;					
+		}
+		
+		ShowBanreasonMenu(client);
 	}
 	else if(action == MenuAction_End)
 	{
@@ -1009,49 +1012,52 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		Format(g_sTargetReason[client], sizeof(g_sTargetReason[]), sInfo);
 		
 		
-		if(IsClientValid(g_iTarget[client]))
+		// Selected target isn't valid anymore
+		if(!IsClientValid(g_iTarget[client]))
 		{
-			// Already reported (race condition)
-			if(!LastReportedTimeCheck(g_iTarget[client]) )
-			{
-				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
-				
-				return;					
-			}
-				
-			// Send the report
-			if(g_bConfirmCall)
-			{
-				ConfirmCall(client);
-			}
-			else
-			{
-				// Admins available and we want to notify them instead of sending the report
-				if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
-				{
-					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
-					PrintNotifyMessageToAdmins(client, g_iTarget[client]);
-					
-					// States
-					g_iLastReport[client]               = GetTime();
-					g_iLastReported[g_iTarget[client]]  = GetTime();
-					
-					if(CLIENTPREFS_AVAILABLE())
-					{
-						SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
-						SetClientCookieEx(g_iTarget[client], g_hLastReportedCookie, "%d", GetTime());
-					}
-					
-					return;
-				}
-				
-				ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
-			}			
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
+			
+			return;
+		}
+		
+		
+		// Already reported (race condition)
+		if(!LastReportedTimeCheck(g_iTarget[client]) )
+		{
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
+			
+			return;					
+		}
+		
+			
+		// Confirm the report
+		if(g_bConfirmCall)
+		{
+			ConfirmCall(client);
 		}
 		else
 		{
-			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
-		}
+			// Admins available and we want to notify them instead of sending the report
+			if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+			{
+				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
+				PrintNotifyMessageToAdmins(client, g_iTarget[client]);
+				
+				// States
+				g_iLastReport[client]               = GetTime();
+				g_iLastReported[g_iTarget[client]]  = GetTime();
+				
+				if(CLIENTPREFS_AVAILABLE())
+				{
+					SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
+					SetClientCookieEx(g_iTarget[client], g_hLastReportedCookie, "%d", GetTime());
+				}
+				
+				return;
+			}
+			
+			ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
+		}			
 	}
 	else if(action == MenuAction_End)
 	{
@@ -1095,40 +1101,42 @@ public Action:ChatListener(client, const String:command[], argc)
 		}
 		
 		
-		if(IsClientValid(g_iTarget[client]))
+		// Selected target isn't valid anymore
+		if(!IsClientValid(g_iTarget[client]))
 		{
-			// Send the report
-			if(g_bConfirmCall)
-			{
-				ConfirmCall(client);
-			}
-			else
-			{
-				// Admins available and we want to notify them instead of send the report
-				if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
-				{
-					PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
-					PrintNotifyMessageToAdmins(client, g_iTarget[client]);
-					
-					// States
-					g_iLastReport[client]               = GetTime();
-					g_iLastReported[g_iTarget[client]]  = GetTime();
-					
-					if(CLIENTPREFS_AVAILABLE())
-					{
-						SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
-						SetClientCookieEx(g_iTarget[client], g_hLastReportedCookie, "%d", GetTime());
-					}
-					
-					return Plugin_Handled;
-				}
-				
-				ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
-			}
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
+			
+			return Plugin_Handled;
+		}
+		
+		
+		// Send the report
+		if(g_bConfirmCall)
+		{
+			ConfirmCall(client);
 		}
 		else
 		{
-			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
+			// Admins available and we want to notify them instead of send the report
+			if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+			{
+				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
+				PrintNotifyMessageToAdmins(client, g_iTarget[client]);
+				
+				// States
+				g_iLastReport[client]               = GetTime();
+				g_iLastReported[g_iTarget[client]]  = GetTime();
+				
+				if(CLIENTPREFS_AVAILABLE())
+				{
+					SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
+					SetClientCookieEx(g_iTarget[client], g_hLastReportedCookie, "%d", GetTime());
+				}
+				
+				return Plugin_Handled;
+			}
+			
+			ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
 		}
 		
 		
