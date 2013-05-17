@@ -18,7 +18,7 @@
 
 
 /**
- * Called when own reason is enabled and the selection for it is about to be drawn for a client.
+ * Called when own reason selection is enabled and the select item for it is about to be drawn for a client.
  *
  * @param client        Client index of the caller.
  * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
@@ -29,8 +29,8 @@ forward Action:CallAdmin_OnDrawOwnReason(client);
 
 
 /**
- * Called when the target selection menu for an client is about to be drawn for a client.
- * Note: Called *n-1 times for each selection where n is the amount of valid players.
+ * Called when an client is about to be drawn as to the target selection menu for an client.
+ * Note: Called *n-1 times for the client selection menu where n is the amount of valid players including the caller.
  *
  * @param client        Client index of the caller.
  * @param target        Client index of the target about to be drawed.
@@ -54,7 +54,7 @@ forward CallAdmin_OnTrackerCountChanged(oldVal, newVal);
 
 
 /**
- * Called after a client (or module) has reported another player.
+ * Called after an client (or module) has reported another player.
  *
  * @param client        Client index of the caller.
  * @param target        Client index of the target.
@@ -67,11 +67,11 @@ forward CallAdmin_OnReportPost(client, target, const String:reason[]);
 
 
 /**
- * Initiates an external report call.
+ * Initiates an report call.
  *
  * @param client        Client index of the caller.
  * @param target        Client index of the target.
- * @param reason        Reason selected by the client for the report.
+ * @param reason        Reason for the report.
  * @return              True if target could be reported, false otherwise.
  */
 native bool:CallAdmin_ReportClient(client, target, const String:reason[]);
@@ -80,7 +80,7 @@ native bool:CallAdmin_ReportClient(client, target, const String:reason[]);
 
 
 /**
- * Called when this player is added to the inGame admincount.
+ * Called when an admin is  about to be added to the inGame admincount.
  *
  * @param client        Client index of the admin.
  * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
@@ -91,7 +91,7 @@ forward Action:CallAdmin_OnAddToAdminCount(client);
 
 
 /**
- * Retrieves the count of current trackers.
+ * Returns the cached count of current trackers.
  *
  * @return              Count of current trackers.
  */
@@ -112,7 +112,7 @@ native CallAdmin_RequestTrackersCountRefresh();
 
 /**
  * Called when the trackercount of a module is requested.
- * Note: This is a pseudo forward
+ * Note: This is a pseudo forward (it's a function call)
  *
  * @param trackers      By ref value of your trackers.
  * @noreturn
@@ -148,7 +148,7 @@ enum ServerData
 /**
  * Returns the servers hostname.
  *
- * @param buffer        String to copy to
+ * @param buffer        String to copy hostname to
  * @param max_size      Maximum size of buffer
  * @noreturn
  */
@@ -160,7 +160,7 @@ native CallAdmin_GetHostName(String:buffer[], max_size);
 /**
  * Returns the servers IP String.
  *
- * @param buffer        String to copy to
+ * @param buffer        String to copy hostip to
  * @param max_size      Maximum size of buffer
  * @noreturn
  */
@@ -183,7 +183,7 @@ native CallAdmin_GetHostPort();
 	To be implemented 
 	------------------
 */
-// Callen when the client executes the sm_call command, we can block this per client
+// We need a dynamic way to notify the client (in his language) why the call was blocked prior implementing this
 //forward CallAdmin_OnReportPre();
 
 
