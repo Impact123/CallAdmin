@@ -898,6 +898,8 @@ public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
 		if(!IsClientValid(iID))
 		{
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
+			
+			return;
 		}
 		
 		
