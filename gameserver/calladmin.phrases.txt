@@ -16,7 +16,7 @@
 	{
 		"#format"	"{1:s},{2:s}"
 		"en"		"You have reported {1} for {2}"
-		"de"		"Du hast {1} wegen {2} reported"
+		"de"		"Du hast {1} wegen {2} reportet"
 	}
 	"CallAdmin_NoPlayers"
 	{
