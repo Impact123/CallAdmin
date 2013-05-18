@@ -24,18 +24,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  */
-$methods = array('notice', 'trackers');
-
-
-$method = 'notice';
-if(isset($_GET['method']))
-{
-	if(in_array($_GET['method'], $methods))
-	{
-		$method = $_GET['method'];
-	}
-}
-
 header("Content-type: text/xml; charset=utf-8"); 
 
 
