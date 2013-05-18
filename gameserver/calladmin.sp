@@ -145,7 +145,7 @@ public Plugin:myinfo =
 public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 {
 	g_bLateLoad = late;
-		
+	
 	RegPluginLibrary("calladmin");
 	
 	
@@ -218,6 +218,7 @@ public Native_ReportClient(Handle:plugin, numParams)
 	target = GetNativeCell(2);
 	GetNativeString(3, sReason, sizeof(sReason));
 	
+	
 	// We check for the REPORTER_CONSOLE define here, if this is set we have no valid client and the report comes from server
 	if(!IsClientValid(client) && client != REPORTER_CONSOLE)
 	{
@@ -233,6 +234,7 @@ public Native_ReportClient(Handle:plugin, numParams)
 	// Call the forward
 	Forward_OnReportPost(client, target, sReason);
 	
+
 	return true;
 }
 
@@ -350,7 +352,7 @@ public OnPluginStart()
 	g_hOnServerDataChangedForward   = CreateGlobalForward("CallAdmin_OnServerDataChanged", ET_Ignore, Param_Cell, Param_Cell, Param_String, Param_String);
 	
 	
-	// Cookeys
+	// Cookies
 	if(CLIENTPREFS_AVAILABLE())
 	{
 		g_hLastReportCookie   = RegClientCookie("CallAdmin_LastReport", "Contains a timestamp when this user has reported the last time", CookieAccess_Private);
@@ -662,6 +664,25 @@ bool:LastReportedTimeCheck(client)
 
 
 
+// Updates the timestamps of lastreport and lastreported
+SetStates(client, target)
+{
+	new currentTime = GetTime();
+	
+	g_iLastReport[client]   = currentTime;
+	g_iLastReported[target] = currentTime;
+	
+	
+	// Cookies
+	if(CLIENTPREFS_AVAILABLE())
+	{
+		SetClientCookieEx(client, g_hLastReportCookie, "%d", currentTime);
+		SetClientCookieEx(target, g_hLastReportedCookie, "%d", currentTime);
+	}
+}
+
+
+
 ConfirmCall(client)
 {
 	new Handle:menu = CreateMenu(MenuHandler_ConfirmCall);
@@ -715,14 +736,7 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 				PrintNotifyMessageToAdmins(client, g_iTarget[client]);
 				
 				// States
-				g_iLastReport[client]               = GetTime();
-				g_iLastReported[g_iTarget[client]]  = GetTime();
-				
-				if(CLIENTPREFS_AVAILABLE())
-				{
-					SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
-					SetClientCookieEx(g_iTarget[client], g_hLastReportedCookie, "%d", GetTime());
-				}
+				SetStates(client, g_iTarget[client]);
 				
 				return;
 			}
@@ -762,14 +776,7 @@ ReportPlayer(client, target, String:sReason[])
 	}
 	
 	// States
-	g_iLastReport[client]   = GetTime();
-	g_iLastReported[target] = GetTime();
-	
-	if(CLIENTPREFS_AVAILABLE())
-	{
-		SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
-		SetClientCookieEx(target, g_hLastReportedCookie, "%d", GetTime());
-	}
+	SetStates(client, target);
 	
 	// Call the forward
 	Forward_OnReportPost(client, target, sReason);
@@ -790,10 +797,10 @@ public Action:Timer_UpdateTrackersCount(Handle:timer)
 	// Call the forward
 	if(temp != g_iCurrentTrackers)
 	{
-		Forward_OnTrackerCountChanged(temp, g_iCurrentTrackers);
+		Forward_OnTrackerCountChanged(g_iCurrentTrackers, temp);
 	}
 	
-	// set the new count
+	// Set the new count
 	g_iCurrentTrackers = temp;
 	
 	return Plugin_Continue;
@@ -835,7 +842,7 @@ GetTotalTrackers()
 	}
 	
 	CloseHandle(hIter);
-		
+	
 	return count;
 }
 
@@ -861,6 +868,7 @@ ShowClientSelectMenu(client)
 		}
 	}
 	
+	// Menu has no items, no players to report
 	if(GetMenuItemCount(menu) < 1)
 	{
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoPlayers");
@@ -1046,14 +1054,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 				PrintNotifyMessageToAdmins(client, g_iTarget[client]);
 				
 				// States
-				g_iLastReport[client]               = GetTime();
-				g_iLastReported[g_iTarget[client]]  = GetTime();
-				
-				if(CLIENTPREFS_AVAILABLE())
-				{
-					SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
-					SetClientCookieEx(g_iTarget[client], g_hLastReportedCookie, "%d", GetTime());
-				}
+				SetStates(client, g_iTarget[client]);
 				
 				return;
 			}
@@ -1126,14 +1127,7 @@ public Action:ChatListener(client, const String:command[], argc)
 				PrintNotifyMessageToAdmins(client, g_iTarget[client]);
 				
 				// States
-				g_iLastReport[client]               = GetTime();
-				g_iLastReported[g_iTarget[client]]  = GetTime();
-				
-				if(CLIENTPREFS_AVAILABLE())
-				{
-					SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
-					SetClientCookieEx(g_iTarget[client], g_hLastReportedCookie, "%d", GetTime());
-				}
+				SetStates(client, g_iTarget[client]);
 				
 				return Plugin_Handled;
 			}
