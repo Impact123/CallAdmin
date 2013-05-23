@@ -54,6 +54,19 @@ forward CallAdmin_OnTrackerCountChanged(oldVal, newVal);
 
 
 /**
+ * Called before an client (or module) has reported another player.
+ *
+ * @param client        Client index of the caller.
+ * @param target        Client index of the target.
+ * @param reason        Reason selected by the client for the report.
+ * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
+ */
+forward Action:CallAdmin_OnReportPre(client, target, const String:reason[]);
+
+
+
+
+/**
  * Called after an client (or module) has reported another player.
  *
  * @param client        Client index of the caller.
@@ -175,16 +188,6 @@ native CallAdmin_GetHostIP(String:buffer[], max_size);
  * @return              Hostport
  */
 native CallAdmin_GetHostPort();
-
-
-
-
-/* 
-	To be implemented 
-	------------------
-*/
-// We need a dynamic way to notify the client (in his language) why the call was blocked prior implementing this
-//forward CallAdmin_OnReportPre();
 
 
 

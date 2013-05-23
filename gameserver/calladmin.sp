@@ -117,6 +117,7 @@ new Handle:g_hLastReportedCookie;
 
 
 // Api
+new Handle:g_hOnReportPreForward;
 new Handle:g_hOnReportPostForward;
 new Handle:g_hOnDrawOwnReasonForward;
 new Handle:g_hOnTrackerCountChangedForward;
@@ -230,7 +231,14 @@ public Native_ReportClient(Handle:plugin, numParams)
 		return false;
 	}
 
+	
+	// Call the forward
+	if(!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
+	{
+		return false;
+	}
 
+	
 	// Call the forward
 	Forward_OnReportPost(client, target, sReason);
 	
@@ -344,6 +352,7 @@ public OnPluginStart()
 	
 	
 	// Api
+	g_hOnReportPreForward           = CreateGlobalForward("CallAdmin_OnReportPre", ET_Event, Param_Cell, Param_Cell, Param_String);
 	g_hOnReportPostForward          = CreateGlobalForward("CallAdmin_OnReportPost", ET_Ignore, Param_Cell, Param_Cell, Param_String);
 	g_hOnDrawOwnReasonForward       = CreateGlobalForward("CallAdmin_OnDrawOwnReason", ET_Event, Param_Cell);
 	g_hOnTrackerCountChangedForward = CreateGlobalForward("CallAdmin_OnTrackerCountChanged", ET_Ignore, Param_Cell, Param_Cell);
@@ -399,6 +408,28 @@ FetchClientCookies()
 			OnClientCookiesCached(i);
 		}
 	}
+}
+
+
+
+
+bool:Forward_OnReportPre(client, target, const String:reason[])
+{
+	new Action:result;
+	
+	Call_StartForward(g_hOnReportPreForward);
+	Call_PushCell(client);
+	Call_PushCell(target);
+	Call_PushString(reason);
+	
+	Call_Finish(result);
+	
+	if(result == Plugin_Continue)
+	{
+		return true;
+	}
+	
+	return false;
 }
 
 
@@ -741,6 +772,14 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 				return;
 			}
 			
+			
+			// Call the forward
+			if(!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
+			{
+				return;
+			}
+			
+			
 			// Send the report
 			ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
 		}
@@ -1059,6 +1098,14 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 				return;
 			}
 			
+			
+			// Call the forward
+			if(!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
+			{
+				return;
+			}
+			
+			
 			ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
 		}			
 	}
@@ -1131,6 +1178,14 @@ public Action:ChatListener(client, const String:command[], argc)
 				
 				return Plugin_Handled;
 			}
+			
+			
+			// Call the forward
+			if(!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
+			{
+				return Plugin_Handled;
+			}
+			
 			
 			ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
 		}
