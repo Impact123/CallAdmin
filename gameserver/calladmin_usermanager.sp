@@ -50,7 +50,7 @@ new bool:g_bShowInformation;
 
 
 
-// Is immune or blacklisted?
+// Is immune or on blacklist?
 new bool:g_bClientOnBlacklist[MAXPLAYERS + 1];
 new bool:g_bClientImmune[MAXPLAYERS + 1];
 
@@ -182,7 +182,7 @@ NATIVES
 */
 
 
-// Set client blacklisted
+// Set client on blacklist
 public Native_SetClientOnBlacklist(Handle:plugin, numParams)
 {
 	new client = GetNativeCell(1);
@@ -206,7 +206,7 @@ public Native_SetClientImmune(Handle:plugin, numParams)
 }
 
 
-// Checks if the client is blacklisted
+// Checks if the client is on the blacklist
 public Native_IsClientOnBlacklist(Handle:plugin, numParams)
 {
 	new client = GetNativeCell(1);
@@ -269,7 +269,7 @@ public Action:CallAdmin_OnReportPre(client, target, const String:reason[])
 		return Plugin_Handled;
 	}
 
-	// Client is blacklisted so don't allow report
+	// Client is on blacklist so don't allow report
 	if (IsClientValid(client) && g_bClientOnBlacklist[client])
 	{
 		// Info text
@@ -297,7 +297,7 @@ public BaseComm_OnClientMute(client, bool:muteState)
 {
 	if (g_bBlacklistMuted && IsClientValid(client))
 	{
-		// Set client blacklisted
+		// Set client on blacklist
 		g_bClientOnBlacklist[client] = muteState;
 
 		// Show information
@@ -321,7 +321,7 @@ public BaseComm_OnClientGag(client, bool:muteState)
 {
 	if (g_bBlacklistGagged && IsClientValid(client))
 	{
-		// Set client blacklisted
+		// Set client on blacklist
 		g_bClientOnBlacklist[client] = muteState;
 
 		// Show information
