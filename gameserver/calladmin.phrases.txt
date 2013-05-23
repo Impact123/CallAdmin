@@ -16,7 +16,7 @@
 	{
 		"#format"	"{1:s},{2:s}"
 		"en"		"You have reported {1} for {2}"
-		"de"		"Du hast {1} wegen {2} reported"
+		"de"		"Du hast {1} wegen {2} reportet"
 	}
 	"CallAdmin_NoPlayers"
 	{
@@ -39,7 +39,7 @@
 		"en"		"Select a reason to report {1}"
 		"de"		"Wähle einen Grund um {1} zu reporten"
 	}
-	// Used when exactly 1 admins is available
+	// Used when exactly 1 admin is available
 	"CallAdmin_AdvertMessageSingular"
 	{
 		"#format"	"{1:d}"
@@ -86,16 +86,6 @@
 	{
 		"en"		"No"
 		"de"		"Nein"
-	}
-	"CallAdmin_NoTrackers"
-	{
-		"en"		"Currently there are no admins who could track your request\nYou will receive a message once one is available"
-		"de"		"Es sind derzeit keine Admins vorhanden die auf deinen Request eingehen könnten\nDu wirst eine Meldung bekommen sobald einer verfügbar ist"
-	}
-	"CallAdmin_AdminsAvailable"
-	{
-		"en"		"Admins are now available for your request!"
-		"de"		"Es sind nun Admins für deinen Request verfügbar!"
 	}
 	"CallAdmin_AlreadyReported"
 	{

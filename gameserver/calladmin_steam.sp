@@ -158,7 +158,7 @@ public OnMessageResultReceived(MessageBotResult:result, error)
 {
 	if(result != RESULT_NO_ERROR)
 	{
-		LogError("Failed to to send message, result was: (%d, %d)", result, error);
+		LogError("Failed to send message, result was: (%d, %d)", result, error);
 	}
 }
 
@@ -210,6 +210,8 @@ ParseSteamIDList()
 		}
 		
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\n", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\r", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\t", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
 		
 		
@@ -288,6 +290,8 @@ ParseGroupIDList()
 		}
 		
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\n", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\r", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\t", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
 		
 		len = strlen(sReadBuffer);
@@ -355,7 +359,7 @@ public OnLibraryAdded(const String:name[])
 
 
 
-public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const String:reasonSanitized[])
+public CallAdmin_OnReportPost(client, target, const String:reason[])
 {
 	MessageBot_SetLoginData(g_sSteamUsername, g_sSteamPassword);
 	
@@ -373,14 +377,23 @@ public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const St
 	serverPort = CallAdmin_GetHostPort();
 	CallAdmin_GetHostName(sServerName, sizeof(sServerName));
 	
-	GetClientName(client, sClientName, sizeof(sClientName));
-	GetClientAuthString(client, sClientID, sizeof(sClientID));
+	// Reporter wasn't a real client (initiated by a module)
+	if(client == REPORTER_CONSOLE)
+	{
+		strcopy(sClientName, sizeof(sClientName), "Server/Console");
+		strcopy(sClientID, sizeof(sClientID), "Server/Console");
+	}
+	else
+	{
+		GetClientName(client, sClientName, sizeof(sClientName));
+		GetClientAuthString(client, sClientID, sizeof(sClientID));
+	}
 	
 	GetClientName(target, sTargetName, sizeof(sTargetName));
 	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
 	
 	decl String:sMessage[4096];
-	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s", sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, reasonRaw);
+	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s", sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, reason);
 							 
 	MessageBot_SendMessage(OnMessageResultReceived, sMessage);
 }

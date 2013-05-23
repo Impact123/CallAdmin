@@ -39,7 +39,7 @@ $helpers = new CallAdmin_Helpers();
 
 
 // Key set and no key given or key is wrong
-if((!empty($access_key) && !isset($_GET['key']) ) || $_GET['key'] !== $access_key)
+if(!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
 	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Takeover");
 }
@@ -60,16 +60,35 @@ if($dbi->connect_errno != 0)
 $dbi->set_charset("utf8");
 
 
+
+// Escape server keys
+foreach($access_keys as $key => $value)
+{
+	if(is_array($value))
+	{
+		foreach($value as $serverKey)
+		{
+			$access_keys[$key][$serverKey] = $dbi->escape_string($serverKey);
+		}
+	}
+}
+
+
+
+// Server Key clause
+$server_key_clause = 'serverKey IN (' .$helpers->keyToServerKeys($access_keys, $_GET['key']). ') OR LENGTH(serverKey) < 1';
+
+
 // Safety
 if(isset($_GET['callid']) && preg_match("/^[0-9]{1,11}+$/", $_GET['callid']))
 {
 	$callID = $dbi->escape_string($_GET['callid']);
 	
 	$insertresult = $dbi->query("UPDATE
-									$table
+									`$table`
 								SET callHandled = 1
 							WHERE
-								callID = $callID");
+								callID = $callID AND $server_key_clause");
 
 	// Insert failed, we should check if the update was successfull somehow (affected_rows ist reliable here)
 	if($insertresult === FALSE)

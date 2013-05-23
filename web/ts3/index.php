@@ -40,7 +40,7 @@ $helpers = new CallAdmin_Helpers();
 
 
 // Key set and no key given or key is wrong
-if( (!empty($access_key) && !isset($_GET['key']) ) || $_GET['key'] !== $access_key)
+if(!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
 	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Ts3");
 }
@@ -103,7 +103,7 @@ try
 		
 		
 		// Ss listed as admin, go send him a message
-		if(in_array($uid, $admins))
+		if(in_array($uid, $access_keys[$_GET['key']]))
 		{
 			$ts3_Client->message("----------------------------------------------------");
 			$ts3_Client->message("[CallAdmin] New report on:   $serverName ($serverIP) $connect");

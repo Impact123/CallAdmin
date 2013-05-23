@@ -24,18 +24,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  */
-$methods = array('notice', 'trackers');
-
-
-$method = 'notice';
-if(isset($_GET['method']))
-{
-	if(in_array($_GET['method'], $methods))
-	{
-		$method = $_GET['method'];
-	}
-}
-
 header("Content-type: text/xml; charset=utf-8"); 
 
 
@@ -51,7 +39,7 @@ $helpers = new CallAdmin_Helpers();
 
 
 // Key set and no key given or key is wrong
-if((!empty($access_key) && !isset($_GET['key']) ) || $_GET['key'] !== $access_key)
+if(!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
 	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Notice");
 }
@@ -70,6 +58,66 @@ if($dbi->connect_errno != 0)
 
 // Set utf-8 encodings
 $dbi->set_charset("utf8");
+
+
+
+// Escape server keys
+foreach($access_keys as $key => $value)
+{
+	if(is_array($value))
+	{
+		foreach($value as $serverKey)
+		{
+			$access_keys[$key][$serverKey] = $dbi->escape_string($serverKey);
+		}
+	}
+}
+
+
+
+// Updated serverKey Access list
+$uniqueArray = $helpers->keysToArray($access_keys);
+
+if($uniqueArray)
+{
+	$deleteresult = $dbi->query("TRUNCATE `" .$table. "_Access`");
+
+	// delete failed
+	if($deleteresult === FALSE)
+	{
+		$dbi->close();
+		$helpers->printXmlError("DB_DELETE_FAILURE", "CallAdmin_Notice");
+	}
+	
+	// Start with zero
+	$current = 0; 
+	
+	foreach($uniqueArray as $serverKey)
+	{
+		$bit = (1 << $current);
+		
+		$insertresult = $dbi->query("INSERT IGNORE INTO `" .$table. "_Access`
+							(serverKey, accessBit)
+						VALUES
+							('$serverKey', $bit)");
+
+		// Insert failed
+		if($insertresult === FALSE)
+		{
+			$dbi->close();
+			$helpers->printXmlError("DB_UPDATE_FAILURE", "CallAdmin_Notice");
+		}
+		
+		if($current + 1 >= 64)
+		{
+			$dbi->close();
+			$helpers->printXmlError("DB_MAX_ACCESS_REACHED", "CallAdmin_Notice");
+		}
+		
+		// Update current
+		$current++;
+	}
+}
 
 
 // Safety
@@ -102,6 +150,15 @@ if(isset($_GET['from']) && preg_match("/^[0-9]{1,11}+$/", $_GET['from']))
 }
 
 
+// Safety
+if(isset($_GET['handled']) && preg_match("/^[0-9]{1,11}+$/", $_GET['handled']))
+{
+	$from = $dbi->escape_string($_GET['handled']);
+
+	$from_query .= " OR callHandled = 1 AND TIMESTAMPDIFF(SECOND, FROM_UNIXTIME(reportedAt), NOW()) <= $from";
+}
+
+
 
 // Safety
 $limit = $data_limit;
@@ -125,16 +182,20 @@ if(isset($_GET['sort']) && preg_match("/^[a-zA-Z]{3,4}+$/", $_GET['sort']))
 }
 
 
+// Server Key clause
+$server_key_clause = 'serverKey IN (' .$helpers->keyToServerKeys($access_keys, $_GET['key']). ') OR LENGTH(serverKey) < 1';
+
 
 $fetchresult = $dbi->query("SELECT 
 							callID, serverIP, serverPort, CONCAT(serverIP, ':', serverPort) as fullIP, serverName, targetName, targetID, targetReason, clientName, clientID, reportedAt, callHandled
 						FROM 
-							$table
+							`$table`
 						WHERE
-							callHandled != 1 AND $from_query
+							($from_query) AND $server_key_clause
 						ORDER BY
 							reportedAt $sort
 						LIMIT 0, $limit");
+
 
 // Retrieval failed
 if($fetchresult === FALSE)
@@ -145,7 +206,7 @@ if($fetchresult === FALSE)
 
 
 // Save this tracker if key is set, key was given, we have an valid remote address and the client sends an store (save him as available)
-if((!empty($access_key) && isset($_GET['key']) ) && isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
+if(isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
 {
 	$trackerIP = $dbi->escape_string($helpers->AnonymizeIP($_SERVER['REMOTE_ADDR']));
 	$trackerID = "";
@@ -156,14 +217,18 @@ if((!empty($access_key) && isset($_GET['key']) ) && isset($_SERVER['REMOTE_ADDR'
 	{
 		$trackerID = $dbi->escape_string($_GET['steamid']);
 	}
+	
+	
+	// Access query
+	$access_query = '(SELECT SUM(`accessBit`) FROM `' .$table. '_Access` WHERE serverKey IN (' .$helpers->keyToServerKeys($access_keys, $_GET['key']). '))';
 
 
-	$insertresult = $dbi->query("INSERT IGNORE INTO CallAdmin_Trackers
-						(trackerIP, trackerID, lastView)
+	$insertresult = $dbi->query("INSERT IGNORE INTO `" .$table. "_Trackers`
+						(trackerIP, trackerID, lastView, accessID)
 					VALUES
-						('$trackerIP', '$trackerID', UNIX_TIMESTAMP())
+						('$trackerIP', '$trackerID', UNIX_TIMESTAMP(), $access_query)
 					ON DUPLICATE KEY
-						UPDATE lastView = UNIX_TIMESTAMP(), trackerID = '$trackerID'");
+						UPDATE lastView = UNIX_TIMESTAMP(), trackerID = '$trackerID', accessID = $access_query");
 
 	// Insert failed
 	if($insertresult === FALSE)
