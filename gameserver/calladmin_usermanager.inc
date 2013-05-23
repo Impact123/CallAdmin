@@ -31,7 +31,7 @@ native bool:CallAdmin_IsClientOnBlacklist(client);
 
 
 /**
- * Sets the Immune state of a client.
+ * Sets whether a client is immune, so he can't be reported, or not.
  *
  * @param client       The Client.
  * @param SetState     True to immune client, otherwise false.
@@ -43,10 +43,10 @@ native CallAdmin_SetClientImmune(client, bool:SetState);
 
 
 /**
- * Sets the blacklist state of a client.
+ * Sets whether a client is on blacklist, so he can't report anyone, or not.
  *
  * @param client       The Client.
- * @param SetState     True to set client on blacklist client, otherwise false.
+ * @param SetState     True to set client on blacklist, otherwise false.
  * @noreturn
  */
 native CallAdmin_SetClientOnBlacklist(client, bool:SetState);
