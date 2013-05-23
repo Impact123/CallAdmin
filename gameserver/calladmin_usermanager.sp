@@ -154,20 +154,20 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 // Updater
 public OnAllPluginsLoaded()
 {
-    if (LibraryExists("updater"))
-    {
-        Updater_AddPlugin(UPDATER_URL);
-    }
+	if (LibraryExists("updater"))
+	{
+		Updater_AddPlugin(UPDATER_URL);
+	}
 }
 
 
 // Updater
 public OnLibraryAdded(const String:name[])
 {
-    if (StrEqual(name, "updater"))
-    {
-        Updater_AddPlugin(UPDATER_URL);
-    }
+	if (StrEqual(name, "updater"))
+	{
+		Updater_AddPlugin(UPDATER_URL);
+	}
 }
 
 
