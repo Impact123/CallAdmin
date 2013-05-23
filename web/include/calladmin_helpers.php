@@ -116,5 +116,97 @@ class CallAdmin_Helpers
 		echo $xml->asXML();
 		exit;
 	}
+	
+
+	
+	/**
+	 * Compares server keys of a key with a OR together
+	 * 
+	 * @var    array
+	 * @var    string
+	 * @return string | bool on error
+	 */
+	public function keyToServerKeys($serverKeys, $access_key)
+	{
+		// Empty result
+		$result = '';
+		
+		// Key is in array and a server key is set for it
+		if(!is_array($serverKeys) || !array_key_exists($access_key, $serverKeys) || !isset($serverKeys[$access_key]) || count($serverKeys[$access_key]) < 1)
+		{
+			return false;
+		}
+		
+		// Loop through server keys
+		foreach($serverKeys[$access_key] as $serverKey)
+		{
+			if(strlen($serverKey) > 0)
+			{
+				if(strlen($result) < 1)
+				{
+					$result = '\''.$serverKey.'\'';
+				}
+				else
+				{
+					$result .= ', \''.$serverKey.'\'';
+				}
+			}
+		}
+
+		// Valid result?
+		if(strlen($result) < 1)
+		{
+			return false;
+		}
+		
+
+		// Return result
+		return $result;
+	}
+	
+	
+	/**
+	 * Filter all serverkeys to one unique array
+	 * 
+	 * @var    array
+	 * @return array | bool on error
+	 */
+	public function keysToArray($serverKeys)
+	{
+		// Empty array
+		$result = array();
+		
+		// serverKeys is array
+		if(!is_array($serverKeys))
+		{
+			return false;
+		}
+		
+		
+		// Loop through server keys
+		foreach($serverKeys as $key => $value)
+		{
+			if(is_array($value))
+			{
+				foreach($value as $serverKey)
+				{
+					if($serverKey != '' && !in_array($serverKey, $result))
+					{
+						$result[] = $serverKey;
+					}
+				}
+			}
+		}
+
+		// Valid result?
+		if(empty($result))
+		{
+			return false;
+		}
+		
+
+		// Return result
+		return $result;
+	}
 }
 // End of file

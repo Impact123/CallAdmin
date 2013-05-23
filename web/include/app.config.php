@@ -5,8 +5,39 @@
  *---------------------------------------------------------------
 */
 
-// This key must be sent in order to view reports, leave empty to disable
-$access_key = '';
+
+/*
+Define for each key the server keys to assign to.
+You can have a maximum of 64 different ServerKeys
+Just use like this:
+
+$access_keys = array
+(
+	'KEY1' => array
+	(
+		'CSS_Server',
+		'TF2_Server',
+	),
+	
+	'KEY2' => array
+	(
+		'CSGO_Server_1',
+	),
+	
+	'KEY3' => array
+	(
+		'CSGO_Server_2',
+	)
+);
+*/
+
+$access_keys = array
+(
+	'' => array
+	(
+		'',
+	),
+);
 
 
 
@@ -36,6 +67,5 @@ $username          = '';
 $password          = '';
 $database          = '';
 $table             = 'CallAdmin';
-$trackers_table    = 'CallAdmin_Trackers';
 $dbport            = '3306';
 // End of file
