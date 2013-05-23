@@ -2,13 +2,13 @@
 {
 	"CallAdmin_ClientBlacklistMute"
 	{
-		"en"		"You are now, because of muting, on the blacklist. You can't report players now!"
-		"de"		"Aufgrund eines Mutes bist du nun auf der Blacklist. Du kannst jetzt keine Spieler mwhe reporten!"
+		"en"		"You are now, because of muting, on the blacklist. You can't report players anymore!"
+		"de"		"Aufgrund eines Mutes bist du nun auf der Blacklist. Du kannst jetzt keine Spieler mehr reporten!"
 	}
 	"CallAdmin_ClientBlacklistGag"
 	{
-		"en"		"You are now, because of gagging, on the blacklist. You can't report players now!"
-		"de"		"Aufgrund eines Maulkorbes bist du nun auf der Blacklist. Du kannst jetzt keine Spieler mehe reporten!"
+		"en"		"You are now, because of gagging, on the blacklist. You can't report players anymore!"
+		"de"		"Aufgrund eines Maulkorbes bist du nun auf der Blacklist. Du kannst jetzt keine Spieler mehr reporten!"
 	}
 	"CallAdmin_ClientBlacklistRemove"
 	{
