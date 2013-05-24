@@ -26,11 +26,11 @@
 
 #include <sourcemod>
 #include <autoexecconfig>
-#include <basecomm>
 #include "calladmin"
 
 #undef REQUIRE_PLUGIN
 #include <updater>
+#include <basecomm>
 
 #pragma semicolon 1
 
@@ -158,6 +158,11 @@ public OnAllPluginsLoaded()
 	{
 		Updater_AddPlugin(UPDATER_URL);
 	}
+
+	if (!LibraryExists("basecomm") && (g_bBlacklistMuted || g_bBlacklistGagged))
+	{
+		LogError("Couldn't find Plugin basecomm.smx. But you've activated mute or gag blacklisting!");
+	}
 }
 
 
@@ -264,8 +269,11 @@ public Action:CallAdmin_OnReportPre(client, target, const String:reason[])
 	if (IsClientValid(target) && g_bClientImmune[target])
 	{
 		// Info text
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_TargetImmune", target);
-
+		if (IsClientValid(client))
+		{
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_TargetImmune", target);
+		}
+		
 		return Plugin_Handled;
 	}
 
