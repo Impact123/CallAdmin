@@ -1,0 +1,29 @@
+"Phrases"
+{
+	"CallAdmin_ClientBlacklistMute"
+	{
+		"en"		"You are now, because of muting, on the blacklist. You can't report players anymore!"
+		"de"		"Aufgrund eines Mutes bist du nun auf der Blacklist. Du kannst jetzt keine Spieler mehr reporten!"
+	}
+	"CallAdmin_ClientBlacklistGag"
+	{
+		"en"		"You are now, because of gagging, on the blacklist. You can't report players anymore!"
+		"de"		"Aufgrund eines Maulkorbes bist du nun auf der Blacklist. Du kannst jetzt keine Spieler mehr reporten!"
+	}
+	"CallAdmin_ClientBlacklistRemove"
+	{
+		"en"		"You got removed from blacklist. You can report players again!"
+		"de"		"Du wurdest von der Blacklist entfernt. Du kannst jetzt wieder Spieler reporten!"
+	}
+	"CallAdmin_ClientOnBlacklist"
+	{
+		"en"		"You are currently on the blacklist. You can't report players!"
+		"de"		"Du bist zurzeit auf der Blacklist. Du kannst keine Spieler reporten!"
+	}
+	"CallAdmin_TargetImmune"
+	{
+		"#format"	"{1:N}}"
+		"en"		"Player {1} is immune. You can't report him."
+		"de"		"Spieler {1} ist Immun. Du kannst ihn nicht reporten!"
+	}
+}
