@@ -83,9 +83,19 @@ public CallAdmin_OnTrackerCountChanged(oldVal, newVal)
 }
 
 
+
 public Action:CallAdmin_OnAddToAdminCount(client)
 {
 	PrintToServer("Client %N is being added to admin count", client);
+	
+	return Plugin_Continue;
+}
+
+
+
+public Action:CallAdmin_OnReportPre(client, target, const String:reason[])
+{
+	PrintToServer("%N is about to be reported by %N for %s", target, client, reason);
 	
 	return Plugin_Continue;
 }
