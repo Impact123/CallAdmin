@@ -138,12 +138,25 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	if (cvar == g_hBlacklistMuted)
 	{
 		g_bBlacklistMuted = GetConVarBool(g_hBlacklistMuted);
+
+		// Check basecomm
+		if (!LibraryExists("basecomm") && g_bBlacklistMuted)
+		{
+			LogError("Couldn't find Plugin basecomm.smx. But you've activated mute blacklisting!");
+		}
 	}
 
 	else if (cvar == g_hBlacklistGagged)
 	{
 		g_bBlacklistGagged = GetConVarBool(g_hBlacklistGagged);
+
+		// Check basecomm
+		if (!LibraryExists("basecomm") && g_hBlacklistGagged)
+		{
+			LogError("Couldn't find Plugin basecomm.smx. But you've activated gag blacklisting!");
+		}
 	}
+
 	else if (cvar == g_hShowInformation)
 	{
 		g_bShowInformation = GetConVarBool(g_hShowInformation);
