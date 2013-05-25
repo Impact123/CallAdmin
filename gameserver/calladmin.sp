@@ -676,6 +676,15 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 
 public Action:Command_Call(client, args)
 {
+	// Console cannot use this
+	if(client == 0)
+	{
+		PrintToServer("This command can't be used from console");
+		
+		return Plugin_Handled;
+	}
+	
+	
 	// Call the forward
 	if(!Forward_OnDrawMenu(client))
 	{
