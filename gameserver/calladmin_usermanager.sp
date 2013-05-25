@@ -274,6 +274,21 @@ CallAdmin
 
 */
 
+// Client open the menu
+public Action:CallAdmin_OnDrawMenu(client)
+{
+	// Client is on blacklist, so don't open menu
+	if (g_bClientOnBlacklist[client])
+	{
+		// Info text
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_ClientOnBlacklist");
+
+		return Plugin_Handled;
+	}
+
+	return Plugin_Continue;
+}
+
 
 // Client will drawn to menu
 public Action:CallAdmin_OnDrawTarget(client, target)
