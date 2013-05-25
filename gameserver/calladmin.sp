@@ -119,6 +119,7 @@ new Handle:g_hLastReportedCookie;
 // Api
 new Handle:g_hOnReportPreForward;
 new Handle:g_hOnReportPostForward;
+new Handle:g_hOnDrawMenuForward;
 new Handle:g_hOnDrawOwnReasonForward;
 new Handle:g_hOnTrackerCountChangedForward;
 new Handle:g_hOnDrawTargetForward;
@@ -354,6 +355,7 @@ public OnPluginStart()
 	// Api
 	g_hOnReportPreForward           = CreateGlobalForward("CallAdmin_OnReportPre", ET_Event, Param_Cell, Param_Cell, Param_String);
 	g_hOnReportPostForward          = CreateGlobalForward("CallAdmin_OnReportPost", ET_Ignore, Param_Cell, Param_Cell, Param_String);
+	g_hOnDrawMenuForward            = CreateGlobalForward("CallAdmin_OnDrawMenu", ET_Event, Param_Cell);
 	g_hOnDrawOwnReasonForward       = CreateGlobalForward("CallAdmin_OnDrawOwnReason", ET_Event, Param_Cell);
 	g_hOnTrackerCountChangedForward = CreateGlobalForward("CallAdmin_OnTrackerCountChanged", ET_Ignore, Param_Cell, Param_Cell);
 	g_hOnDrawTargetForward          = CreateGlobalForward("CallAdmin_OnDrawTarget", ET_Event, Param_Cell, Param_Cell);
@@ -408,6 +410,26 @@ FetchClientCookies()
 			OnClientCookiesCached(i);
 		}
 	}
+}
+
+
+
+
+bool:Forward_OnDrawMenu(client)
+{
+	new Action:result;
+	
+	Call_StartForward(g_hOnDrawMenuForward);
+	Call_PushCell(client);
+	
+	Call_Finish(result);
+	
+	if(result == Plugin_Continue)
+	{
+		return true;
+	}
+	
+	return false;
 }
 
 
@@ -654,6 +676,13 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 
 public Action:Command_Call(client, args)
 {
+	// Call the forward
+	if(!Forward_OnDrawMenu(client))
+	{
+		return Plugin_Handled;
+	}
+	
+	
 	if(g_iLastReport[client] == 0 || LastReportTimeCheck(client))
 	{
 		g_bSawMesage[client] = false;

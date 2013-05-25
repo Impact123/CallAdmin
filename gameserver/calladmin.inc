@@ -18,6 +18,17 @@
 
 
 /**
+ * Called when the main CallAdmin client selection menu is about to be drawn for a client.
+ *
+ * @param client        Client index of the caller.
+ * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
+ */
+forward Action:CallAdmin_OnDrawMenu(client);
+
+
+
+
+/**
  * Called when own reason selection is enabled and the select item for it is about to be drawn for a client.
  *
  * @param client        Client index of the caller.
