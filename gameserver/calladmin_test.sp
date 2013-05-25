@@ -58,6 +58,14 @@ public Action:Command_Test(client, args)
 
 
 
+public Action:CallAdmin_OnDrawMenu(client)
+{
+	PrintToServer("The main CallAdmin client selection menu is drawn to: %N", client);
+	
+	return Plugin_Continue;
+}
+
+
 
 public Action:CallAdmin_OnDrawOwnReason(client)
 {
