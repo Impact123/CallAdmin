@@ -36,6 +36,9 @@
 
 
 
+// Version cvar
+new Handle:g_hVersion;
+
 // Cvar to blacklist muted players
 new Handle:g_hBlacklistMuted;
 new bool:g_bBlacklistMuted;
@@ -106,7 +109,7 @@ public OnPluginStart()
 	AutoExecConfig_SetFile("plugin.calladmin_usermanager");
 
 
-	AutoExecConfig_CreateConVar("sm_calladmin_usermanager_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hVersion = AutoExecConfig_CreateConVar("sm_calladmin_usermanager_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	g_hBlacklistMuted = AutoExecConfig_CreateConVar("sm_calladmin_blacklist_muted", "1",  "Disallow muted players to report a player", FCVAR_PLUGIN);
 	g_hBlacklistGagged = AutoExecConfig_CreateConVar("sm_calladmin_blacklist_gagged", "1",  "Disallow gagged players to report a player", FCVAR_PLUGIN);
 	g_hShowInformation = AutoExecConfig_CreateConVar("sm_calladmin_show_information", "1",  "Show status to player on mute/gag", FCVAR_PLUGIN);
@@ -125,7 +128,12 @@ public OnPluginStart()
 	g_bBlacklistGagged = GetConVarBool(g_hBlacklistGagged);
 	g_bShowInformation = GetConVarBool(g_hShowInformation);
 
+
+	// Set Version
+	SetConVarString(g_hVersion, CALLADMIN_VERSION);
+
 	// Hook changes
+	HookConVarChange(g_hVersion, OnCvarChanged);
 	HookConVarChange(g_hBlacklistMuted, OnCvarChanged);
 	HookConVarChange(g_hBlacklistGagged, OnCvarChanged);
 	HookConVarChange(g_hShowInformation, OnCvarChanged);
@@ -160,6 +168,11 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	else if (cvar == g_hShowInformation)
 	{
 		g_bShowInformation = GetConVarBool(g_hShowInformation);
+	}
+
+	else if (cvar == g_hVersion)
+	{
+		SetConVarString(g_hVersion, CALLADMIN_VERSION);
 	}
 }
 
