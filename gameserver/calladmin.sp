@@ -233,7 +233,7 @@ public Native_ReportClient(Handle:plugin, numParams)
 
 	
 	// Call the forward
-	if(!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
+	if(!Forward_OnReportPre(client, target, sReason))
 	{
 		return false;
 	}
