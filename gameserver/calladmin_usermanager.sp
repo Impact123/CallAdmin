@@ -253,7 +253,7 @@ CallAdmin
 public Action:CallAdmin_OnDrawTarget(client, target)
 {
 	// Target is immune, so don't draw it
-	if (IsClientValid(target) && g_bClientImmune[target])
+	if (g_bClientImmune[target])
 	{
 		return Plugin_Handled;
 	}
@@ -266,10 +266,10 @@ public Action:CallAdmin_OnDrawTarget(client, target)
 public Action:CallAdmin_OnReportPre(client, target, const String:reason[])
 {
 	// Target is immune, so don't report
-	if (IsClientValid(target) && g_bClientImmune[target])
+	if (g_bClientImmune[target])
 	{
 		// Info text
-		if (IsClientValid(client))
+		if (client != REPORTER_CONSOLE)
 		{
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_TargetImmune", target);
 		}
@@ -278,7 +278,7 @@ public Action:CallAdmin_OnReportPre(client, target, const String:reason[])
 	}
 
 	// Client is on blacklist so don't allow report
-	if (IsClientValid(client) && g_bClientOnBlacklist[client])
+	if (client != REPORTER_CONSOLE && g_bClientOnBlacklist[client])
 	{
 		// Info text
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_ClientOnBlacklist");
