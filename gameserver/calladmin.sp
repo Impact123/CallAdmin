@@ -416,13 +416,13 @@ CreateReasonList()
 	}
 	
 	WriteFileLine(hFile, "// List of reasons seperated by a new line, max %d in length", REASON_MAX_LENGTH);
-	WriteFileLine(hFile, "Aimbot", REASON_MAX_LENGTH);
-	WriteFileLine(hFile, "Wallhack", REASON_MAX_LENGTH);
-	WriteFileLine(hFile, "Speedhack", REASON_MAX_LENGTH);
-	WriteFileLine(hFile, "Spinhack", REASON_MAX_LENGTH);
-	WriteFileLine(hFile, "Multihack", REASON_MAX_LENGTH);
-	WriteFileLine(hFile, "No-Recoil Hack", REASON_MAX_LENGTH);
-	WriteFileLine(hFile, "Other", REASON_MAX_LENGTH);
+	WriteFileLine(hFile, "Aimbot");
+	WriteFileLine(hFile, "Wallhack");
+	WriteFileLine(hFile, "Speedhack");
+	WriteFileLine(hFile, "Spinhack");
+	WriteFileLine(hFile, "Multihack");
+	WriteFileLine(hFile, "No-Recoil Hack");
+	WriteFileLine(hFile, "Other");
 	
 	CloseHandle(hFile);
 }
