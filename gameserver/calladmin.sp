@@ -38,9 +38,8 @@
 
 
 // Banreasons
-new Handle:g_hBanReasons;
-new String:g_sBanReasons[1200];
-new String:g_sBanReasonsExploded[24][48];
+new Handle:g_hReasonAdt;
+new String:g_sReasonConfigFile[PLATFORM_MAX_PATH];
 
 
 // Global Stuff
@@ -79,6 +78,11 @@ new Handle:g_hAdminAction;
 new g_iAdminAction;
 
 
+
+// Logfile
+new String:g_sLogFile[PLATFORM_MAX_PATH];
+
+
 #define ADMIN_ACTION_PASS          0
 #define ADMIN_ACTION_BLOCK_MESSAGE 1
 
@@ -93,7 +97,7 @@ new g_iCurrentTrackers;
 
 // User info
 new g_iTarget[MAXPLAYERS + 1];
-new String:g_sTargetReason[MAXPLAYERS + 1][48];
+new String:g_sTargetReason[MAXPLAYERS + 1][REASON_MAX_LENGTH];
 
 // Is this player writing his own reason?
 new bool:g_bAwaitingReason[MAXPLAYERS +1];
@@ -158,6 +162,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 	CreateNative("CallAdmin_GetHostIP", Native_GetHostIP);
 	CreateNative("CallAdmin_GetHostPort", Native_GetHostPort);
 	CreateNative("CallAdmin_ReportClient", Native_ReportClient);
+	CreateNative("CallAdmin_LogMessage", Native_LogMessage);
 	
 	
 	return APLRes_Success;
@@ -214,7 +219,7 @@ public Native_ReportClient(Handle:plugin, numParams)
 {
 	new client;
 	new target;
-	new String:sReason[48];
+	new String:sReason[REASON_MAX_LENGTH];
 	
 	client = GetNativeCell(1);
 	target = GetNativeCell(2);
@@ -250,10 +255,24 @@ public Native_ReportClient(Handle:plugin, numParams)
 
 
 
+public Native_LogMessage(Handle:plugin, numParams)
+{
+	new String:sPluginName[64];
+	new String:sMessage[256];
+	GetPluginInfo(plugin, PlInfo_Name, sPluginName, sizeof(sPluginName));
+	
+	FormatNativeString(0, 1, 2, sizeof(sMessage), _, sMessage);
+	
+	LogToFileEx(g_sLogFile, "[%s] %s", sPluginName, sMessage);
+}
+
+
 
 
 public OnPluginStart()
 {
+	BuildPath(Path_SM, g_sLogFile, sizeof(g_sLogFile), "logs/calladmin.log");
+	
 	g_hHostPort   = FindConVar("hostport");
 	g_hHostIP     = FindConVar("hostip");
 	g_hServerName = FindConVar("hostname");
@@ -280,7 +299,6 @@ public OnPluginStart()
 	AutoExecConfig_SetFile("plugin.calladmin");
 	
 	g_hVersion                = AutoExecConfig_CreateConVar("sm_calladmin_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hBanReasons             = AutoExecConfig_CreateConVar("sm_calladmin_banreasons", "Aimbot; Wallhack; Speedhack; Spinhack; Multihack; No-Recoil Hack; Other", "Semicolon seperated list of banreasons (24 reasons max, 48 max length per reason)", FCVAR_PLUGIN);
 	g_hAdvertInterval         = AutoExecConfig_CreateConVar("sm_calladmin_advert_interval", "60.0",  "Interval to advert the use of calladmin, 0.0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 1800.0);
 	g_hPublicMessage          = AutoExecConfig_CreateConVar("sm_calladmin_public_message", "1",  "Whether or not an report should be notified to all players or only the reporter.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_hOwnReason              = AutoExecConfig_CreateConVar("sm_calladmin_own_reason", "1",  "Whether or not client can submit their own reason.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
@@ -300,10 +318,6 @@ public OnPluginStart()
 	
 	SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
-	
-	GetConVarString(g_hBanReasons, g_sBanReasons, sizeof(g_sBanReasons));
-	ExplodeString(g_sBanReasons, ";", g_sBanReasonsExploded, sizeof(g_sBanReasonsExploded), sizeof(g_sBanReasonsExploded[]), true);
-	HookConVarChange(g_hBanReasons, OnCvarChanged);
 	
 	GetConVarString(g_hServerName, g_sServerName, sizeof(g_sServerName));
 	HookConVarChange(g_hServerName, OnCvarChanged);
@@ -371,6 +385,91 @@ public OnPluginStart()
 		
 		FetchClientCookies();
 	}
+	
+	
+	// Reason handling
+	g_hReasonAdt = CreateArray(REASON_MAX_LENGTH);
+	
+	BuildPath(Path_SM, g_sReasonConfigFile, sizeof(g_sReasonConfigFile), "configs/calladmin_reasons.cfg");
+	
+	if(!FileExists(g_sReasonConfigFile))
+	{
+		CreateReasonList();
+	}
+	
+	// Read in all those Reasons
+	ParseReasonList();
+}
+
+
+
+
+CreateReasonList()
+{
+	new Handle:hFile;
+	hFile = OpenFile(g_sReasonConfigFile, "w");
+	
+	// Failed to open
+	if(hFile == INVALID_HANDLE)
+	{
+		SetFailState("Failed to open configfile 'calladmin_reasons.cfg' for writing");
+	}
+	
+	WriteFileLine(hFile, "// List of reasons seperated by a new line, max %d in length", REASON_MAX_LENGTH);
+	
+	CloseHandle(hFile);
+}
+
+
+
+
+ParseReasonList()
+{
+	new Handle:hFile;
+	
+	hFile = OpenFile(g_sReasonConfigFile, "r");
+	
+	
+	// Failed to open
+	if(hFile == INVALID_HANDLE)
+	{
+		SetFailState("Failed to open configfile 'calladmin_reasons.cfg' for reading");
+	}
+	
+	
+	// Buffer must be a little bit bigger to have enough room for possible comments and being able to check for too long reasons
+	decl String:sReadBuffer[PLATFORM_MAX_PATH];
+	
+	
+	new len;
+	while(!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
+	{
+		if(sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
+		{
+			continue;
+		}
+		
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\n", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\r", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\t", "");
+
+		len = strlen(sReadBuffer);
+		
+		
+		if(len < 3 || len > REASON_MAX_LENGTH)
+		{
+			continue;
+		}
+			
+		
+		// Add the reason to the list
+		if(FindStringInArray(g_hReasonAdt, "") == -1)
+		{
+			PushArrayString(g_hReasonAdt, sReadBuffer);
+		}
+	}
+	
+	CloseHandle(hFile);
 }
 
 
@@ -597,12 +696,7 @@ public OnLibraryAdded(const String:name[])
 
 public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue[])
 {
-	if(cvar == g_hBanReasons)
-	{
-		GetConVarString(g_hBanReasons, g_sBanReasons, sizeof(g_sBanReasons));
-		ExplodeString(g_sBanReasons, ";", g_sBanReasonsExploded, sizeof(g_sBanReasonsExploded), sizeof(g_sBanReasonsExploded[]), true);
-	}
-	else if(cvar == g_hHostPort)
+	if(cvar == g_hHostPort)
 	{
 		g_iHostPort = GetConVarInt(g_hHostPort);
 		
@@ -1042,8 +1136,8 @@ RemoveAsTarget(client)
 ShowBanreasonMenu(client)
 {
 	new count;
-	
-	count = sizeof(g_sBanReasonsExploded);
+	new String:sReasonBuffer[REASON_MAX_LENGTH];
+	count = GetArraySize(g_hReasonAdt);
 
 	
 	new Handle:menu = CreateMenu(MenuHandler_BanReason);
@@ -1052,24 +1146,27 @@ ShowBanreasonMenu(client)
 	new index;
 	for(new i; i < count; i++)
 	{
-		if(strlen(g_sBanReasonsExploded[i]) < 3)
+		GetArrayString(g_hReasonAdt, i, sReasonBuffer, sizeof(sReasonBuffer));
+		
+		if(strlen(sReasonBuffer) < 3)
 		{
 			continue;
 		}
 		
+		// Handle whitespaces at the beginning
 		index = 0;
-		if(g_sBanReasonsExploded[i][0] == ' ')
+		if(sReasonBuffer[0] == ' ')
 		{
 			index = 1;
 		}
 		
-		AddMenuItem(menu, g_sBanReasonsExploded[i][index], g_sBanReasonsExploded[i][index]);
+		AddMenuItem(menu, sReasonBuffer[index], sReasonBuffer[index]);
 	}
 	
 	// Own reason, call the forward
 	if(g_bOwnReason && Forward_OnDrawOwnReason(client))
 	{
-		decl String:sOwnReason[48];
+		decl String:sOwnReason[REASON_MAX_LENGTH];
 
 		Format(sOwnReason, sizeof(sOwnReason), "%T", "CallAdmin_OwnReason", client);
 		AddMenuItem(menu, "Own reason", sOwnReason);
@@ -1085,7 +1182,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 {
 	if(action == MenuAction_Select)
 	{
-		new String:sInfo[48];
+		new String:sInfo[REASON_MAX_LENGTH];
 		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 		
 		// Own reason
@@ -1161,7 +1258,7 @@ public Action:ChatListener(client, const String:command[], argc)
 	if(g_bAwaitingReason[client] && !IsChatTrigger())
 	{
 		// 2 more for quotes
-		decl String:sReason[50];
+		decl String:sReason[REASON_MAX_LENGTH + 2];
 		
 		GetCmdArgString(sReason, sizeof(sReason));
 		StripQuotes(sReason);
