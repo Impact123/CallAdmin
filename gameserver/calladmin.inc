@@ -15,6 +15,9 @@
 #define REPORTER_CONSOLE 1679124
 
 
+// Maximum size a reason string can be in lenght
+#define REASON_MAX_LENGTH 128
+
 
 
 /**
@@ -172,8 +175,8 @@ enum ServerData
 /**
  * Returns the servers hostname.
  *
- * @param buffer        String to copy hostname to
- * @param max_size      Maximum size of buffer
+ * @param buffer        String to copy hostname to.
+ * @param max_size      Maximum size of buffer.
  * @noreturn
  */
 native CallAdmin_GetHostName(String:buffer[], max_size);
@@ -184,8 +187,8 @@ native CallAdmin_GetHostName(String:buffer[], max_size);
 /**
  * Returns the servers IP String.
  *
- * @param buffer        String to copy hostip to
- * @param max_size      Maximum size of buffer
+ * @param buffer        String to copy hostip to.
+ * @param max_size      Maximum size of buffer.
  * @noreturn
  */
 native CallAdmin_GetHostIP(String:buffer[], max_size);
@@ -196,10 +199,21 @@ native CallAdmin_GetHostIP(String:buffer[], max_size);
 /**
  * Returns the servers HostPort.
  *
- * @return              Hostport
+ * @return              Hostport.
  */
 native CallAdmin_GetHostPort();
 
+
+
+
+/**
+ * Logs a message to the calladmin logfile.
+ *
+ * @param message       Formatting rules.
+ * @param ...           Variable number of format parameters.
+ * @noreturn
+ */
+native CallAdmin_LogMessage(const String:format[], any:...);
 
 
 
@@ -228,5 +242,6 @@ public __pl_calladmin_SetNTVOptional()
 	MarkNativeAsOptional("CallAdmin_GetHostIP");
 	MarkNativeAsOptional("CallAdmin_GetHostPort");
 	MarkNativeAsOptional("CallAdmin_ReportClient");
+	MarkNativeAsOptional("CallAdmin_LogMessage");
 }
 #endif
