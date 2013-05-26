@@ -332,7 +332,7 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	new String:sKey[(32 + 1) * 2];
 	SQL_EscapeString(g_hDbHandle, g_sServerKey, sKey, sizeof(sKey));
 
-	new String:sReason[(48 + 1) * 2];
+	new String:sReason[(REASON_MAX_LENGTH + 1) * 2];
 	SQL_EscapeString(g_hDbHandle, reason, sReason, sizeof(sReason));
 	
 	
@@ -392,7 +392,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															`serverKey` VARCHAR(32) NOT NULL,\
 															`targetName` VARCHAR(32) NOT NULL,\
 															`targetID` VARCHAR(21) NOT NULL,\
-															`targetReason` VARCHAR(48) NOT NULL,\
+															`targetReason` VARCHAR(%d) NOT NULL,\
 															`clientName` VARCHAR(32) NOT NULL,\
 															`clientID` VARCHAR(21) NOT NULL,\
 															`callHandled` TINYINT UNSIGNED NOT NULL,\
@@ -402,7 +402,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															INDEX `callHandled` (`callHandled`),\
 															PRIMARY KEY (`callID`))\
 															COLLATE='utf8_unicode_ci'\
-														", g_sTableName);
+														", REASON_MAX_LENGTH, g_sTableName);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 														
 		// Create trackers Table
