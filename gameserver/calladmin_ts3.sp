@@ -314,7 +314,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 		
 		
 		// Currently maximum 48 in length
-		decl String:sReason[48];
+		decl String:sReason[REASON_MAX_LENGTH];
 		
 		
 		// Reset the pack
