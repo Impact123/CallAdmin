@@ -416,6 +416,13 @@ CreateReasonList()
 	}
 	
 	WriteFileLine(hFile, "// List of reasons seperated by a new line, max %d in length", REASON_MAX_LENGTH);
+	WriteFileLine(hFile, "Aimbot", REASON_MAX_LENGTH);
+	WriteFileLine(hFile, "Wallhack", REASON_MAX_LENGTH);
+	WriteFileLine(hFile, "Speedhack", REASON_MAX_LENGTH);
+	WriteFileLine(hFile, "Spinhack", REASON_MAX_LENGTH);
+	WriteFileLine(hFile, "Multihack", REASON_MAX_LENGTH);
+	WriteFileLine(hFile, "No-Recoil Hack", REASON_MAX_LENGTH);
+	WriteFileLine(hFile, "Other", REASON_MAX_LENGTH);
 	
 	CloseHandle(hFile);
 }
@@ -1092,7 +1099,7 @@ public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
 			return;					
 		}
 		
-		ShowBanreasonMenu(client);
+		ShowBanReasonMenu(client);
 	}
 	else if(action == MenuAction_End)
 	{
@@ -1133,7 +1140,7 @@ RemoveAsTarget(client)
 
 
 
-ShowBanreasonMenu(client)
+ShowBanReasonMenu(client)
 {
 	new count;
 	new String:sReasonBuffer[REASON_MAX_LENGTH];
@@ -1152,13 +1159,7 @@ ShowBanreasonMenu(client)
 		{
 			continue;
 		}
-		
-		// Handle whitespaces at the beginning
-		index = 0;
-		if(sReasonBuffer[0] == ' ')
-		{
-			index = 1;
-		}
+
 		
 		AddMenuItem(menu, sReasonBuffer[index], sReasonBuffer[index]);
 	}
