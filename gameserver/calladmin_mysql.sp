@@ -402,7 +402,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															INDEX `callHandled` (`callHandled`),\
 															PRIMARY KEY (`callID`))\
 															COLLATE='utf8_unicode_ci'\
-														", REASON_MAX_LENGTH, g_sTableName);
+														", g_sTableName, REASON_MAX_LENGTH);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 														
 		// Create trackers Table
