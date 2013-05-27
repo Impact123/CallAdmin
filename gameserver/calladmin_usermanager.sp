@@ -346,11 +346,8 @@ public BaseComm_OnClientMute(client, bool:muteState)
 {
 	if (g_bBlacklistMuted && IsClientValid(client))
 	{
-		// Set client on blacklist
-		g_bClientOnBlacklist[client] = muteState;
-
 		// Show information
-		if (g_bShowInformation)
+		if (g_bShowInformation && muteState != g_bClientOnBlacklist[client])
 		{
 			if (muteState)
 			{
@@ -361,22 +358,22 @@ public BaseComm_OnClientMute(client, bool:muteState)
 				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_ClientBlacklistRemove");
 			}
 		}
+
+		// Set client on blacklist
+		g_bClientOnBlacklist[client] = muteState;
 	}
 }
 
 
 // Client get gagged
-public BaseComm_OnClientGag(client, bool:muteState)
+public BaseComm_OnClientGag(client, bool:gagState)
 {
 	if (g_bBlacklistGagged && IsClientValid(client))
 	{
-		// Set client on blacklist
-		g_bClientOnBlacklist[client] = muteState;
-
 		// Show information
-		if (g_bShowInformation)
+		if (g_bShowInformation && g_bClientOnBlacklist[client] != gagState)
 		{
-			if (muteState)
+			if (gagState)
 			{
 				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_ClientBlacklistGag");
 			}
@@ -385,6 +382,9 @@ public BaseComm_OnClientGag(client, bool:muteState)
 				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_ClientBlacklistRemove");
 			}
 		}
+
+		// Set client on blacklist
+		g_bClientOnBlacklist[client] = gagState;
 	}
 }
 
