@@ -22,7 +22,7 @@
 	}
 	"CallAdmin_TargetImmune"
 	{
-		"#format"	"{1:N}}"
+		"#format"	"{1:N}"
 		"en"		"Player {1} is immune. You can't report him."
 		"de"		"Spieler {1} ist Immun. Du kannst ihn nicht reporten!"
 	}
