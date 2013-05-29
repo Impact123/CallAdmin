@@ -200,7 +200,8 @@ ParseSteamIDList()
 	
 	// Buffer must be a little bit bigger to have enough room for possible comments
 	decl String:sReadBuffer[128];
-	
+	decl String:sReadBuffer2[128];
+
 	
 	while(!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
 	{
@@ -213,6 +214,12 @@ ParseSteamIDList()
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\r", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\t", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
+
+
+		if(SplitString(sReadBuffer, "/", sReadBuffer2, sizeof(sReadBuffer2)) > -1)
+		{
+			strcopy(sReadBuffer, sizeof(sReadBuffer), sReadBuffer2);
+		}
 		
 		
 		new AuthStringType:type = GetAuthIDType(sReadBuffer);
@@ -279,7 +286,8 @@ ParseGroupIDList()
 	
 	// Buffer must be a little bit bigger to have enough room for possible comments
 	decl String:sReadBuffer[128];
-	
+	decl String:sReadBuffer2[128];
+
 	
 	new len;
 	while(!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
@@ -293,6 +301,13 @@ ParseGroupIDList()
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\r", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\t", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
+
+
+		if(SplitString(sReadBuffer, "/", sReadBuffer2, sizeof(sReadBuffer2)) > -1)
+		{
+			strcopy(sReadBuffer, sizeof(sReadBuffer), sReadBuffer2);
+		}
+		
 		
 		len = strlen(sReadBuffer);
 		
