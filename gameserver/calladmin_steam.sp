@@ -200,7 +200,6 @@ ParseSteamIDList()
 	
 	// Buffer must be a little bit bigger to have enough room for possible comments
 	decl String:sReadBuffer[128];
-	decl String:sReadBuffer2[128];
 
 	
 	while(!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
@@ -216,9 +215,16 @@ ParseSteamIDList()
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
 
 
-		if(SplitString(sReadBuffer, "/", sReadBuffer2, sizeof(sReadBuffer2)) > -1)
+		new len = strlen(sReadBuffer);
+
+		for(new i=0; i < len; i++)
 		{
-			strcopy(sReadBuffer, sizeof(sReadBuffer), sReadBuffer2);
+			if(sReadBuffer[i] == '/')
+			{
+				sReadBuffer[i] = 0;
+
+				break;
+			}
 		}
 		
 		
@@ -286,7 +292,6 @@ ParseGroupIDList()
 	
 	// Buffer must be a little bit bigger to have enough room for possible comments
 	decl String:sReadBuffer[128];
-	decl String:sReadBuffer2[128];
 
 	
 	new len;
@@ -303,18 +308,23 @@ ParseGroupIDList()
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
 
 
-		if(SplitString(sReadBuffer, "/", sReadBuffer2, sizeof(sReadBuffer2)) > -1)
-		{
-			strcopy(sReadBuffer, sizeof(sReadBuffer), sReadBuffer2);
-		}
-		
-		
 		len = strlen(sReadBuffer);
 		
 		
 		if(len < 3 || len > 64)
 		{
 			continue;
+		}
+
+
+		for(new i=0; i < len; i++)
+		{
+			if(sReadBuffer[i] == '/')
+			{
+				sReadBuffer[i] = 0;
+
+				break;
+			}
 		}
 			
 		
