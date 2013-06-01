@@ -214,8 +214,8 @@ ParseSteamIDList()
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\r", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\t", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
-
-
+		
+		
 		
 		// Support for comments on end of line
 		len = strlen(sReadBuffer);
@@ -308,27 +308,31 @@ ParseGroupIDList()
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\r", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\t", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
-
-
+		
+		
+		
+		// Support for comments on end of line
 		len = strlen(sReadBuffer);
+		for(new i; i < len; i++)
+		{
+			if(sReadBuffer[i] == '/')
+			{
+				sReadBuffer[i] = '\0';
+				
+				// Refresh the len
+				len = strlen(sReadBuffer);
+				
+				
+				break;
+			}
+		}
 		
 		
 		if(len < 3 || len > 64)
 		{
 			continue;
 		}
-
-
-		for(new i=0; i < len; i++)
-		{
-			if(sReadBuffer[i] == '/')
-			{
-				sReadBuffer[i] = 0;
-
-				break;
-			}
-		}
-			
+		
 		
 		// Go get them members
 		FetchGroupMembers(sReadBuffer);
