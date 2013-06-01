@@ -210,7 +210,7 @@ native CallAdmin_GetHostPort();
 /**
  * Logs a message to the calladmin logfile.
  *
- * @param message       Formatting rules.
+ * @param format        Formatting rules.
  * @param ...           Variable number of format parameters.
  * @noreturn
  */
