@@ -1,3 +1,4 @@
+/** Include guard */
 #if defined _calladmin_included
 	#endinput
 #endif
@@ -6,16 +7,16 @@
 
 
 
-// Do not touch
+/** Global calladmin version, do not change */
 #define CALLADMIN_VERSION	"0.1.2A"
 
 
 
-// Pass this as a clientindex to the ReportPlayer native if you don't have a client, eg report from server automatically
+/** Pass this as a clientindex to the ReportPlayer native if you don't have a client, eg report from server automatically */
 #define REPORTER_CONSOLE 1679124
 
 
-// Maximum size a reason string can be in lenght
+/** Maximum size a reason string can be in lenght */
 #define REASON_MAX_LENGTH 128
 
 
@@ -165,10 +166,10 @@ forward CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const Stri
 
 enum ServerData
 {
-	ServerData_HostName,
-	ServerData_HostIP,
-	ServerData_HostPort
-}
+	ServerData_HostName,     /**< This is the hostname of the server, gathered from the `hostname` convar */
+	ServerData_HostIP,       /**< This is the hostip of the server, gathered and converted from the `hostip` convar */
+	ServerData_HostPort      /**< This is the hostport of the server, gathered and converted from the `hostport` convar */
+};
 
 
 
