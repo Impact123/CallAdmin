@@ -202,6 +202,7 @@ ParseSteamIDList()
 	decl String:sReadBuffer[128];
 
 	
+	new len;
 	while(!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
 	{
 		if(sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
@@ -215,14 +216,15 @@ ParseSteamIDList()
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
 
 
-		new len = strlen(sReadBuffer);
-
-		for(new i=0; i < len; i++)
+		
+		// Support for comments on end of line
+		len = strlen(sReadBuffer);
+		for(new i; i < len; i++)
 		{
 			if(sReadBuffer[i] == '/')
 			{
-				sReadBuffer[i] = 0;
-
+				sReadBuffer[i] = '\0';
+				
 				break;
 			}
 		}
