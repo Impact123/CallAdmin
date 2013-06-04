@@ -5,4 +5,4 @@ Please view the headers of the specific file you use to updrade your scheme as i
 
 ## Important informations
 Database upgrades must be done in a specific order, in most cases you cannot directly upgrade from (for example) version 0.1.1 to 0.1.3.  
-Please be usre that you change all occurences of `YourTableName` to the tablename you currently use.  
+Please be sure that you change all occurences of `YourTableName` to the tablename you currently use.  
