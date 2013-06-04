@@ -400,6 +400,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															INDEX `serverIP_serverPort` (`serverIP`, `serverPort`),\
 															INDEX `reportedAt` (`reportedAt`),\
 															INDEX `callHandled` (`callHandled`),\
+															INDEX `serverKey` (`serverKey`),\
 															PRIMARY KEY (`callID`))\
 															COLLATE='utf8_unicode_ci'\
 														", g_sTableName, REASON_MAX_LENGTH);
