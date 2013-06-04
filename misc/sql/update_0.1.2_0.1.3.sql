@@ -1,5 +1,5 @@
 /*
-	This file is used to update an existing installtion of CallAdmin to a newer one
+	This file is used to update the database scheme an existing installation of CallAdmin to a newer one
 	
 	Important informations
 	------------
@@ -9,13 +9,13 @@
 	
 	What has changed?
 	-----------------
-	 - The targetReason column is now bigger, which allowing longer reasons
-	 - The column serverKey was added, which allows the use of a more complex permission system
+	 - The size of the targetReason column is now bigger, which now allows longer reasons
+	 - The column serverKey was added, which allows the use of a more complex key based permission system
 	 
 	
 	For which version is this file?
 	-------------------------------	
-	This file should be used to update the database scheme from version `0.1.2` to `0.1.3`
+	This file should be used to update the database scheme from version `0.1.2` to `0.1.3`  
 */
 
 ALTER TABLE `YourTableName`
