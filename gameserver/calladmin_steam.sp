@@ -35,8 +35,9 @@
 #pragma semicolon 1
 
 
-// According to Bailopan this is 16 KB
-#pragma dynamic 524288
+// This should be 128 KB which is more than enough
+// x * 4 -> bytes / 1024 -> KiloBytes
+#pragma dynamic 32768
 
 
 #define CALLADMIN_STEAM_AVAILABLE()      (GetFeatureStatus(FeatureType_Native, "CallAdminBot_ReportPlayer")   == FeatureStatus_Available)
@@ -524,8 +525,9 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any:pack)
 		}
 		
 		
-		// 150 ids should be enough for now, if not we have to increase the stack
-		new String:Split[150][64];
+		// 150 ids should be enough for now
+		// We shoudln't need it, but we use a little bit of a buffer to filter out garbage
+		new String:Split[150 + 50][64];
 		new String:sTempID[21];
 		
 		
