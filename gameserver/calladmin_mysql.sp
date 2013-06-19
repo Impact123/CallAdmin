@@ -497,7 +497,7 @@ public SQLT_CurrentVersion(Handle:owner, Handle:hndl, const String:error[], any:
 	}
 	else 
 	{
-		Format(version, sizeof(version), "0.1.2A");
+		SetFailState("VersionErr: %s", error);
 	}
 
 
