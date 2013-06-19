@@ -48,6 +48,7 @@ new g_iOhphanedEntryPruning;
 
 new Handle:g_hVersion;
 
+new bool:g_bAllLoaded;
 new bool:g_bLateLoad;
 new bool:g_bDBDelayedLoad;
 
@@ -102,6 +103,9 @@ public OnConfigsExecuted()
 {
 	if(g_bDBDelayedLoad)
 	{
+		// We are not loaded, yet
+		g_bAllLoaded = false;
+
 		InitDB();
 		g_bDBDelayedLoad = false;
 	}
@@ -124,6 +128,9 @@ public OnPluginStart()
 	// Configs might've not been excuted and we can't grab the hostname/hostport else
 	if(g_bLateLoad)
 	{
+		// We are not loaded, yet
+		g_bAllLoaded = false;
+
 		InitDB();
 	}
 	
@@ -250,7 +257,7 @@ public CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const Strin
 
 PruneDatabase()
 {
-	if(g_hDbHandle != INVALID_HANDLE)
+	if(g_hDbHandle != INVALID_HANDLE && g_bAllLoaded)
 	{
 		decl String:query[1024];
 		decl String:sHostIP[16];
@@ -278,7 +285,7 @@ PruneDatabase()
 
 UpdateServerData()
 {
-	if(g_hDbHandle != INVALID_HANDLE)
+	if(g_hDbHandle != INVALID_HANDLE && g_bAllLoaded)
 	{
 		decl String:query[1024];
 		
@@ -286,7 +293,7 @@ UpdateServerData()
 		SQL_EscapeString(g_hDbHandle, g_sServerName, sHostName, sizeof(sHostName));
 		
 		// Update the servername
-		Format(query, sizeof(query), "UPDATE IGNORE `%s` SET serverName = '%s' WHERE serverIP = '%s' AND serverPort = '%d'", g_sTableName, sHostName, g_sHostIP, g_iHostPort);
+		Format(query, sizeof(query), "UPDATE IGNORE `%s` SET serverName = '%s', serverKey = '%s' WHERE serverIP = '%s' AND serverPort = '%d'", g_sTableName, sHostName, g_sServerKey, g_sHostIP, g_iHostPort);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	}
 }
@@ -321,6 +328,13 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 
 public CallAdmin_OnReportPost(client, target, const String:reason[])
 {
+	// We need all loaded
+	if(!g_bAllLoaded || g_hDbHandle == INVALID_HANDLE)
+	{
+		return;
+	}
+
+
 	new String:clientNameBuf[MAX_NAME_LENGTH];
 	new String:clientName[(MAX_NAME_LENGTH + 1) * 2];
 	new String:clientAuth[21];
@@ -426,19 +440,20 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 															COLLATE='utf8_unicode_ci'\
 														", g_sTableName);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
-
-
-		// Prune old entries if enabled
-		if(g_iEntryPruning > 0)
-		{
-			PruneDatabase();
-		}
+										
+		// Create Version Table
+		Format(query, sizeof(query), "CREATE TABLE IF NOT EXISTS `%s_Settings` (\
+															`version` VARCHAR(12) NOT NULL)\
+															COLLATE='utf8_unicode_ci'\
+														", g_sTableName);
+		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 		
-		// Get Current trackers
-		GetCurrentTrackers();
-		
-		// Update Serverdata
-		UpdateServerData();
+		// Get current version
+		Format(query, sizeof(query), "SELECT \
+											`version` \
+										FROM \
+											`%s_Settings` LIMIT 1", g_sTableName);
+		SQL_TQuery(g_hDbHandle, SQLT_CurrentVersion, query);
 	}
 }
 
@@ -451,6 +466,71 @@ public SQLT_ErrorCheckCallback(Handle:owner, Handle:hndl, const String:error[], 
 	{
 		SetFailState("QueryErr: %s", error);
 	}
+}
+
+
+
+
+public SQLT_CurrentVersion(Handle:owner, Handle:hndl, const String:error[], any:data)
+{
+	decl String:version[12];
+	decl String:query[512];
+
+	if(hndl != INVALID_HANDLE && StrEqual(error, ""))
+	{
+		if(SQL_FetchRow(hndl))
+		{
+			SQL_FetchString(hndl, 0, version, sizeof(version));
+		}
+		else
+		{
+			// If no column insert, we have a version < 0.1.3
+			Format(version, sizeof(version), "0.1.2A");
+
+			// Insert Version
+			Format(query, sizeof(query), "INSERT INTO `%s_Settings` \
+														(version) \
+													VALUES \
+														('%s')", g_sTableName, CALLADMIN_VERSION);
+			SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
+		}
+	}
+	else 
+	{
+		Format(version, sizeof(version), "0.1.2A");
+	}
+
+
+	// Check version < 0.1.3
+	if(!IsVersionNewerOrEqual(version, "0.1.3"))
+	{
+		// Update Table to current structure
+		Format(query, sizeof(query), "ALTER TABLE `%s` \
+													ADD COLUMN `serverKey` VARCHAR(32) NOT NULL AFTER `serverName`, \
+													CHANGE COLUMN `targetReason` `targetReason` VARCHAR(%d) NOT NULL AFTER `targetID`, \
+													ADD INDEX `serverKey` (`serverKey`) \
+													", g_sTableName, REASON_MAX_LENGTH);
+		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
+	}
+
+
+	// Update version
+	Format(query, sizeof(query), "UPDATE `%s_Settings` SET version = '%s'", g_sTableName, CALLADMIN_VERSION);
+	SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
+
+
+	// Now we are finished
+	OnAllLoaded();
+}
+
+
+
+
+
+bool:IsVersionNewerOrEqual(const String:currentVersion[], const String:versionCompare[])
+{
+	// Check if currentVersion >= versionCompare
+	return (strcmp(versionCompare, currentVersion, false) <= 0);
 }
 
 
@@ -469,7 +549,8 @@ public Action:Timer_UpdateTrackersCount(Handle:timer)
 
 GetCurrentTrackers()
 {
-	if(g_hDbHandle != INVALID_HANDLE)
+	// We need all loaded
+	if(g_hDbHandle != INVALID_HANDLE && g_bAllLoaded)
 	{
 		decl String:query[1024];
 
@@ -485,6 +566,11 @@ GetCurrentTrackers()
 											TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(lastView), NOW()) < 2 AND \
 											`accessID` & (SELECT `accessBit` FROM `%s_Access` WHERE `serverKey`='%s')", g_sTableName, g_sTableName, sKey);
 		SQL_TQuery(g_hDbHandle, SQLT_CurrentTrackersCallback, query);
+	}
+	else
+	{
+		// Set to zero
+		g_iCurrentTrackers = 0;
 	}
 }
 
@@ -506,6 +592,26 @@ public SQLT_CurrentTrackersCallback(Handle:owner, Handle:hndl, const String:erro
 	}
 }
 
+
+
+
+OnAllLoaded()
+{
+	g_bAllLoaded = true;
+
+
+	// Prune old entries if enabled
+	if(g_iEntryPruning > 0)
+	{
+		PruneDatabase();
+	}
+	
+	// Get Current trackers
+	GetCurrentTrackers();
+
+	// Update Serverdata
+	UpdateServerData();
+}
 
 
 
