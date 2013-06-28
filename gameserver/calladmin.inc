@@ -44,8 +44,8 @@ forward Action:CallAdmin_OnDrawOwnReason(client);
 
 
 /**
- * Called when an client is about to be drawn as to the target selection menu for an client.
- * Note: Called *n-1 times for the client selection menu where n is the amount of valid players including the caller.
+ * Called when an client is about to be drawn to the target selection menu for an client.
+ * Note: Called *n-1 times for the client selection menu where n is the amount of valid targets including the caller.
  *
  * @param client        Client index of the caller.
  * @param target        Client index of the target about to be drawed.
@@ -57,7 +57,7 @@ forward Action:CallAdmin_OnDrawTarget(client, target);
 
 
 /**
- * Called when the trackercount was Changed.
+ * Called when the trackercount was changed.
  *
  * @param oldVal        Trackercount before update.
  * @param newVal        Trackercount after update.
@@ -83,6 +83,7 @@ forward Action:CallAdmin_OnReportPre(client, target, const String:reason[]);
 
 /**
  * Called after an client (or module) has reported another player.
+ * Be sure to check that client != REPORTER_CONSOLE if you expect a valid client index.
  *
  * @param client        Client index of the caller.
  * @param target        Client index of the target.
@@ -96,6 +97,7 @@ forward CallAdmin_OnReportPost(client, target, const String:reason[]);
 
 /**
  * Initiates an report call.
+ * If you report automatically (via a module for example) set the clientindex to REPORTER_CONSOLE
  *
  * @param client        Client index of the caller.
  * @param target        Client index of the target.
@@ -130,6 +132,7 @@ native CallAdmin_GetTrackersCount();
 
 /**
  * Requests an forced refresh of the trackers count.
+ * Note that most module's work asynchronous and only return their own cached count.
  *
  * @noreturn
  */
@@ -140,7 +143,7 @@ native CallAdmin_RequestTrackersCountRefresh();
 
 /**
  * Called when the trackercount of a module is requested.
- * Note: This is a pseudo forward (it's a function call)
+ * This is either called periodically via the base calladmin or when RequestTrackersCountRefresh is invoked.
  *
  * @param trackers      By ref value of your trackers.
  * @noreturn
@@ -168,7 +171,7 @@ enum ServerData
 {
 	ServerData_HostName,     /**< This is the hostname of the server, gathered from the `hostname` convar */
 	ServerData_HostIP,       /**< This is the hostip of the server, gathered and converted from the `hostip` convar */
-	ServerData_HostPort      /**< This is the hostport of the server, gathered and converted from the `hostport` convar */
+	ServerData_HostPort      /**< This is the hostport of the server, gathered from the `hostport` convar */
 };
 
 
@@ -209,7 +212,7 @@ native CallAdmin_GetHostPort();
 
 /**
  * Logs a message to the calladmin logfile.
- * The message has this format "[Pluginname] Message"
+ * The message has this format "[Pluginname] Message", where the pluginname is gathered automatically
  *
  * @param format        Formatting rules.
  * @param ...           Variable number of format parameters.
