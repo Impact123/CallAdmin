@@ -281,14 +281,17 @@ public OnPluginStart()
 	if(g_hHostPort == INVALID_HANDLE)
 	{
 		SetFailState("Couldn't find cvar 'hostport'");
+		CallAdmin_LogMessage("Couldn't find cvar 'hostport'");
 	}
 	if(g_hHostIP == INVALID_HANDLE)
 	{
 		SetFailState("Couldn't find cvar 'hostip'");
+		CallAdmin_LogMessage("Couldn't find cvar 'hostip'");
 	}
 	if(g_hServerName == INVALID_HANDLE)
 	{
 		SetFailState("Couldn't find cvar 'hostname'");
+		CallAdmin_LogMessage("Couldn't find cvar 'hostname'");
 	}
 
 	
@@ -413,6 +416,7 @@ CreateReasonList()
 	if(hFile == INVALID_HANDLE)
 	{
 		SetFailState("Failed to open configfile 'calladmin_reasons.cfg' for writing");
+		CallAdmin_LogMessage("Failed to open configfile 'calladmin_reasons.cfg' for writing");
 	}
 	
 	WriteFileLine(hFile, "// List of reasons seperated by a new line, max %d in length", REASON_MAX_LENGTH);
@@ -441,6 +445,7 @@ ParseReasonList()
 	if(hFile == INVALID_HANDLE)
 	{
 		SetFailState("Failed to open configfile 'calladmin_reasons.cfg' for reading");
+		CallAdmin_LogMessage("Failed to open configfile 'calladmin_reasons.cfg' for reading");
 	}
 	
 	
