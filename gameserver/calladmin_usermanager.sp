@@ -150,7 +150,7 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 		// Check basecomm
 		if (!LibraryExists("basecomm") && g_bBlacklistMuted)
 		{
-			LogError("Couldn't find Plugin basecomm.smx. But you've activated mute blacklisting!");
+			CallAdmin_LogMessage("Couldn't find Plugin basecomm.smx. But you've activated mute blacklisting!");
 		}
 	}
 
@@ -161,7 +161,7 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 		// Check basecomm
 		if (!LibraryExists("basecomm") && g_hBlacklistGagged)
 		{
-			LogError("Couldn't find Plugin basecomm.smx. But you've activated gag blacklisting!");
+			CallAdmin_LogMessage("Couldn't find Plugin basecomm.smx. But you've activated gag blacklisting!");
 		}
 	}
 
@@ -180,6 +180,11 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 // Updater
 public OnAllPluginsLoaded()
 {
+	if(!LibraryExists("calladmin"))
+	{
+		SetFailState("CallAdmin not found");
+	}
+	
 	if (LibraryExists("updater"))
 	{
 		Updater_AddPlugin(UPDATER_URL);
@@ -187,7 +192,7 @@ public OnAllPluginsLoaded()
 
 	if (!LibraryExists("basecomm") && (g_bBlacklistMuted || g_bBlacklistGagged))
 	{
-		LogError("Couldn't find Plugin basecomm.smx. But you've activated mute or gag blacklisting!");
+		CallAdmin_LogMessage("Couldn't find Plugin basecomm.smx. But you've activated mute or gag blacklisting!");
 	}
 }
 
