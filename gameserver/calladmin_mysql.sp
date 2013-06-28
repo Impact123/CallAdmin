@@ -121,6 +121,7 @@ public OnPluginStart()
 	if(!SQL_CheckConfig(SQL_DB_CONF) && !SQL_CheckConfig("default"))
 	{
 		SetFailState("Couldn't find database config");
+		CallAdmin_LogMessage("Couldn't find database config");
 	}
 	
 	
@@ -388,6 +389,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 	if(hndl == INVALID_HANDLE)
 	{
 		SetFailState("ConErr: %s", error);
+		CallAdmin_LogMessage("ConErr: %s", error);
 	}
 	else
 	{
@@ -465,6 +467,7 @@ public SQLT_ErrorCheckCallback(Handle:owner, Handle:hndl, const String:error[], 
 	if(hndl == INVALID_HANDLE)
 	{
 		SetFailState("QueryErr: %s", error);
+		CallAdmin_LogMessage("QueryErr: %s", error);
 	}
 }
 
@@ -498,6 +501,7 @@ public SQLT_CurrentVersion(Handle:owner, Handle:hndl, const String:error[], any:
 	else 
 	{
 		SetFailState("VersionErr: %s", error);
+		CallAdmin_LogMessage("VersionErr: %s", error);
 	}
 
 
@@ -582,6 +586,7 @@ public SQLT_CurrentTrackersCallback(Handle:owner, Handle:hndl, const String:erro
 	if(hndl == INVALID_HANDLE)
 	{
 		SetFailState("CurrentTrackersErr: %s", error);
+		CallAdmin_LogMessage("CurrentTrackersErr: %s", error);
 	}
 	else
 	{
