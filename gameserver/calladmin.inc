@@ -209,6 +209,7 @@ native CallAdmin_GetHostPort();
 
 /**
  * Logs a message to the calladmin logfile.
+ * The message has this format "[Pluginname] Message"
  *
  * @param format        Formatting rules.
  * @param ...           Variable number of format parameters.
