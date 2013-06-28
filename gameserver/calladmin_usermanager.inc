@@ -13,7 +13,7 @@
  * If a client is immune, he can't be reported.
  *
  * @param client       The Client.
- * @return             True if client is immune, otherwise false.
+ * @return             True if client is immune, false otherwise.
  */
 native bool:CallAdmin_IsClientImmune(client);
 
@@ -25,7 +25,7 @@ native bool:CallAdmin_IsClientImmune(client);
  * If a client is on the blacklist, he can't report players.
  *
  * @param client       The Client.
- * @return             True if client is on blacklist, otherwise false.
+ * @return             True if client is on blacklist, false otherwise.
  */
 native bool:CallAdmin_IsClientOnBlacklist(client);
 
@@ -37,7 +37,7 @@ native bool:CallAdmin_IsClientOnBlacklist(client);
  * If a client is immune, he can't be reported.
  *
  * @param client       The Client.
- * @param immune       True to immune client, otherwise false.
+ * @param immune       True to immune client, false otherwise.
  * @noreturn
  */
 native CallAdmin_SetClientImmune(client, bool:immune);
