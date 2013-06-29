@@ -174,8 +174,8 @@ CreateSteamIDList()
 	// Failed to open
 	if(hFile == INVALID_HANDLE)
 	{
-		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for writing");
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for writing");
+		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for writing");
 	}
 	
 	WriteFileLine(hFile, "// List of steamID's or communityid's, seperated by a new line");
@@ -196,8 +196,8 @@ ParseSteamIDList()
 	// Failed to open
 	if(hFile == INVALID_HANDLE)
 	{
-		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for reading");
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for reading");
+		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for reading");
 	}
 	
 	
@@ -270,8 +270,8 @@ CreateGroupIDList()
 	// Failed to open
 	if(hFile == INVALID_HANDLE)
 	{
-		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for writing");
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for writing");
+		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for writing");
 	}
 	
 	WriteFileLine(hFile, "// List of group names, seperated by a new line");
@@ -292,8 +292,8 @@ ParseGroupIDList()
 	// Failed to open
 	if(hFile == INVALID_HANDLE)
 	{
-		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for reading");
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for reading");
+		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for reading");
 	}
 	
 	
