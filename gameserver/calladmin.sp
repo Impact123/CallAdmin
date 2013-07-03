@@ -474,8 +474,8 @@ ParseReasonList()
 		}
 			
 		
-		// Add the reason to the list
-		if(FindStringInArray(g_hReasonAdt, "") == -1)
+		// Add the reason to the list if it doesn't exist already
+		if(FindStringInArray(g_hReasonAdt, sReadBuffer) == -1)
 		{
 			PushArrayString(g_hReasonAdt, sReadBuffer);
 		}
