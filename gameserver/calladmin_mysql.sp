@@ -78,7 +78,7 @@ public Plugin:myinfo =
 {
 	name = "CallAdmin: Mysql module",
 	author = "Impact, Popoklopsi",
-	description = "BLEH",
+	description = "The mysqlmodule for CallAdmin",
 	version = CALLADMIN_VERSION,
 	url = "http://gugyclan.eu"
 }

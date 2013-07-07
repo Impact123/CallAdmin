@@ -68,7 +68,7 @@ public Plugin:myinfo =
 {
 	name = "CallAdmin UserManager",
 	author = "Popoklopsi, Impact",
-	description = "A UserManager for CallAdmin",
+	description = "The usermanagermodule for CallAdmin",
 	version = CALLADMIN_VERSION,
 	url = "http://popoklopsi.de"
 }

@@ -60,7 +60,7 @@ public Plugin:myinfo =
 {
 	name = "CallAdmin: Ts3 module",
 	author = "Impact, Popoklopsi",
-	description = "Sends reports to an ts3server",
+	description = "The ts3module for CallAdmin",
 	version = CALLADMIN_VERSION,
 	url = "http://gugyclan.eu"
 }

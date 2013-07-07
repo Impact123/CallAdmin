@@ -85,7 +85,7 @@ public Plugin:myinfo =
 {
 	name = "CallAdmin: Steam module",
 	author = "Impact, Popoklopsi",
-	description = "Sends reports to steam accounts and/or members of groups",
+	description = "The steammodule for CallAdmin",
 	version = CALLADMIN_VERSION,
 	url = "http://gugyclan.eu"
 }
