@@ -35,8 +35,9 @@
 #pragma semicolon 1
 
 
-// According to Bailopan this is 16 KB
-#pragma dynamic 524288
+// This should be 128 KB which is more than enough
+// x * 4 -> bytes / 1024 -> KiloBytes
+#pragma dynamic 32768
 
 
 #define CALLADMIN_STEAM_AVAILABLE()      (GetFeatureStatus(FeatureType_Native, "CallAdminBot_ReportPlayer")   == FeatureStatus_Available)
@@ -84,7 +85,7 @@ public Plugin:myinfo =
 {
 	name = "CallAdmin: Steam module",
 	author = "Impact, Popoklopsi",
-	description = "Sends reports to steam accounts and/or members of groups",
+	description = "The steammodule for CallAdmin",
 	version = CALLADMIN_VERSION,
 	url = "http://gugyclan.eu"
 }
@@ -158,7 +159,7 @@ public OnMessageResultReceived(MessageBotResult:result, error)
 {
 	if(result != RESULT_NO_ERROR)
 	{
-		LogError("Failed to to send message, result was: (%d, %d)", result, error);
+		LogError("Failed to send message, result was: (%d, %d)", result, error);
 	}
 }
 
@@ -173,6 +174,7 @@ CreateSteamIDList()
 	// Failed to open
 	if(hFile == INVALID_HANDLE)
 	{
+		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for writing");
 		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for writing");
 	}
 	
@@ -194,14 +196,16 @@ ParseSteamIDList()
 	// Failed to open
 	if(hFile == INVALID_HANDLE)
 	{
+		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for reading");
 		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for reading");
 	}
 	
 	
 	// Buffer must be a little bit bigger to have enough room for possible comments
 	decl String:sReadBuffer[128];
+
 	
-	
+	new len;
 	while(!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
 	{
 		if(sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
@@ -210,7 +214,23 @@ ParseSteamIDList()
 		}
 		
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\n", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\r", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\t", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
+		
+		
+		
+		// Support for comments on end of line
+		len = strlen(sReadBuffer);
+		for(new i; i < len; i++)
+		{
+			if(sReadBuffer[i] == '/')
+			{
+				sReadBuffer[i] = '\0';
+				
+				break;
+			}
+		}
 		
 		
 		new AuthStringType:type = GetAuthIDType(sReadBuffer);
@@ -250,6 +270,7 @@ CreateGroupIDList()
 	// Failed to open
 	if(hFile == INVALID_HANDLE)
 	{
+		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for writing");
 		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for writing");
 	}
 	
@@ -271,13 +292,14 @@ ParseGroupIDList()
 	// Failed to open
 	if(hFile == INVALID_HANDLE)
 	{
+		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for reading");
 		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for reading");
 	}
 	
 	
 	// Buffer must be a little bit bigger to have enough room for possible comments
 	decl String:sReadBuffer[128];
-	
+
 	
 	new len;
 	while(!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
@@ -288,16 +310,34 @@ ParseGroupIDList()
 		}
 		
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\n", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\r", "");
+		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\t", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
 		
+		
+		
+		// Support for comments on end of line
 		len = strlen(sReadBuffer);
+		for(new i; i < len; i++)
+		{
+			if(sReadBuffer[i] == '/')
+			{
+				sReadBuffer[i] = '\0';
+				
+				// Refresh the len
+				len = strlen(sReadBuffer);
+				
+				
+				break;
+			}
+		}
 		
 		
 		if(len < 3 || len > 64)
 		{
 			continue;
 		}
-			
+		
 		
 		// Go get them members
 		FetchGroupMembers(sReadBuffer);
@@ -355,7 +395,7 @@ public OnLibraryAdded(const String:name[])
 
 
 
-public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const String:reasonSanitized[])
+public CallAdmin_OnReportPost(client, target, const String:reason[])
 {
 	MessageBot_SetLoginData(g_sSteamUsername, g_sSteamPassword);
 	
@@ -373,14 +413,23 @@ public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const St
 	serverPort = CallAdmin_GetHostPort();
 	CallAdmin_GetHostName(sServerName, sizeof(sServerName));
 	
-	GetClientName(client, sClientName, sizeof(sClientName));
-	GetClientAuthString(client, sClientID, sizeof(sClientID));
+	// Reporter wasn't a real client (initiated by a module)
+	if(client == REPORTER_CONSOLE)
+	{
+		strcopy(sClientName, sizeof(sClientName), "Server/Console");
+		strcopy(sClientID, sizeof(sClientID), "Server/Console");
+	}
+	else
+	{
+		GetClientName(client, sClientName, sizeof(sClientName));
+		GetClientAuthString(client, sClientID, sizeof(sClientID));
+	}
 	
 	GetClientName(target, sTargetName, sizeof(sTargetName));
 	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
 	
 	decl String:sMessage[4096];
-	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s", sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, reasonRaw);
+	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s", sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, reason);
 							 
 	MessageBot_SendMessage(OnMessageResultReceived, sMessage);
 }
@@ -480,8 +529,9 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any:pack)
 		}
 		
 		
-		// 150 ids should be enough for now, if not we have to increase the stack
-		new String:Split[150][64];
+		// 150 ids should be enough for now
+		// We shoudln't need it, but we use a little bit of a buffer to filter out garbage
+		new String:Split[150 + 50][64];
 		new String:sTempID[21];
 		
 		

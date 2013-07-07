@@ -27,6 +27,7 @@
 #include <autoexecconfig>
 #include "calladmin"
 #include <socket>
+#include <regex>
 
 #undef REQUIRE_PLUGIN
 #include <updater>
@@ -47,6 +48,7 @@ new String:g_sRealPath[PLATFORM_MAX_PATH];
 new Handle:g_hKey;
 new String:g_sKey[PLATFORM_MAX_PATH];
 
+new g_iCurrentTrackers;
 
 
 
@@ -58,7 +60,7 @@ public Plugin:myinfo =
 {
 	name = "CallAdmin: Ts3 module",
 	author = "Impact, Popoklopsi",
-	description = "Sends reports to an ts3server",
+	description = "The ts3module for CallAdmin",
 	version = CALLADMIN_VERSION,
 	url = "http://gugyclan.eu"
 }
@@ -89,7 +91,38 @@ public OnPluginStart()
 	
 	GetConVarString(g_hKey, g_sKey, sizeof(g_sKey));
 	HookConVarChange(g_hKey, OnCvarChanged);
+	
+	CreateTimer(20.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
+	GetCurrentTrackers();
 }
+
+
+
+public Action:Timer_UpdateTrackersCount(Handle:timer)
+{
+	// Get current trackers
+	GetCurrentTrackers();
+	
+	return Plugin_Continue;
+}
+
+
+
+GetCurrentTrackers()
+{
+	// Create a new socket
+	new Handle:Socket = SocketCreate(SOCKET_TCP, OnSocketError);
+	
+	
+	// Optional tweaking stuff
+	SocketSetOption(Socket, ConcatenateCallbacks, 4096);
+	SocketSetOption(Socket, SocketReceiveTimeout, 3);
+	SocketSetOption(Socket, SocketSendTimeout, 3);
+	
+	// Connect
+	SocketConnect(Socket, OnSocketConnectCount, OnSocketReceiveCount, OnSocketDisconnect, g_sRealUrl, 80);
+}
+
 
 
 
@@ -184,8 +217,15 @@ public OnLibraryAdded(const String:name[])
 
 
 
+// Pseudo forward
+public CallAdmin_OnRequestTrackersCountRefresh(&trackers)
+{
+	trackers = g_iCurrentTrackers;
+}
 
-public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const String:reasonSanitized[])
+
+
+public CallAdmin_OnReportPost(client, target, const String:reason[])
 {
 	// Create a new socket
 	new Handle:Socket = SocketCreate(SOCKET_TCP, OnSocketError);
@@ -209,12 +249,21 @@ public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const St
 	decl String:sTargetName[MAX_NAME_LENGTH];
 	
 	
-	// We don't have to verify clients, calladmin does this for us
-	GetClientAuthString(client, sClientID, sizeof(sClientID));
-	GetClientName(client, sClientName, sizeof(sClientName));
+	// Reporter wasn't a real client (initiated by a module)
+	if(client == REPORTER_CONSOLE)
+	{
+		strcopy(sClientName, sizeof(sClientName), "Server/Console");
+		strcopy(sClientID, sizeof(sClientID), "Server/Console");
+	}
+	else
+	{
+		GetClientName(client, sClientName, sizeof(sClientName));
+		GetClientAuthString(client, sClientID, sizeof(sClientID));
+	}
+
 	
-	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
 	GetClientName(target, sTargetName, sizeof(sTargetName));
+	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
 	
 	
 	// Write the data to the pack
@@ -224,7 +273,7 @@ public CallAdmin_OnReportPost(client, target, const String:reasonRaw[], const St
 	WritePackString(pack, sTargetID);
 	WritePackString(pack, sTargetName);
 	
-	WritePackString(pack, reasonRaw);
+	WritePackString(pack, reason);
 	
 	
 	// Set the pack as argument to the callbacks, so we can read it out later
@@ -265,7 +314,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 		
 		
 		// Currently maximum 48 in length
-		decl String:sReason[48];
+		decl String:sReason[REASON_MAX_LENGTH];
 		
 		
 		// Reset the pack
@@ -313,6 +362,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 
 
 
+
 public OnSocketReceive(Handle:socket, String:data[], const size, any:pack) 
 {
 	if(socket != INVALID_HANDLE)
@@ -349,6 +399,96 @@ public OnSocketError(Handle:socket, const errorType, const errorNum, any:pack)
 		CloseHandle(socket);
 	}
 }
+
+
+
+
+// Onlinecount callback
+public OnSocketConnectCount(Handle:socket, any:pack)
+{
+	// If socket is connected, should be since this is the callback that is called if it is connected
+	if(SocketIsConnected(socket))
+	{
+		// Buffers
+		decl String:sRequestString[2048];
+		decl String:sRequestParams[2048];
+
+		
+		// Params
+		Format(sRequestParams, sizeof(sRequestParams), "onlinecount.php?key=%s", g_sKey);
+		
+		
+		// Request String
+		Format(sRequestString, sizeof(sRequestString), "GET %s/%s HTTP/1.0\r\nHost: %s\r\nConnection: close\r\n\r\n", g_sRealPath, sRequestParams, g_sRealUrl);
+		
+		
+		// Send the request
+		SocketSend(socket, sRequestString);
+	}
+}
+
+
+
+
+// Onlinecount callback
+public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack) 
+{
+	if(socket != INVALID_HANDLE)
+	{
+		// This fixes an bug on windowsservers
+		// The receivefunction for socket is getting called twice on these systems, once for the headers, and a second time for the body
+		// Because we know that our response should begin with <?xml and contains a steamid we can quit here and don't waste resources on the first response
+		// Other than that if the api is down, the request was malformed etcetera we don't waste resources for working with useless data
+		if(StrContains(data, "<?xml", false) == -1)
+		{
+			return;
+		}
+		
+		
+		new String:Split[2][48];
+		
+		ExplodeString(data, "<onlineCount>", Split, sizeof(Split), sizeof(Split[]));
+		
+		
+		// Run though count
+		new splitsize = sizeof(Split);
+		new index;
+		for(new i; i < splitsize; i++)
+		{
+			if(strlen(Split[i]) > 0)
+			{
+				// If we find something we split off at the searchresult, we then then only have the steamid
+				if( (index = StrContains(Split[i], "</onlineCount>", true)) != -1)
+				{
+					Split[i][index] = '\0';
+				}
+			}
+		}
+		
+		
+		// Add the count to the total trackers
+		if(strlen(Split[1]) > 0)
+		{
+			if(SimpleRegexMatch(Split[1], "^[0-9]+$"))
+			{
+				new temp = StringToInt(Split[1]);
+				
+				if(temp > 0)
+				{
+					g_iCurrentTrackers += temp;
+				}
+			}
+		}
+
+		
+		// Close the socket
+		if(SocketIsConnected(socket))
+		{
+			SocketDisconnect(socket);
+		}
+	}
+}
+
 
 
 

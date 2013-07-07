@@ -1,0 +1,18 @@
+"Updater"
+{
+	"Information"
+	{
+		"Version"
+		{
+			"Latest"	"0.1.3"
+		}
+	}
+	
+	"Files"
+	{
+		"Plugin"	"Path_SM/plugins/calladmin_usermanager.smx"
+		"Plugin"	"Path_SM/translations/calladmin_usermanager.phrases.txt"
+		"Source"	"Path_SM/scripting/calladmin_usermanager.sp"
+		"Source"	"Path_SM/scripting/include/calladmin_usermanager.inc"
+	}
+}

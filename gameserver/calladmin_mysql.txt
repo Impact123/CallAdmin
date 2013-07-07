@@ -1,0 +1,16 @@
+"Updater"
+{
+	"Information"
+	{
+		"Version"
+		{
+			"Latest"	"0.1.3"
+		}
+	}
+	
+	"Files"
+	{
+		"Plugin"	"Path_SM/plugins/calladmin_mysql.smx"
+		"Source"	"Path_SM/scripting/calladmin_mysql.sp"
+	}
+}

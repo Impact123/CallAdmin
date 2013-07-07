@@ -39,7 +39,7 @@ $helpers = new CallAdmin_Helpers();
 
 
 // Key set and no key given or key is wrong
-if((!empty($access_key) && !isset($_GET['key']) ) || $_GET['key'] !== $access_key)
+if(!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
 	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Trackers");
 }
@@ -58,6 +58,20 @@ if($dbi->connect_errno != 0)
 
 // Set utf-8 encodings
 $dbi->set_charset("utf8");
+
+
+
+// Escape server keys
+foreach($access_keys as $key => $value)
+{
+	if(is_array($value))
+	{
+		foreach($value as $serverKey)
+		{
+			$access_keys[$key][$serverKey] = $dbi->escape_string($serverKey);
+		}
+	}
+}
 
 
 // Safety
@@ -102,6 +116,7 @@ if(isset($_GET['limit']) && preg_match("/^[0-9]{1,2}+$/", $_GET['limit']))
 }
 
 
+
 // Safety
 $sort = strtoupper("desc");
 if(isset($_GET['sort']) && preg_match("/^[a-zA-Z]{3,4}+$/", $_GET['sort']))
@@ -113,13 +128,16 @@ if(isset($_GET['sort']) && preg_match("/^[a-zA-Z]{3,4}+$/", $_GET['sort']))
 }
 
 
+// Access query
+$access_query = '`accessID` & (SELECT SUM(`accessBit`) FROM `' .$table. '_Access` WHERE serverKey IN (' .$helpers->keyToServerKeys($access_keys, $_GET['key']). '))';
+
 
 $fetchresult = $dbi->query("SELECT 
 							trackerIP, trackerID, lastView, TIMESTAMPDIFF(SECOND, FROM_UNIXTIME(lastView), NOW()) AS lastViewDiff
 						FROM 
-							$trackers_table
+							`" .$table ."_Trackers`
 						WHERE
-							$from_query
+							$from_query AND $access_query
 						ORDER BY
 							lastView $sort
 						LIMIT 0, $limit");
