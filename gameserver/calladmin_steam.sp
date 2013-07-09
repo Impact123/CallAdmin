@@ -159,7 +159,7 @@ public OnMessageResultReceived(MessageBotResult:result, error)
 {
 	if(result != RESULT_NO_ERROR)
 	{
-		LogError("Failed to send message, result was: (%d, %d)", result, error);
+		CallAdmin_LogMessage("Failed to send message, result was: (%d, %d)", result, error));
 	}
 }
 
@@ -604,7 +604,7 @@ public OnSocketDisconnect(Handle:socket, any:pack)
 
 public OnSocketError(Handle:socket, const errorType, const errorNum, any:pack)
 {
-	LogError("Socket Error: %d, %d", errorType, errorNum);
+	CallAdmin_LogMessage("Socket Error: %d, %d", errorType, errorNum);
 	
 	if(socket != INVALID_HANDLE)
 	{
