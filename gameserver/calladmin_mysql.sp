@@ -117,14 +117,6 @@ public OnConfigsExecuted()
 
 public OnPluginStart()
 {
-	// Fallback for default if possible
-	if(!SQL_CheckConfig(SQL_DB_CONF) && !SQL_CheckConfig("default"))
-	{
-		CallAdmin_LogMessage("Couldn't find database config");
-		SetFailState("Couldn't find database config");
-	}
-	
-	
 	// We only connect directly if it was a lateload, else we connect when configs were executed to grab the cvars
 	// Configs might've not been excuted and we can't grab the hostname/hostport else
 	if(g_bLateLoad)
@@ -166,10 +158,6 @@ public OnPluginStart()
 	
 	g_iOhphanedEntryPruning = GetConVarInt(g_hOhphanedEntryPruning);
 	HookConVarChange(g_hOhphanedEntryPruning, OnCvarChanged);
-	
-	g_iHostPort = CallAdmin_GetHostPort();
-	CallAdmin_GetHostIP(g_sHostIP, sizeof(g_sHostIP));
-	CallAdmin_GetHostName(g_sServerName, sizeof(g_sServerName));
 
 	CreateTimer(600.0, Timer_PruneEntries, _, TIMER_REPEAT);
 	CreateTimer(20.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
@@ -180,6 +168,13 @@ public OnPluginStart()
 
 InitDB()
 {
+	// Fallback for default if possible
+	if(!SQL_CheckConfig(SQL_DB_CONF) && !SQL_CheckConfig("default"))
+	{
+		CallAdmin_LogMessage("Couldn't find database config");
+		SetFailState("Couldn't find database config");
+	}
+	
 	SQL_TConnect(SQLT_ConnectCallback, SQL_CheckConfig(SQL_DB_CONF) ? SQL_DB_CONF : "default");
 }
 
@@ -198,6 +193,10 @@ public OnAllPluginsLoaded()
 	{
 		Updater_AddPlugin(UPDATER_URL);
 	}
+
+	g_iHostPort = CallAdmin_GetHostPort();
+	CallAdmin_GetHostIP(g_sHostIP, sizeof(g_sHostIP));
+	CallAdmin_GetHostName(g_sServerName, sizeof(g_sServerName));
 }
 
 
