@@ -107,9 +107,9 @@ try
 		{
 			$ts3_Client->message("----------------------------------------------------");
 			$ts3_Client->message("[CallAdmin] New report on:   $serverName ($serverIP) $connect");
-			$ts3_Client->message("[CallAdmin] Reporter:        $targetName ($targetCommBB)");
+			$ts3_Client->message("[CallAdmin] Reporter:        $clientName ($clientCommBB)");
 			$ts3_Client->message("[CallAdmin] Report reason:   $targetReason");
-			$ts3_Client->message("[CallAdmin] Reported player: $clientName ($clientCommBB)");
+			$ts3_Client->message("[CallAdmin] Reported player: $targetName ($targetCommBB)");
 			$ts3_Client->message("----------------------------------------------------");
 		}
 	}
