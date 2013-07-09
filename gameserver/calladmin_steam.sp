@@ -159,7 +159,7 @@ public OnMessageResultReceived(MessageBotResult:result, error)
 {
 	if(result != RESULT_NO_ERROR)
 	{
-		CallAdmin_LogMessage("Failed to send message, result was: (%d, %d)", result, error));
+		CallAdmin_LogMessage("Failed to send message, result was: (%d, %d)", result, error);
 	}
 }
 
