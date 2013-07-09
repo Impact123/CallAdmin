@@ -102,7 +102,7 @@ try
 		//$name = (string)$ts3_Client['client_nickname'];
 		
 		
-		// Ss listed as admin, go send him a message
+		// Is listed as admin, go send him a message
 		if(in_array($uid, $access_keys[$_GET['key']]))
 		{
 			$ts3_Client->message("----------------------------------------------------");
