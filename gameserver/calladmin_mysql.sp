@@ -478,16 +478,24 @@ public SQLT_CurrentVersion(Handle:owner, Handle:hndl, const String:error[], any:
 	decl String:version[12];
 	decl String:query[512];
 
-	if(hndl != INVALID_HANDLE && StrEqual(error, ""))
+	if(hndl != INVALID_HANDLE)
 	{
 		if(SQL_FetchRow(hndl))
 		{
 			SQL_FetchString(hndl, 0, version, sizeof(version));
+
+			// Setup maybe new structure
+			ChangeDB(version);
 		}
 		else
 		{
-			// If no column insert, we have a version < 0.1.3
-			Format(version, sizeof(version), "0.1.2A");
+			// We have to check the real version
+			Format(query, sizeof(query), "SELECT \
+										`serverKey` \
+									FROM \
+										`%s` LIMIT 1", g_sTableName);
+
+			SQL_TQuery(g_hDbHandle, SQLT_GetRealVersion, query);
 
 			// Insert Version
 			Format(query, sizeof(query), "INSERT INTO `%s_Settings` \
@@ -495,6 +503,9 @@ public SQLT_CurrentVersion(Handle:owner, Handle:hndl, const String:error[], any:
 													VALUES \
 														('%s')", g_sTableName, CALLADMIN_VERSION);
 			SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
+
+
+			return;
 		}
 	}
 	else 
@@ -503,6 +514,35 @@ public SQLT_CurrentVersion(Handle:owner, Handle:hndl, const String:error[], any:
 		SetFailState("VersionErr: %s", error);
 	}
 
+
+	// Update version
+	Format(query, sizeof(query), "UPDATE `%s_Settings` SET version = '%s'", g_sTableName, CALLADMIN_VERSION);
+	SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
+}
+
+
+
+
+public SQLT_GetRealVersion(Handle:owner, Handle:hndl, const String:error[], any:data)
+{
+	if(hndl == INVALID_HANDLE)
+	{
+		// We have the old 0.1.2A
+		ChangeDB("0.1.2A");
+	}
+	else
+	{
+		// The version is the current version
+		OnAllLoaded();
+	}
+}
+
+
+
+
+ChangeDB(String:version[])
+{
+	decl String:query[512];
 
 	// Check version < 0.1.3
 	if(!IsVersionNewerOrEqual(version, "0.1.3"))
@@ -515,12 +555,6 @@ public SQLT_CurrentVersion(Handle:owner, Handle:hndl, const String:error[], any:
 													", g_sTableName, REASON_MAX_LENGTH);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	}
-
-
-	// Update version
-	Format(query, sizeof(query), "UPDATE `%s_Settings` SET version = '%s'", g_sTableName, CALLADMIN_VERSION);
-	SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
-
 
 	// Now we are finished
 	OnAllLoaded();
