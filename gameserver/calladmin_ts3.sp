@@ -475,7 +475,7 @@ public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack)
 				
 				if(temp > 0)
 				{
-					g_iCurrentTrackers += temp;
+					g_iCurrentTrackers = temp;
 				}
 			}
 		}

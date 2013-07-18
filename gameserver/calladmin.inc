@@ -212,7 +212,7 @@ native CallAdmin_GetHostPort();
 
 /**
  * Logs a message to the calladmin logfile.
- * The message has this format "[Pluginname] Message", where the pluginname is gathered automatically
+ * The message has this format "[Pluginname] Message", where the pluginname is gathered automatically.
  *
  * @param format        Formatting rules.
  * @param ...           Variable number of format parameters.

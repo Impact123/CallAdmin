@@ -1,9 +1,8 @@
+/** Include guard */
 #if defined _calladmin_usermanager_included
 	#endinput
 #endif
 #define _calladmin_usermanager_included
-
-
 
 
 
@@ -46,7 +45,7 @@ native CallAdmin_SetClientImmune(client, bool:immune);
 
 
 /**
- * Adds or removes a client to/from blacklist.
+ * Sets whether a client is in the backlist or not.
  * If a client is on the blacklist, he can't report players.
  *
  * @param client       The Client.
@@ -54,7 +53,6 @@ native CallAdmin_SetClientImmune(client, bool:immune);
  * @noreturn
  */
 native CallAdmin_SetClientOnBlacklist(client, bool:add);
-
 
 
 
