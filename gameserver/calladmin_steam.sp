@@ -320,7 +320,7 @@ ParseGroupIDList()
 		len = strlen(sReadBuffer);
 		for(new i; i < len; i++)
 		{
-			if(sReadBuffer[i] == '/')
+			if(sReadBuffer[i] == ' ' || sReadBuffer[i] == '/')
 			{
 				sReadBuffer[i] = '\0';
 				
