@@ -43,13 +43,13 @@
 	"CallAdmin_AdvertMessageSingular"
 	{
 		"#format"	"{1:d}"
-		"en"		"There is {1} admin available for calling, type !call or /call in chat to report a player"
+		"en"		"There is {1} admin available, type !call or /call in chat to report a player"
 		"de"		"Es ist {1} Admin verfügbar, tippe !call oder /call in den Chat um einen Spieler zu melden"
 	}
 	"CallAdmin_AdvertMessagePlural"
 	{
 		"#format"	"{1:d}"
-		"en"		"There are {1} admins available for calling, type !call or /call in chat to report a player"
+		"en"		"There are {1} admins available, type !call or /call in chat to report a player"
 		"de"		"Es sind {1} Admins verfügbar, tippe !call oder /call in den Chat um einen Spieler zu melden"
 	}
 	"CallAdmin_OwnReason"
@@ -69,7 +69,7 @@
 	}
 	"CallAdmin_OwnReasonTooShort"
 	{
-		"en"		"Your banreason was too short, try again"
+		"en"		"Your banreason is too short, try again"
 		"de"		"Dein Bangrund ist zu kurz, versuche es erneut"
 	}
 	"CallAdmin_ConfirmCall"
