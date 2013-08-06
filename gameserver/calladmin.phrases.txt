@@ -4,24 +4,24 @@
 	{
 		"#format"	"{1:d}"
 		"en"		"You are not allowed to use this command for the next {1} seconds"
-		"de"		"Du darfst diesen Command nicht innerhalb der nächsten {1} Sekunden benutzen"
+		"de"		"Du darfst diesen Befehl nicht innerhalb der nächsten {1} Sekunden benutzen"
 	}
 	"CallAdmin_HasReported"
 	{
 		"#format"	"{1:s},{2:s},{3:s}"
 		"en"		"{1} reported {2} for {3}"
-		"de"		"{1} hat {2} wegen {3} reported"
+		"de"		"{1} hat {2} wegen {3} gemeldet"
 	}
 	"CallAdmin_YouHaveReported"
 	{
 		"#format"	"{1:s},{2:s}"
 		"en"		"You have reported {1} for {2}"
-		"de"		"Du hast {1} wegen {2} reportet"
+		"de"		"Du hast {1} wegen {2} gemeldet"
 	}
 	"CallAdmin_NoPlayers"
 	{
 		"en"		"There are no players you can report at this time"
-		"de"		"Es sind derzeit keine Spieler vorhanden die du reporten kannst"
+		"de"		"Es sind derzeit keine Spieler vorhanden die du Melden kannst"
 	}
 	"CallAdmin_NotInGame"
 	{
@@ -31,26 +31,26 @@
 	"CallAdmin_SelectClient"
 	{
 		"en"		"Select a client to report"
-		"de"		"Wähle einen Spieler zum reporten"
+		"de"		"Wähle einen Spieler zum Melden"
 	}
 	"CallAdmin_SelectReason"
 	{
 		"#format"	"{1:N}"
 		"en"		"Select a reason to report {1}"
-		"de"		"Wähle einen Grund um {1} zu reporten"
+		"de"		"Wähle einen Grund um {1} zu Melden"
 	}
 	// Used when exactly 1 admin is available
 	"CallAdmin_AdvertMessageSingular"
 	{
 		"#format"	"{1:d}"
 		"en"		"There is {1} admin available for calling, type !call or /call in chat to report a player"
-		"de"		"Es ist {1} Admin zum reporten verfügbar, tippe !call oder /call in den Chat um einen Spieler zu reporten"
+		"de"		"Es ist {1} Admin verfügbar, tippe !call oder /call in den Chat um einen Spieler zu Melden"
 	}
 	"CallAdmin_AdvertMessagePlural"
 	{
 		"#format"	"{1:d}"
 		"en"		"There are {1} admins available for calling, type !call or /call in chat to report a player"
-		"de"		"Es sind {1} Admins zum reporten verfügbar, tippe !call oder /call in den Chat um einen Spieler zu reporten"
+		"de"		"Es sind {1} Admins verfügbar, tippe !call oder /call in den Chat um einen Spieler zu Melden"
 	}
 	"CallAdmin_OwnReason"
 	{
@@ -65,12 +65,12 @@
 	"CallAdmin_CallAborted"
 	{
 		"en"		"Your call has been aborted"
-		"de"		"Dein Request wurde abgebrochen"
+		"de"		"Der Meldevorgang wurde abgebrochen"
 	}
 	"CallAdmin_OwnReasonTooShort"
 	{
 		"en"		"Your banreason was too short, try again"
-		"de"		"Dein Bangrund war zu kurz, versuche es erneut"
+		"de"		"Dein Bangrund ist zu kurz, versuche es erneut"
 	}
 	"CallAdmin_ConfirmCall"
 	{
@@ -90,17 +90,17 @@
 	"CallAdmin_AlreadyReported"
 	{
 		"en"		"Player was already reported"
-		"de"		"Spieler wurde bereits reported"
+		"de"		"Spieler wurde bereits gemeldet"
 	}
 	"CallAdmin_IngameAdminNotified"
 	{
 		"en"		"An admin inGame was notified about your report"
-		"de"		"Ein Admin inGame wurde über deinen Report benachrichtigt"
+		"de"		"Ein Admin inGame wurde über deine Meldung benachrichtigt"
 	}
 	"CallAdmin_AdminNotification"
 	{
 		"#format"	"{1:N},{2:N},{3:s}"
 		"en"		"Player {1} reported {2} for {3}"
-		"de"		"Spieler {1} hat {2} wegen {3} reported"
+		"de"		"Spieler {1} hat {2} wegen {3} gemeldet"
 	}
 }
