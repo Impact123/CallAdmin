@@ -21,7 +21,7 @@
 	"CallAdmin_NoPlayers"
 	{
 		"en"		"There are no players you can report at this time"
-		"de"		"Es sind derzeit keine Spieler vorhanden die du Melden kannst"
+		"de"		"Es sind derzeit keine Spieler vorhanden die du melden kannst"
 	}
 	"CallAdmin_NotInGame"
 	{
@@ -37,20 +37,20 @@
 	{
 		"#format"	"{1:N}"
 		"en"		"Select a reason to report {1}"
-		"de"		"Wähle einen Grund um {1} zu Melden"
+		"de"		"Wähle einen Grund um {1} zu melden"
 	}
 	// Used when exactly 1 admin is available
 	"CallAdmin_AdvertMessageSingular"
 	{
 		"#format"	"{1:d}"
 		"en"		"There is {1} admin available for calling, type !call or /call in chat to report a player"
-		"de"		"Es ist {1} Admin verfügbar, tippe !call oder /call in den Chat um einen Spieler zu Melden"
+		"de"		"Es ist {1} Admin verfügbar, tippe !call oder /call in den Chat um einen Spieler zu elden"
 	}
 	"CallAdmin_AdvertMessagePlural"
 	{
 		"#format"	"{1:d}"
 		"en"		"There are {1} admins available for calling, type !call or /call in chat to report a player"
-		"de"		"Es sind {1} Admins verfügbar, tippe !call oder /call in den Chat um einen Spieler zu Melden"
+		"de"		"Es sind {1} Admins verfügbar, tippe !call oder /call in den Chat um einen Spieler zu melden"
 	}
 	"CallAdmin_OwnReason"
 	{
