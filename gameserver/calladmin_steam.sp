@@ -27,15 +27,12 @@
 #include <autoexecconfig>
 #include <messagebot>
 #include "calladmin"
+#include <socket>
 #include <regex>
 
 #undef REQUIRE_PLUGIN
 #include <updater>
 #pragma semicolon 1
-
-#undef REQUIRE_EXTENSIONS
-#include <socket>
-
 
 
 // This should be 128 KB which is more than enough
@@ -43,18 +40,17 @@
 #pragma dynamic 32768
 
 
+#define CALLADMIN_STEAM_AVAILABLE()      (GetFeatureStatus(FeatureType_Native, "CallAdminBot_ReportPlayer")   == FeatureStatus_Available)
+#define SOCKET_AVAILABLE()               (GetFeatureStatus(FeatureType_Native, "SocketCreate")                == FeatureStatus_Available)
+
+
 
 // Each array can have 150 items, this is hardcoded, bad things happen if you change this
 #define MAX_ITEMS 150
-#define MAX_LISTENERS 64
 
-// Updater
-#define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_steam.txt"
 
 
 // Global stuff
-new g_iListeners;
-
 new Handle:g_hVersion;
 
 new Handle:g_hSteamUsername;
@@ -63,32 +59,12 @@ new String:g_sSteamUsername[128];
 new Handle:g_hSteamPassword;
 new String:g_sSteamPassword[128];
 
-new Handle:g_hSteamSystem;
-new bool:g_bSteamSystem;
-
-new Handle:g_hSteamMagic;
-new String:g_sSteamMagic[64];
-
-new Handle:g_hSteamListenPort;
-new g_iSteamListenPort;
-
-new Handle:g_hSteamMasterIP;
-new String:g_sSteamMasterIP[32];
-
-new Handle:g_hSteamMasterPort;
-new g_iSteamMasterPort;
-
 new Handle:g_hSteamIDRegex;
 new Handle:g_hCommunityIDRegex;
 
 
 new String:g_sSteamIDConfigFile[PLATFORM_MAX_PATH];
 new String:g_sGroupIDConfigFile[PLATFORM_MAX_PATH];
-
-new Handle:g_hListenSocket = INVALID_HANDLE;
-new Handle:g_hRelaySocket = INVALID_HANDLE;
-new Handle:g_hRecipientsList = INVALID_HANDLE;
-
 
 
 
@@ -100,25 +76,16 @@ enum AuthStringType
 }
 
 
-enum Listener
-{
-	String:eMagicKey[64],
-	Handle:eRecipients,
-}
 
-
-new g_Listeners[MAX_LISTENERS][Listener];
-
-
-
-
+// Updater
+#define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_steam.txt"
 
 
 public Plugin:myinfo = 
 {
 	name = "CallAdmin: Steam module",
-	author = "Impact, Popoklopsi, Zephyrus",
-	description = "The Steammodule for CallAdmin",
+	author = "Impact, Popoklopsi",
+	description = "The steammodule for CallAdmin",
 	version = CALLADMIN_VERSION,
 	url = "http://gugyclan.eu"
 }
@@ -127,39 +94,8 @@ public Plugin:myinfo =
 
 
 
-
-public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
-{
-	MarkNativeAsOptional("GetUserMessageType");
-	MarkNativeAsOptional("SocketIsConnected");
-	MarkNativeAsOptional("SocketCreate");
-	MarkNativeAsOptional("SocketBind");
-	MarkNativeAsOptional("SocketConnect");
-	MarkNativeAsOptional("SocketDisconnect");
-	MarkNativeAsOptional("SocketListen");
-	MarkNativeAsOptional("SocketSend");
-	MarkNativeAsOptional("SocketSendTo");
-	MarkNativeAsOptional("SocketSetOption");
-	MarkNativeAsOptional("SocketSetReceiveCallback");
-	MarkNativeAsOptional("SocketSetSendqueueEmptyCallback");
-	MarkNativeAsOptional("SocketSetDisconnectCallback");
-	MarkNativeAsOptional("SocketSetErrorCallback");
-	MarkNativeAsOptional("SocketSetArg");
-	MarkNativeAsOptional("SocketGetHostName");
-
-	return APLRes_Success;
-}
-
-
-
-public Action:SteamTest(arg)
-{
-	CallAdmin_OnReportPost(0, 0, "TestReason");
-	return Plugin_Handled;
-}
 public OnPluginStart()
 {
-	RegServerCmd("steamtest", SteamTest);
 	// Path to the SteamID list
 	BuildPath(Path_SM, g_sSteamIDConfigFile, sizeof(g_sSteamIDConfigFile), "configs/calladmin_steam_steamidlist.cfg");
 	
@@ -184,29 +120,29 @@ public OnPluginStart()
 	
 	
 	
+	// Clear the recipients
+	MessageBot_ClearRecipients();
+	
+	// Read in all those steamids
+	ParseSteamIDList();
+	
+	// Read in all those groupids
+	ParseGroupIDList();
+	
+
+	
+	
 	AutoExecConfig_SetFile("plugin.calladmin_steam");
 	
 	g_hVersion       = AutoExecConfig_CreateConVar("sm_calladmin_steam_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	g_hSteamUsername = AutoExecConfig_CreateConVar("sm_calladmin_steam_username", "", "Your steam username", FCVAR_PLUGIN|FCVAR_PROTECTED);
 	g_hSteamPassword = AutoExecConfig_CreateConVar("sm_calladmin_steam_password", "", "Your steam password", FCVAR_PLUGIN|FCVAR_PROTECTED);
-
-	g_hSteamSystem = AutoExecConfig_CreateConVar("sm_calladmin_steam_system", "1", "1=Standalone system, 0=Master-Relay System", FCVAR_PLUGIN);
-	g_hSteamMagic = AutoExecConfig_CreateConVar("sm_calladmin_steam_key", "", "A Key to identify this server on the steamidlist.", FCVAR_PLUGIN|FCVAR_PROTECTED);
-	g_hSteamListenPort = AutoExecConfig_CreateConVar("sm_calladmin_steam_listen_port", "0", "Only for master server: Port on which receive all reports", FCVAR_PLUGIN|FCVAR_PROTECTED);
-	g_hSteamMasterIP = AutoExecConfig_CreateConVar("sm_calladmin_steam_master_ip", "", "Only for relay server: IP of the master gameserver", FCVAR_PLUGIN);
-	g_hSteamMasterPort = AutoExecConfig_CreateConVar("sm_calladmin_steam_master_port", "", "Only for relay server: Listening Port of the master server", FCVAR_PLUGIN|FCVAR_PROTECTED);
 	
 	
 	AutoExecConfig(true, "plugin.calladmin_steam");
 	AutoExecConfig_CleanFile();
-}
-
-
-
-
-public OnConfigsExecuted()
-{
-	// Read the config
+	
+	
 	SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
 	
@@ -215,82 +151,7 @@ public OnConfigsExecuted()
 	
 	GetConVarString(g_hSteamPassword, g_sSteamPassword, sizeof(g_sSteamPassword));
 	HookConVarChange(g_hSteamPassword, OnCvarChanged);
-
-	GetConVarString(g_hSteamMagic, g_sSteamMagic, sizeof(g_sSteamMagic));
-	GetConVarString(g_hSteamMasterIP, g_sSteamMasterIP, sizeof(g_sSteamMasterIP));
-
-	g_bSteamSystem = GetConVarBool(g_hSteamSystem);
-	g_iSteamListenPort = GetConVarInt(g_hSteamListenPort);
-	g_iSteamMasterPort = GetConVarInt(g_hSteamMasterPort);
-
-	
-
-	// Read in all those steamids
-	ParseSteamIDList();
-	
-	// Read in all those groupids
-	ParseGroupIDList();
-
-
-
-	if (!g_bSteamSystem)
-	{
-		// We need the socket extension if we use master-relay system
-		if(GetExtensionFileStatus("socket.ext") != 1)
-		{
-			CallAdmin_LogMessage("Failed to find running Socket extension for Master-Relay System. Falling back to Standalone System!");
-
-			g_bSteamSystem = true;
-
-			return;
-		}
-
-		if(g_iSteamListenPort != 0)
-		{
-			// Create a master socket
-			if(g_hListenSocket == INVALID_HANDLE)
-			{
-				SetupMasterSocket();
-			}
-		}
-		else if(g_iSteamMasterPort != 0 && strlen(g_sSteamMasterIP) > 1)
-		{
-			// Create a relay system here
-			if(g_hRelaySocket == INVALID_HANDLE)
-			{
-				if (!SetupRelaySocket())
-				{
-					CreateTimer(30.0, Relay_Reconnect, TIMER_REPEAT);
-				}
-			}
-		}
-		else
-		{
-			// Falling back to normal system
-			CallAdmin_LogMessage("Find incorrect settings for a Master-Relay System. Falling back to Standalone System!");
-
-			g_bSteamSystem = true;
-		}
-	}
 }
-
-
-
-
-// Close socket on end
-public OnPluginEnd()
-{
-	if(g_hListenSocket != INVALID_HANDLE)
-	{
-		CloseHandle(g_hListenSocket);
-	}
-
-	if(g_hRelaySocket != INVALID_HANDLE)
-	{
-		CloseHandle(g_hRelaySocket);
-	}
-}
-
 
 
 
@@ -324,6 +185,7 @@ CreateSteamIDList()
 
 
 
+
 ParseSteamIDList()
 {
 	new Handle:hFile;
@@ -337,95 +199,37 @@ ParseSteamIDList()
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for reading");
 		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for reading");
 	}
-
-	// Recipients list
-	if (g_hRecipientsList == INVALID_HANDLE)
-	{
-		g_hRecipientsList = CreateArray(64);
-	}
 	
 	
 	// Buffer must be a little bit bigger to have enough room for possible comments
 	decl String:sReadBuffer[128];
-	new bool:isName;
-	new Handle:current = g_hRecipientsList;
 
+	
 	new len;
 	while(!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
 	{
-		isName = false;
-
 		if(sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
 		{
 			continue;
-		}
-
-		if(sReadBuffer[0] == '[')
-		{
-			if (g_bSteamSystem)
-			{
-				continue;
-			}
-			else
-			{
-				isName = true;
-			}
 		}
 		
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\n", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\r", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\t", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
-		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "[", "");
+		
 		
 		
 		// Support for comments on end of line
 		len = strlen(sReadBuffer);
 		for(new i; i < len; i++)
 		{
-			if(sReadBuffer[i] == ' ' || sReadBuffer[i] == '/' || sReadBuffer[i] == ']')
+			if(sReadBuffer[i] == ' ' || sReadBuffer[i] == '/')
 			{
 				sReadBuffer[i] = '\0';
 				
 				break;
 			}
-		}
-
-
-		if (isName)
-		{
-			if (StrEqual(g_sSteamMagic, sReadBuffer, false))
-			{
-				current = g_hRecipientsList;
-
-				continue;
-			}
-
-
-			new bool:found = false;
-
-			// Find equal name
-			for (new i=0; i < g_iListeners; i++)
-			{
-				if (StrEqual(g_Listeners[i][eMagicKey], sReadBuffer, false))
-				{
-					current = g_Listeners[i][eRecipients];
-					found = true;
-
-					break;
-				}
-			}
-
-			if (!found && g_iListeners < MAX_LISTENERS)
-			{
-				Format(g_Listeners[g_iListeners][eMagicKey], 64, sReadBuffer);
-
-				current = g_Listeners[g_iListeners][eRecipients] = CreateArray(64);
-
-				g_iListeners++;
-			}
-
-			continue;
 		}
 		
 		
@@ -448,8 +252,8 @@ ParseSteamIDList()
 		}
 		
 		
-		// Add to Array
-		PushArrayString(current, sReadBuffer);
+		// Add as recipient
+		MessageBot_AddRecipient(sReadBuffer);
 	}
 	
 	CloseHandle(hFile);
@@ -491,25 +295,11 @@ ParseGroupIDList()
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for reading");
 		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for reading");
 	}
-
-	if(GetExtensionFileStatus("socket.ext") != 1)
-	{
-		CallAdmin_LogMessage("Failed to load GroupID list. Extension socket is missing!");
-
-		return;
-	}
-
-	// Recipients list
-	if (g_hRecipientsList == INVALID_HANDLE)
-	{
-		g_hRecipientsList = CreateArray(64);
-	}
 	
 	
 	// Buffer must be a little bit bigger to have enough room for possible comments
 	decl String:sReadBuffer[128];
-	new bool:isName;
-	new Handle:current = g_hRecipientsList;
+
 	
 	new len;
 	while(!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
@@ -518,31 +308,19 @@ ParseGroupIDList()
 		{
 			continue;
 		}
-
-		if(sReadBuffer[0] == '[')
-		{
-			if (g_bSteamSystem)
-			{
-				continue;
-			}
-			else
-			{
-				isName = true;
-			}
-		}
 		
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\n", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\r", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "\t", "");
 		ReplaceString(sReadBuffer, sizeof(sReadBuffer), " ", "");
-		ReplaceString(sReadBuffer, sizeof(sReadBuffer), "[", "");
+		
 		
 		
 		// Support for comments on end of line
 		len = strlen(sReadBuffer);
 		for(new i; i < len; i++)
 		{
-			if(sReadBuffer[i] == ' ' || sReadBuffer[i] == '/' || sReadBuffer[i] == ']')
+			if(sReadBuffer[i] == ' ' || sReadBuffer[i] == '/')
 			{
 				sReadBuffer[i] = '\0';
 				
@@ -553,43 +331,6 @@ ParseGroupIDList()
 				break;
 			}
 		}
-
-
-		if (isName)
-		{
-			if (StrEqual(g_sSteamMagic, sReadBuffer, false))
-			{
-				current = g_hRecipientsList;
-
-				continue;
-			}
-
-
-			new bool:found = false;
-
-			// Find equal name
-			for (new i=0; i < g_iListeners; i++)
-			{
-				if (StrEqual(g_Listeners[i][eMagicKey], sReadBuffer, false))
-				{
-					current = g_Listeners[i][eRecipients];
-					found = true;
-
-					break;
-				}
-			}
-
-			if (!found && g_iListeners < MAX_LISTENERS)
-			{
-				Format(g_Listeners[g_iListeners][eMagicKey], 64, sReadBuffer);
-
-				current = g_Listeners[g_iListeners][eRecipients] = CreateArray(64);
-
-				g_iListeners++;
-			}
-			
-			continue;
-		}
 		
 		
 		if(len < 3 || len > 64)
@@ -599,7 +340,7 @@ ParseGroupIDList()
 		
 		
 		// Go get them members
-		FetchGroupMembers(sReadBuffer, current);
+		FetchGroupMembers(sReadBuffer);
 	}
 	
 	CloseHandle(hFile);
@@ -656,6 +397,8 @@ public OnLibraryAdded(const String:name[])
 
 public CallAdmin_OnReportPost(client, target, const String:reason[])
 {
+	MessageBot_SetLoginData(g_sSteamUsername, g_sSteamPassword);
+	
 	decl String:sClientName[MAX_NAME_LENGTH];
 	decl String:sClientID[21];
 	
@@ -663,19 +406,15 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	decl String:sTargetID[21];
 	
 	decl String:sServerIP[16];
-	decl String:sServerPort[16];
-	decl String:sServerName[128];
 	new serverPort;
+	decl String:sServerName[128];
 	
 	CallAdmin_GetHostIP(sServerIP, sizeof(sServerIP));
 	serverPort = CallAdmin_GetHostPort();
 	CallAdmin_GetHostName(sServerName, sizeof(sServerName));
-
-	IntToString(serverPort, sServerPort, sizeof(sServerPort));
-
 	
 	// Reporter wasn't a real client (initiated by a module)
-	if(client == REPORTER_CONSOLE || client == 0)
+	if(client == REPORTER_CONSOLE)
 	{
 		strcopy(sClientName, sizeof(sClientName), "Server/Console");
 		strcopy(sClientID, sizeof(sClientID), "Server/Console");
@@ -685,281 +424,20 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 		GetClientName(client, sClientName, sizeof(sClientName));
 		GetClientAuthString(client, sClientID, sizeof(sClientID));
 	}
-
-	if(target == 0)
-	{
-		strcopy(sTargetName, sizeof(sTargetName), "-/Console");
-		strcopy(sTargetID, sizeof(sTargetID), "-/Console");
-	}
-	else
-	{
-		GetClientName(target, sTargetName, sizeof(sTargetName));
-		GetClientAuthString(target, sTargetID, sizeof(sTargetID));
-	}
 	
-	//GetClientName(target, sTargetName, sizeof(sTargetName));
-	//GetClientAuthString(target, sTargetID, sizeof(sTargetID));
+	GetClientName(target, sTargetName, sizeof(sTargetName));
+	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
 	
-	if (g_bSteamSystem || g_hRelaySocket == INVALID_HANDLE)
-	{
-		SendReport(reason, sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, g_sSteamMagic);
-	}
-	else
-	{
-		new iLength = strlen(g_sSteamMagic) + 640 + 9;
-		new String:m_szPacket[iLength];
-		new iIdx = 0;
-
-		iIdx += strcopy(m_szPacket[iIdx], iLength-iIdx, g_sSteamMagic) + 1;
-		iIdx += strcopy(m_szPacket[iIdx], iLength-iIdx, sServerName) + 1;
-		iIdx += strcopy(m_szPacket[iIdx], iLength-iIdx, sServerIP) + 1;
-		iIdx += strcopy(m_szPacket[iIdx], iLength-iIdx, sServerPort) + 1;
-		iIdx += strcopy(m_szPacket[iIdx], iLength-iIdx, sClientName) + 1;
-		iIdx += strcopy(m_szPacket[iIdx], iLength-iIdx, sClientID) + 1;
-		iIdx += strcopy(m_szPacket[iIdx], iLength-iIdx, sTargetName) + 1;
-		iIdx += strcopy(m_szPacket[iIdx], iLength-iIdx, sTargetID) + 1;
-		iIdx += strcopy(m_szPacket[iIdx], iLength-iIdx, reason) + 1;
-
-		SocketSend(g_hRelaySocket, m_szPacket, iIdx);
-	}
-}
-
-
-
-SendReport(const String:sReason[], const String:sServerName[], const String:sServerIP[], iServerPort, const String:sClientName[], const String:sClientID[], const String:sTargetName[], const String:sTargetID[], const String:sKey[])
-{
-	new Handle:hRecipients = INVALID_HANDLE;
-
-	// Find recipients
-	if (g_bSteamSystem || StrEqual(sKey, g_sSteamMagic, false))
-	{
-		hRecipients = g_hRecipientsList;
-
-	}
-	else
-	{
-		for (new i = 0; i < g_iListeners; i++)
-		{
-			if (StrEqual(g_Listeners[i][eMagicKey], sKey, false))
-			{
-				hRecipients = g_Listeners[i][eRecipients];
-
-				break;
-			}
-		}
-	}
-
-
-	// Add all recipients
-	if (hRecipients != INVALID_HANDLE)
-	{
-		decl String:sMessage[4096];
-
-		// Clear the recipients
-		MessageBot_ClearRecipients();
-
-		// Add Recipients
-		decl String:buffer[128];
-		new len = GetArraySize(hRecipients);
-
-		for(new i=0; i < len; i++)
-		{
-			GetArrayString(hRecipients, i, buffer, sizeof(buffer));
-			MessageBot_AddRecipient(buffer);
-		}
-
-		Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s", sServerName, sServerIP, iServerPort, sClientName, sClientID, sTargetName, sTargetID, sReason);
-
-		MessageBot_SetLoginData(g_sSteamUsername, g_sSteamPassword);
-		MessageBot_SendMessage(OnMessageResultReceived, sMessage);
-	}
+	decl String:sMessage[4096];
+	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s", sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, reason);
+							 
+	MessageBot_SendMessage(OnMessageResultReceived, sMessage);
 }
 
 
 
 
-SetupMasterSocket()
-{
-	decl String:sServerIP[16];
-	
-	CallAdmin_GetHostIP(sServerIP, sizeof(sServerIP));
-
-
-	g_hListenSocket = SocketCreate(SOCKET_TCP, Master_SocketError);
-
-	if(!SocketBind(g_hListenSocket, sServerIP, g_iSteamListenPort))
-	{
-		CallAdmin_LogMessage("Failed to bind socket to %s:%d", sServerIP, g_iSteamListenPort);
-		CloseHandle(g_hListenSocket);
-
-		return;
-	}
-
-	SocketListen(g_hListenSocket, Master_SocketIncoming);
-}
-
-
-public Master_SocketIncoming(Handle:socket, Handle:newSocket, String:remoteIP[], remotePort, any:data)
-{
-	SocketSetReceiveCallback(newSocket, Master_ChildSocketReceive);
-	SocketSetDisconnectCallback(newSocket, Master_ChildSocketDisconnected);
-	SocketSetErrorCallback(newSocket, Master_ChildSocketError);
-}
-
-
-public Master_ChildSocketReceive(Handle:socket, String:receiveData[], const dataSize, any:data)
-{
-	new iTerminators = 0;
-
-	decl String:sMagic[64];
-	decl String:sServerName[128];
-	decl String:sServerIP[16];
-	decl String:sServerPort[16];
-	decl String:sClientName[64];
-	decl String:sClientID[32];
-	decl String:sTargetName[64];
-	decl String:sTargetID[32];
-	decl String:sReason[256];
-
-
-	for(new i=0; i < dataSize; ++i)
-	{
-		if(receiveData[i] == 0)
-		{
-			++iTerminators;
-		}
-	}
-
-	if(iTerminators != 9)
-	{
-		return;
-	}
-
-
-	new iIdx = 0;
-
-	strcopy(sMagic, sizeof(sMagic), receiveData[iIdx]);
-	iIdx += strlen(receiveData[iIdx]) + 1;
-	strcopy(sServerName, sizeof(sServerName), receiveData[iIdx]);
-	iIdx += strlen(receiveData[iIdx]) + 1;
-	strcopy(sServerIP, sizeof(sServerIP), receiveData[iIdx]);
-	iIdx += strlen(receiveData[iIdx]) + 1;
-	strcopy(sServerPort, sizeof(sServerPort), receiveData[iIdx]);
-	iIdx += strlen(receiveData[iIdx]) + 1;
-	strcopy(sClientName, sizeof(sClientName), receiveData[iIdx]);
-	iIdx += strlen(receiveData[iIdx]) + 1;
-	strcopy(sClientID, sizeof(sClientID), receiveData[iIdx]);
-	iIdx += strlen(receiveData[iIdx]) + 1;
-	strcopy(sTargetName, sizeof(sTargetName), receiveData[iIdx]);
-	iIdx += strlen(receiveData[iIdx]) + 1;
-	strcopy(sTargetID, sizeof(sTargetID), receiveData[iIdx]);
-	iIdx += strlen(receiveData[iIdx]) + 1;
-	strcopy(sReason, sizeof(sReason), receiveData[iIdx]);
-	iIdx += strlen(receiveData[iIdx]) + 1;
-
-
-	// Send the report
-	SendReport(sReason, sServerName, sServerIP, StringToInt(sServerPort), sClientName, sClientID, sTargetName, sTargetID, sMagic);
-}
-
-
-public Master_ChildSocketDisconnected(Handle:socket, any:hRecipients)
-{
-	CloseHandle(socket);
-}
-
-
-public Master_ChildSocketError(Handle:socket, const errorType, const errorNum, any:data)
-{
-	CallAdmin_LogMessage("Relay server socket error %d (errno %d)", errorType, errorNum);
-
-	CloseHandle(socket);
-}
-
-
-public Master_SocketError(Handle:socket, const errorType, const errorNum, any:data)
-{
-	CallAdmin_LogMessage("Master socket error %d (errno %d)", errorType, errorNum);
-	g_hListenSocket = INVALID_HANDLE;
-
-	CloseHandle(socket);
-}
-
-
-
-
-bool:SetupRelaySocket()
-{
-	g_hRelaySocket = SocketCreate(SOCKET_TCP, Relay_SocketError);
-
-	SocketConnect(g_hRelaySocket, Relay_SocketConnected, Relay_SocketReceive, Relay_SocketDisconnected, g_sSteamMasterIP, g_iSteamMasterPort);
-
-	if (g_hRelaySocket == INVALID_HANDLE || !SocketIsConnected(g_hRelaySocket))
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-public Relay_SocketConnected(Handle:socket, any:data)
-{
-}
-
-
-public Relay_SocketReceive(Handle:socket, String:receiveData[], const dataSize, any:data)
-{
-}
-
-
-public Relay_SocketDisconnected(Handle:socket, any:data)
-{
-	CallAdmin_LogMessage("Stopped relaying reports. Maybe master Server is down? Trying to reconnect...");
-	g_hRelaySocket = INVALID_HANDLE;
-
-	CloseHandle(socket);
-
-	CreateTimer(30.0, Relay_Reconnect, TIMER_REPEAT);
-}
-
-
-public Relay_SocketError(Handle:socket, const errorType, const errorNum, any:data)
-{
-	CallAdmin_LogMessage("Relay socket error %d (errno %d). Trying to reconnect...", errorType, errorNum);
-
-	g_hRelaySocket = INVALID_HANDLE;
-
-	CloseHandle(socket);
-
-
-	CreateTimer(30.0, Relay_Reconnect);
-}
-
-
-public Action:Relay_Reconnect(Handle:timer, any:data)
-{
-	if(g_iSteamMasterPort != 0 && strlen(g_sSteamMasterIP) > 1)
-	{
-		// Create a new relay system here
-		if(g_hRelaySocket == INVALID_HANDLE)
-		{
-			if (SetupRelaySocket())
-			{
-				CallAdmin_LogMessage("Relay socket is connected again!");
-
-				return Plugin_Stop;
-			}
-		}
-	}
-
-	return Plugin_Continue;
-}
-
-
-
-
-FetchGroupMembers(String:groupID[], Handle:current)
+FetchGroupMembers(String:groupID[])
 {
 	// Create a new socket
 	new Handle:Socket = SocketCreate(SOCKET_TCP, OnSocketError);
@@ -972,8 +450,8 @@ FetchGroupMembers(String:groupID[], Handle:current)
 	
 	
 
-	// Create a array
-	new Handle:array = CreateArray(64, 2);
+	// Create a datapack
+	new Handle:pack = CreateDataPack();
 	
 	
 	// Buffers
@@ -981,13 +459,12 @@ FetchGroupMembers(String:groupID[], Handle:current)
 	strcopy(sGroupID, sizeof(sGroupID), groupID);
 	
 	
-	// Write the data to the array
-	PushArrayString(array, sGroupID);
-	PushArrayCell(array, current);
+	// Write the data to the pack
+	WritePackString(pack, sGroupID);
 	
 	
-	// Set the array as argument to the callbacks, so we can read it out later
-	SocketSetArg(Socket, array);
+	// Set the pack as argument to the callbacks, so we can read it out later
+	SocketSetArg(Socket, pack);
 	
 	
 	// Connect
@@ -997,7 +474,7 @@ FetchGroupMembers(String:groupID[], Handle:current)
 
 
 
-public OnSocketConnect(Handle:socket, any:array)
+public OnSocketConnect(Handle:socket, any:pack)
 {
 	// If socket is connected, should be since this is the callback that is called if it is connected
 	if(SocketIsConnected(socket))
@@ -1007,15 +484,16 @@ public OnSocketConnect(Handle:socket, any:array)
 		decl String:sRequestPath[512];
 		decl String:sGroupID[64];
 		
-		new Handle:current;
-
+		
+		// Reset the pack
+		ResetPack(pack, false);
+		
 		
 		// Read data
-		GetArrayString(array, 0, sGroupID, sizeof(sGroupID));
-		current = GetArrayCell(array, 1);
-
-		// Close the array
-		CloseHandle(array);
+		ReadPackString(pack, sGroupID, sizeof(sGroupID));
+		
+		// Close the pack
+		CloseHandle(pack);
 		
 		
 		URLEncode(sGroupID, sizeof(sGroupID));
@@ -1030,7 +508,6 @@ public OnSocketConnect(Handle:socket, any:array)
 
 		
 		// Send the request
-		SocketSetArg(socket, current);
 		SocketSend(socket, sRequestString);
 	}
 }
@@ -1038,7 +515,7 @@ public OnSocketConnect(Handle:socket, any:array)
 
 
 
-public OnSocketReceive(Handle:socket, String:data[], const size, any:current) 
+public OnSocketReceive(Handle:socket, String:data[], const size, any:pack) 
 {
 	if(socket != INVALID_HANDLE)
 	{
@@ -1073,8 +550,8 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any:current)
 		
 		
 		ExplodeString(data[startindex], "<steamID64>", Split, sizeof(Split), sizeof(Split[]));
-			
-
+				
+		
 		// Run though Communityids
 		new splitsize = sizeof(Split);
 		new index;
@@ -1097,8 +574,8 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any:current)
 				// We might have a use for this later
 				strcopy(sTempID, sizeof(sTempID), Split[i]);
 				
-				// Add to array
-				PushArrayString(current, sTempID);
+				// Add as recipient
+				MessageBot_AddRecipient(sTempID);
 			}
 		}
 		
