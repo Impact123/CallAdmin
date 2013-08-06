@@ -44,7 +44,7 @@
 	{
 		"#format"	"{1:d}"
 		"en"		"There is {1} admin available for calling, type !call or /call in chat to report a player"
-		"de"		"Es ist {1} Admin verfügbar, tippe !call oder /call in den Chat um einen Spieler zu elden"
+		"de"		"Es ist {1} Admin verfügbar, tippe !call oder /call in den Chat um einen Spieler zu melden"
 	}
 	"CallAdmin_AdvertMessagePlural"
 	{
