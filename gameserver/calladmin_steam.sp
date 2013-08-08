@@ -482,7 +482,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 		// Buffers
 		decl String:sRequestString[1024];
 		decl String:sRequestPath[512];
-		decl String:sGroupID[64];
+		decl String:sGroupID[64 * 4];
 		
 		
 		// Reset the pack
