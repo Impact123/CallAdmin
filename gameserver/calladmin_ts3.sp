@@ -298,12 +298,12 @@ public OnSocketConnect(Handle:socket, any:pack)
 		
 		// Params
 		decl String:sClientID[21];
-		decl String:sClientName[MAX_NAME_LENGTH];
+		decl String:sClientName[MAX_NAME_LENGTH * 4];
 		
 		decl String:sTargetID[21];
-		decl String:sTargetName[MAX_NAME_LENGTH];
+		decl String:sTargetName[MAX_NAME_LENGTH * 4];
 		
-		decl String:sServerName[64];
+		decl String:sServerName[64 * 4];
 		decl String:sServerIP[16 + 5];
 		
 		
@@ -314,7 +314,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 		
 		
 		// Currently maximum 48 in length
-		decl String:sReason[REASON_MAX_LENGTH];
+		decl String:sReason[REASON_MAX_LENGTH * 4];
 		
 		
 		// Reset the pack
