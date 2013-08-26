@@ -274,7 +274,7 @@ CreateGroupIDList()
 		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for writing");
 	}
 	
-	WriteFileLine(hFile, "// List of group names, seperated by a new line");
+	WriteFileLine(hFile, "// List of group names (custom group url), seperated by a new line");
 	
 	CloseHandle(hFile);
 }
