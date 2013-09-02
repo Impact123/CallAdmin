@@ -366,6 +366,7 @@ public OnPluginStart()
 	
 	// Used for the own reason
 	AddCommandListener(ChatListener, "say");
+	AddCommandListener(ChatListener, "say2");
 	AddCommandListener(ChatListener, "say_team");
 	
 	
