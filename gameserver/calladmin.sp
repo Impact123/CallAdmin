@@ -1301,6 +1301,15 @@ public Action:ChatListener(client, const String:command[], argc)
 		}
 		
 		
+		// Already reported (race condition)
+		if(!LastReportedTimeCheck(g_iTarget[client]) )
+		{
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
+			
+			return Plugin_Handled;					
+		}
+		
+		
 		// Send the report
 		if(g_bConfirmCall)
 		{
