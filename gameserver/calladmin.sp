@@ -129,6 +129,7 @@ new Handle:g_hOnTrackerCountChangedForward;
 new Handle:g_hOnDrawTargetForward;
 new Handle:g_hOnAddToAdminCountForward;
 new Handle:g_hOnServerDataChangedForward;
+new Handle:g_hOnLogMessageForward;
 
 
 
@@ -264,6 +265,9 @@ public Native_LogMessage(Handle:plugin, numParams)
 	FormatNativeString(0, 1, 2, sizeof(sMessage), _, sMessage);
 	
 	LogToFileEx(g_sLogFile, "[%s] %s", sPluginName, sMessage);
+	
+	// Call the forward
+	Forward_OnLogMessage(plugin, sMessage);
 }
 
 
@@ -379,7 +383,7 @@ public OnPluginStart()
 	g_hOnDrawTargetForward          = CreateGlobalForward("CallAdmin_OnDrawTarget", ET_Event, Param_Cell, Param_Cell);
 	g_hOnAddToAdminCountForward     = CreateGlobalForward("CallAdmin_OnAddToAdminCount", ET_Event, Param_Cell);
 	g_hOnServerDataChangedForward   = CreateGlobalForward("CallAdmin_OnServerDataChanged", ET_Ignore, Param_Cell, Param_Cell, Param_String, Param_String);
-	
+	g_hOnLogMessageForward          = CreateGlobalForward("CallAdmin_OnLogMessage", ET_Ignore, Param_Cell, Param_String); 
 	
 	// Cookies
 	if(CLIENTPREFS_AVAILABLE())
@@ -657,6 +661,17 @@ Forward_OnServerDataChanged(Handle:convar, ServerData:type, const String:oldVal[
 	Call_PushCell(type);
 	Call_PushString(oldVal);
 	Call_PushString(newVal);
+	
+	Call_Finish();
+}
+
+
+
+Forward_OnLogMessage(Handle:plugin, const String:message[])
+{
+	Call_StartForward(g_hOnLogMessageForward);
+	Call_PushCell(plugin);
+	Call_PushString(message);
 	
 	Call_Finish();
 }

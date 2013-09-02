@@ -16,7 +16,7 @@
 #define REPORTER_CONSOLE 1679124
 
 
-/** Maximum size a reason string can be in lenght */
+/** Maximum size a reason string can be in length */
 #define REASON_MAX_LENGTH 128
 
 
@@ -219,6 +219,18 @@ native CallAdmin_GetHostPort();
  * @noreturn
  */
 native CallAdmin_LogMessage(const String:format[], any:...);
+
+
+
+
+/**
+ * Called when a message was logged to the calladmin logfile.
+ *
+ * @param plugin       Handle to the plugin which logged a message.
+ * @param message      Message which was logged.
+ * @noreturn
+ */
+forward CallAdmin_OnLogMessage(Handle:plugin, const String:message[]);
 
 
 
