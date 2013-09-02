@@ -52,6 +52,7 @@ public OnPluginStart()
 public Action:Command_Test(client, args)
 {
 	PrintToServer("Current trackercount: %d", CallAdmin_GetTrackersCount());
+	CallAdmin_LogMessage("Loggingtest");
 	
 	return Plugin_Handled;
 }
@@ -128,6 +129,16 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 public CallAdmin_OnRequestTrackersCountRefresh(&trackers)
 {
 	PrintToServer("Base plugin requested a tracker count from us");
+}
+
+
+
+public CallAdmin_OnLogMessage(Handle:plugin, const String:message[])
+{
+	new String:sPluginName[64];
+	GetPluginInfo(plugin, PlInfo_Name, sPluginName, sizeof(sPluginName));
+	
+	PrintToServer("Plugin: %s (handle: %x) logged a message: %s", sPluginName, plugin, message);
 }
 
 
