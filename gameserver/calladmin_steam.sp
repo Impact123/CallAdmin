@@ -143,6 +143,9 @@ public OnPluginStart()
 	AutoExecConfig_CleanFile();
 	
 	
+	LoadTranslations("calladmin_steam.phrases");
+	
+	
 	SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
 	
@@ -159,7 +162,7 @@ public OnMessageResultReceived(MessageBotResult:result, error)
 {
 	if(result != RESULT_NO_ERROR)
 	{
-		CallAdmin_LogMessage("Failed to send message, result was: (%d, %d)", result, error);
+		LogError("Failed to send message, result was: (%d, %d)", result, error);
 	}
 }
 
@@ -224,7 +227,7 @@ ParseSteamIDList()
 		len = strlen(sReadBuffer);
 		for(new i; i < len; i++)
 		{
-			if(sReadBuffer[i] == ' ' || sReadBuffer[i] == '/')
+			if(sReadBuffer[i] == '/')
 			{
 				sReadBuffer[i] = '\0';
 				
@@ -274,7 +277,7 @@ CreateGroupIDList()
 		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for writing");
 	}
 	
-	WriteFileLine(hFile, "// List of group names (custom group url), seperated by a new line");
+	WriteFileLine(hFile, "// List of group names, seperated by a new line");
 	
 	CloseHandle(hFile);
 }
@@ -320,7 +323,7 @@ ParseGroupIDList()
 		len = strlen(sReadBuffer);
 		for(new i; i < len; i++)
 		{
-			if(sReadBuffer[i] == ' ' || sReadBuffer[i] == '/')
+			if(sReadBuffer[i] == '/')
 			{
 				sReadBuffer[i] = '\0';
 				
@@ -429,8 +432,8 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
 	
 	decl String:sMessage[4096];
-	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s\nJoin server: steam://connect/%s:%d", sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, reason, sServerIP, serverPort);
-							 
+	Format(sMessage, sizeof(sMessage), "%t", "CallAdmin_SteamMessage", sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, reason);
+	
 	MessageBot_SendMessage(OnMessageResultReceived, sMessage);
 }
 
@@ -482,7 +485,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 		// Buffers
 		decl String:sRequestString[1024];
 		decl String:sRequestPath[512];
-		decl String:sGroupID[64 * 4];
+		decl String:sGroupID[64];
 		
 		
 		// Reset the pack
@@ -604,7 +607,7 @@ public OnSocketDisconnect(Handle:socket, any:pack)
 
 public OnSocketError(Handle:socket, const errorType, const errorNum, any:pack)
 {
-	CallAdmin_LogMessage("Socket Error: %d, %d", errorType, errorNum);
+	LogError("Socket Error: %d, %d", errorType, errorNum);
 	
 	if(socket != INVALID_HANDLE)
 	{
