@@ -143,6 +143,8 @@ public OnPluginStart()
 	AutoExecConfig_CleanFile();
 	
 	
+	LoadTranslations("calladmin_steam.phrases");
+	
 	SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
 	
@@ -429,8 +431,8 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
 	
 	decl String:sMessage[4096];
-	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s\nJoin server: steam://connect/%s:%d", sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, reason, sServerIP, serverPort);
-							 
+	Format(sMessage, sizeof(sMessage), "%t", "CallAdmin_SteamMessage", sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, reason);
+	
 	MessageBot_SendMessage(OnMessageResultReceived, sMessage);
 }
 
