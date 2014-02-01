@@ -40,8 +40,8 @@
 #pragma dynamic 32768
 
 
-#define CALLADMIN_STEAM_AVAILABLE()      (GetFeatureStatus(FeatureType_Native, "MessageBot_SendMessage")      == FeatureStatus_Available)
-#define SOCKET_AVAILABLE()               (GetFeatureStatus(FeatureType_Native, "SocketCreate")                == FeatureStatus_Available)
+#define CALLADMIN_STEAM_METHOD_AVAILABLE()      (GetFeatureStatus(FeatureType_Native, "MessageBot_SetSendMethod")      == FeatureStatus_Available)
+#define SOCKET_AVAILABLE()                      (GetFeatureStatus(FeatureType_Native, "SocketCreate")                  == FeatureStatus_Available)
 
 
 
@@ -161,13 +161,16 @@ public OnPluginStart()
 	HookConVarChange(g_hSteamMethod, OnCvarChanged);
 
 
-	if (g_bSteamMethod)
+	if(CALLADMIN_STEAM_METHOD_AVAILABLE)
 	{
-		MessageBot_SetSendMethod(SEND_METHOD_STEAMWORKS);
-	}
-	else
-	{
-		MessageBot_SetSendMethod(SEND_METHOD_ONLINEAPI);
+		if(g_bSteamMethod)
+		{
+			MessageBot_SetSendMethod(SEND_METHOD_STEAMWORKS);
+		}
+		else
+		{
+			MessageBot_SetSendMethod(SEND_METHOD_ONLINEAPI);
+		}
 	}
 }
 
@@ -385,13 +388,16 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	{
 		g_bSteamMethod = GetConVarBool(g_hSteamMethod);
 
-		if (g_bSteamMethod)
+		if(CALLADMIN_STEAM_METHOD_AVAILABLE)
 		{
-			MessageBot_SetSendMethod(SEND_METHOD_STEAMWORKS);
-		}
-		else
-		{
-			MessageBot_SetSendMethod(SEND_METHOD_ONLINEAPI);
+			if(g_bSteamMethod)
+			{
+				MessageBot_SetSendMethod(SEND_METHOD_STEAMWORKS);
+			}
+			else
+			{
+				MessageBot_SetSendMethod(SEND_METHOD_ONLINEAPI);
+			}
 		}
 	}
 }
