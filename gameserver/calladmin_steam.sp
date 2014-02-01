@@ -40,7 +40,7 @@
 #pragma dynamic 32768
 
 
-#define CALLADMIN_STEAM_AVAILABLE()      (GetFeatureStatus(FeatureType_Native, "CallAdminBot_ReportPlayer")   == FeatureStatus_Available)
+#define CALLADMIN_STEAM_AVAILABLE()      (GetFeatureStatus(FeatureType_Native, "MessageBot_SendMessage")      == FeatureStatus_Available)
 #define SOCKET_AVAILABLE()               (GetFeatureStatus(FeatureType_Native, "SocketCreate")                == FeatureStatus_Available)
 
 
@@ -52,6 +52,10 @@
 
 // Global stuff
 new Handle:g_hVersion;
+
+new Handle:g_hSteamMethod;
+new bool:g_bSteamMethod;
+
 
 new Handle:g_hSteamUsername;
 new String:g_sSteamUsername[128];
@@ -135,6 +139,7 @@ public OnPluginStart()
 	AutoExecConfig_SetFile("plugin.calladmin_steam");
 	
 	g_hVersion       = AutoExecConfig_CreateConVar("sm_calladmin_steam_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hSteamMethod   = AutoExecConfig_CreateConVar("sm_calladmin_steam_method", "1", "1 = Use Opensteamworks to send message, 0 = Use Steam Web API to send message", FCVAR_PLUGIN);
 	g_hSteamUsername = AutoExecConfig_CreateConVar("sm_calladmin_steam_username", "", "Your steam username", FCVAR_PLUGIN|FCVAR_PROTECTED);
 	g_hSteamPassword = AutoExecConfig_CreateConVar("sm_calladmin_steam_password", "", "Your steam password", FCVAR_PLUGIN|FCVAR_PROTECTED);
 	
@@ -151,6 +156,19 @@ public OnPluginStart()
 	
 	GetConVarString(g_hSteamPassword, g_sSteamPassword, sizeof(g_sSteamPassword));
 	HookConVarChange(g_hSteamPassword, OnCvarChanged);
+	
+	g_bSteamMethod = GetConVarBool(g_hSteamMethod);
+	HookConVarChange(g_hSteamMethod, OnCvarChanged);
+
+
+	if (g_bSteamMethod)
+	{
+		MessageBot_SetSendMethod(SEND_METHOD_STEAMWORKS);
+	}
+	else
+	{
+		MessageBot_SetSendMethod(SEND_METHOD_ONLINEAPI);
+	}
 }
 
 
@@ -363,6 +381,19 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	{
 		GetConVarString(g_hSteamPassword, g_sSteamPassword, sizeof(g_sSteamPassword));
 	}
+	else if(cvar == g_hSteamMethod)
+	{
+		g_bSteamMethod = GetConVarBool(g_hSteamMethod);
+
+		if (g_bSteamMethod)
+		{
+			MessageBot_SetSendMethod(SEND_METHOD_STEAMWORKS);
+		}
+		else
+		{
+			MessageBot_SetSendMethod(SEND_METHOD_ONLINEAPI);
+		}
+	}
 }
 
 
@@ -386,10 +417,10 @@ public OnAllPluginsLoaded()
 
 public OnLibraryAdded(const String:name[])
 {
-    if(StrEqual(name, "updater"))
-    {
-        Updater_AddPlugin(UPDATER_URL);
-    }
+	if(StrEqual(name, "updater"))
+	{
+		Updater_AddPlugin(UPDATER_URL);
+	}
 }
 
 
