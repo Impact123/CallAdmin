@@ -161,7 +161,7 @@ public OnPluginStart()
 	HookConVarChange(g_hSteamMethod, OnCvarChanged);
 
 
-	if(CALLADMIN_STEAM_METHOD_AVAILABLE)
+	if(CALLADMIN_STEAM_METHOD_AVAILABLE())
 	{
 		if(g_bSteamMethod)
 		{
@@ -388,7 +388,7 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	{
 		g_bSteamMethod = GetConVarBool(g_hSteamMethod);
 
-		if(CALLADMIN_STEAM_METHOD_AVAILABLE)
+		if(CALLADMIN_STEAM_METHOD_AVAILABLE())
 		{
 			if(g_bSteamMethod)
 			{
