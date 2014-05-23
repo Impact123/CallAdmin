@@ -40,7 +40,7 @@ $helpers = new CallAdmin_Helpers();
 
 
 // Key set and no key given or key is wrong
-if(!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
+if (!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
 	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Ts3");
 }
@@ -58,12 +58,12 @@ try
 	$count = 0;
 	$uid  = "";
 	$name = "";
-	foreach($ts3_VirtualServer->clientList() as $ts3_Client)
+	foreach ($ts3_VirtualServer->clientList() as $ts3_Client)
 	{
 		$uid  = $helpers->_xmlentities((string)$ts3_Client['client_unique_identifier']);
 		$name = $helpers->_xmlentities((string)$ts3_Client['client_nickname']);
 		
-		if($uid == "ServerQuery")
+		if ($uid == "ServerQuery")
 		{
 			continue;
 		}

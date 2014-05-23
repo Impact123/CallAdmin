@@ -105,7 +105,7 @@ class CallAdmin_Helpers
 	 */
 	public function printXmlError($error, $tag)
 	{
-		if(!headers_sent())
+		if (!headers_sent())
 		{
 			header("Content-type: text/xml; charset=utf-8"); 
 		}
@@ -132,17 +132,17 @@ class CallAdmin_Helpers
 		$result = '';
 		
 		// Key is in array and a server key is set for it
-		if(!is_array($serverKeys) || !array_key_exists($access_key, $serverKeys) || !isset($serverKeys[$access_key]) || count($serverKeys[$access_key]) < 1)
+		if (!is_array($serverKeys) || !array_key_exists($access_key, $serverKeys) || !isset($serverKeys[$access_key]) || count($serverKeys[$access_key]) < 1)
 		{
 			return false;
 		}
 		
 		// Loop through server keys
-		foreach($serverKeys[$access_key] as $serverKey)
+		foreach ($serverKeys[$access_key] as $serverKey)
 		{
-			if(strlen($serverKey) > 0)
+			if (strlen($serverKey) > 0)
 			{
-				if(strlen($result) < 1)
+				if (strlen($result) < 1)
 				{
 					$result = '\''.$serverKey.'\'';
 				}
@@ -154,7 +154,7 @@ class CallAdmin_Helpers
 		}
 
 		// Valid result?
-		if(strlen($result) < 1)
+		if (strlen($result) < 1)
 		{
 			return false;
 		}
@@ -177,20 +177,20 @@ class CallAdmin_Helpers
 		$result = array();
 		
 		// serverKeys is array
-		if(!is_array($serverKeys))
+		if (!is_array($serverKeys))
 		{
 			return false;
 		}
 		
 		
 		// Loop through server keys
-		foreach($serverKeys as $key => $value)
+		foreach ($serverKeys as $key => $value)
 		{
-			if(is_array($value))
+			if (is_array($value))
 			{
-				foreach($value as $serverKey)
+				foreach ($value as $serverKey)
 				{
-					if($serverKey != '' && !in_array($serverKey, $result))
+					if ($serverKey != '' && !in_array($serverKey, $result))
 					{
 						$result[] = $serverKey;
 					}
@@ -199,7 +199,7 @@ class CallAdmin_Helpers
 		}
 
 		// Valid result?
-		if(empty($result))
+		if (empty($result))
 		{
 			return false;
 		}

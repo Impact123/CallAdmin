@@ -40,13 +40,13 @@ $helpers = new CallAdmin_Helpers();
 
 
 // Key set and no key given or key is wrong
-if(!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
+if (!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
 	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Ts3");
 }
 
 
-if(!isset($_GET['targetid']) 
+if (!isset($_GET['targetid']) 
 		|| !isset($_GET['targetname'])
 		|| !isset($_GET['targetreason'])
 		|| !isset($_GET['clientid'])
@@ -69,7 +69,7 @@ $serverIP     = $_GET['serverip'];
 
 
 $targetCommBB = "Invalid";
-if($helpers->IsValidSteamID($targetID))
+if ($helpers->IsValidSteamID($targetID))
 {
 	$targetCommID = $helpers->SteamIDToComm($targetID);
 	$targetCommBB = "[url=http://steamcommunity.com/profiles/" . $targetCommID . "]$targetID" . "[/url]";
@@ -77,7 +77,7 @@ if($helpers->IsValidSteamID($targetID))
 
 
 $clientCommBB = "Invalid";
-if($helpers->IsValidSteamID($clientID))
+if ($helpers->IsValidSteamID($clientID))
 {
 	$clientCommID = $helpers->SteamIDToComm($clientID);
 	$clientCommBB = "[url=http://steamcommunity.com/profiles/" . $clientCommID . "]$clientID" . "[/url]";
@@ -96,14 +96,14 @@ try
 	
 	$uid  = "";
 	//$name = "";
-	foreach($ts3_VirtualServer->clientList() as $ts3_Client)
+	foreach ($ts3_VirtualServer->clientList() as $ts3_Client)
 	{
 		$uid = (string)$ts3_Client['client_unique_identifier'];
 		//$name = (string)$ts3_Client['client_nickname'];
 		
 		
 		// Is listed as admin, go send him a message
-		if(in_array($uid, $access_keys[$_GET['key']]))
+		if (in_array($uid, $access_keys[$_GET['key']]))
 		{
 			$ts3_Client->message("----------------------------------------------------");
 			$ts3_Client->message("[CallAdmin] New report on:   $serverName ($serverIP) $connect");
