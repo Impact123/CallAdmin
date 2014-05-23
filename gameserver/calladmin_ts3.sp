@@ -133,17 +133,17 @@ PreFormatUrl()
 	
 	
 	// Strip http and such stuff here
-	if(StrContains(g_sRealUrl, "http://") == 0)
+	if (StrContains(g_sRealUrl, "http://") == 0)
 	{
 		ReplaceString(g_sRealUrl, sizeof(g_sRealUrl), "http://", "");
 	}
 
-	if(StrContains(g_sRealUrl, "https://") == 0)
+	if (StrContains(g_sRealUrl, "https://") == 0)
 	{
 		ReplaceString(g_sRealUrl, sizeof(g_sRealUrl), "https://", "");
 	}
 	
-	if(StrContains(g_sRealUrl, "www.") == 0)
+	if (StrContains(g_sRealUrl, "www.") == 0)
 	{
 		ReplaceString(g_sRealUrl, sizeof(g_sRealUrl), "www.", "");
 	}
@@ -152,7 +152,7 @@ PreFormatUrl()
 	new index;
 	
 	// We strip from / of the url to get the path
-	if( (index = StrContains(g_sRealUrl, "/")) != -1 )
+	if ( (index = StrContains(g_sRealUrl, "/")) != -1 )
 	{
 		// Copy from there
 		strcopy(g_sRealPath, sizeof(g_sRealPath), g_sRealUrl[index]);
@@ -160,7 +160,7 @@ PreFormatUrl()
 		
 		// Strip the slash of the path if there is one
 		new len = strlen(g_sRealPath);
-		if(len > 0 && g_sRealPath[len - 1] == '/')
+		if (len > 0 && g_sRealPath[len - 1] == '/')
 		{
 			g_sRealPath[len -1] = '\0';
 		}
@@ -175,16 +175,16 @@ PreFormatUrl()
 
 public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue[])
 {
-	if(cvar == g_hVersion)
+	if (cvar == g_hVersion)
 	{
 		SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
 	}
-	else if(cvar == g_hUrl)
+	else if (cvar == g_hUrl)
 	{
 		GetConVarString(g_hUrl, g_sUrl, sizeof(g_sUrl));
 		PreFormatUrl();
 	}
-	else if(cvar == g_hKey)
+	else if (cvar == g_hKey)
 	{
 		GetConVarString(g_hKey, g_sKey, sizeof(g_sKey));
 	}
@@ -194,12 +194,12 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 
 public OnAllPluginsLoaded()
 {
-	if(!LibraryExists("calladmin"))
+	if (!LibraryExists("calladmin"))
 	{
 		SetFailState("CallAdmin not found");
 	}
 	
-	if(LibraryExists("updater"))
+	if (LibraryExists("updater"))
 	{
 		Updater_AddPlugin(UPDATER_URL);
 	}
@@ -209,7 +209,7 @@ public OnAllPluginsLoaded()
 
 public OnLibraryAdded(const String:name[])
 {
-    if(StrEqual(name, "updater"))
+    if (StrEqual(name, "updater"))
     {
         Updater_AddPlugin(UPDATER_URL);
     }
@@ -250,7 +250,7 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	
 	
 	// Reporter wasn't a real client (initiated by a module)
-	if(client == REPORTER_CONSOLE)
+	if (client == REPORTER_CONSOLE)
 	{
 		strcopy(sClientName, sizeof(sClientName), "Server/Console");
 		strcopy(sClientID, sizeof(sClientID), "Server/Console");
@@ -290,7 +290,7 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 public OnSocketConnect(Handle:socket, any:pack)
 {
 	// If socket is connected, should be since this is the callback that is called if it is connected
-	if(SocketIsConnected(socket))
+	if (SocketIsConnected(socket))
 	{
 		// Buffers
 		decl String:sRequestString[2048];
@@ -341,7 +341,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 		
 		
 		// Temp, for bots
-		if(strlen(sTargetID) < 1)
+		if (strlen(sTargetID) < 1)
 		{
 			Format(sTargetID, sizeof(sTargetID), "INVALID");
 		}
@@ -365,13 +365,13 @@ public OnSocketConnect(Handle:socket, any:pack)
 
 public OnSocketReceive(Handle:socket, String:data[], const size, any:pack) 
 {
-	if(socket != INVALID_HANDLE)
+	if (socket != INVALID_HANDLE)
 	{
 		// Check the response here and do something
 		
 		
 		// Close the socket
-		if(SocketIsConnected(socket))
+		if (SocketIsConnected(socket))
 		{
 			SocketDisconnect(socket);
 		}
@@ -382,7 +382,7 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any:pack)
 
 public OnSocketDisconnect(Handle:socket, any:pack)
 {
-	if(socket != INVALID_HANDLE)
+	if (socket != INVALID_HANDLE)
 	{
 		CloseHandle(socket);
 	}
@@ -394,7 +394,7 @@ public OnSocketError(Handle:socket, const errorType, const errorNum, any:pack)
 {
 	CallAdmin_LogMessage("Socket Error: %d, %d", errorType, errorNum);
 	
-	if(socket != INVALID_HANDLE)
+	if (socket != INVALID_HANDLE)
 	{
 		CloseHandle(socket);
 	}
@@ -407,7 +407,7 @@ public OnSocketError(Handle:socket, const errorType, const errorNum, any:pack)
 public OnSocketConnectCount(Handle:socket, any:pack)
 {
 	// If socket is connected, should be since this is the callback that is called if it is connected
-	if(SocketIsConnected(socket))
+	if (SocketIsConnected(socket))
 	{
 		// Buffers
 		decl String:sRequestString[2048];
@@ -433,13 +433,13 @@ public OnSocketConnectCount(Handle:socket, any:pack)
 // Onlinecount callback
 public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack) 
 {
-	if(socket != INVALID_HANDLE)
+	if (socket != INVALID_HANDLE)
 	{
 		// This fixes an bug on windowsservers
 		// The receivefunction for socket is getting called twice on these systems, once for the headers, and a second time for the body
 		// Because we know that our response should begin with <?xml and contains a steamid we can quit here and don't waste resources on the first response
 		// Other than that if the api is down, the request was malformed etcetera we don't waste resources for working with useless data
-		if(StrContains(data, "<?xml", false) == -1)
+		if (StrContains(data, "<?xml", false) == -1)
 		{
 			return;
 		}
@@ -453,12 +453,12 @@ public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack)
 		// Run though count
 		new splitsize = sizeof(Split);
 		new index;
-		for(new i; i < splitsize; i++)
+		for (new i; i < splitsize; i++)
 		{
-			if(strlen(Split[i]) > 0)
+			if (strlen(Split[i]) > 0)
 			{
 				// If we find something we split off at the searchresult, we then then only have the steamid
-				if( (index = StrContains(Split[i], "</onlineCount>", true)) != -1)
+				if ( (index = StrContains(Split[i], "</onlineCount>", true)) != -1)
 				{
 					Split[i][index] = '\0';
 				}
@@ -467,13 +467,13 @@ public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack)
 		
 		
 		// Add the count to the total trackers
-		if(strlen(Split[1]) > 0)
+		if (strlen(Split[1]) > 0)
 		{
-			if(SimpleRegexMatch(Split[1], "^[0-9]+$"))
+			if (SimpleRegexMatch(Split[1], "^[0-9]+$"))
 			{
 				new temp = StringToInt(Split[1]);
 				
-				if(temp > 0)
+				if (temp > 0)
 				{
 					g_iCurrentTrackers = temp;
 				}
@@ -482,7 +482,7 @@ public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack)
 
 		
 		// Close the socket
-		if(SocketIsConnected(socket))
+		if (SocketIsConnected(socket))
 		{
 			SocketDisconnect(socket);
 		}
@@ -500,7 +500,7 @@ stock URLEncode(String:sString[], maxlen, String:safe[] = "/", bool:bFormat = fa
 	
 	// Need 2 '%' since sp's Format parses one as a parameter to replace
 	// http://wiki.alliedmods.net/Format_Class_Functions_%28SourceMod_Scripting%29
-	if(bFormat)
+	if (bFormat)
 	{
 		ReplaceString(sString, maxlen, "%", "%%25");
 	}
@@ -513,19 +513,19 @@ stock URLEncode(String:sString[], maxlen, String:safe[] = "/", bool:bFormat = fa
 	new String:sChar[8];
 	new String:sReplaceChar[8];
 	
-	for(new i = 1; i < 256; i++)
+	for (new i = 1; i < 256; i++)
 	{
 		// Skip the '%' double replace ftw..
-		if(i==37)
+		if (i==37)
 		{
 			continue;
 		}
 		
 		
 		Format(sChar, sizeof(sChar), "%c", i);
-		if(StrContains(sAlwaysSafe, sChar) == -1 && StrContains(sString, sChar) != -1)
+		if (StrContains(sAlwaysSafe, sChar) == -1 && StrContains(sString, sChar) != -1)
 		{
-			if(bFormat)
+			if (bFormat)
 			{
 				Format(sReplaceChar, sizeof(sReplaceChar), "%%%%%02X", i);
 			}

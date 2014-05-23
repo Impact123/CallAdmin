@@ -180,7 +180,7 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 // Updater
 public OnAllPluginsLoaded()
 {
-	if(!LibraryExists("calladmin"))
+	if (!LibraryExists("calladmin"))
 	{
 		SetFailState("CallAdmin not found");
 	}

@@ -114,7 +114,7 @@ public Action:CallAdmin_OnReportPre(client, target, const String:reason[])
 public CallAdmin_OnReportPost(client, target, const String:reason[])
 {
 	// Reporter wasn't a real client (initiated by a module)
-	if(client == REPORTER_CONSOLE)
+	if (client == REPORTER_CONSOLE)
 	{
 		PrintToServer("%N was reported by Server for %s", target, reason);
 	}

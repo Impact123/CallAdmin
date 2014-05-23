@@ -228,19 +228,19 @@ public Native_ReportClient(Handle:plugin, numParams)
 	
 	
 	// We check for the REPORTER_CONSOLE define here, if this is set we have no valid client and the report comes from server
-	if(!IsClientValid(client) && client != REPORTER_CONSOLE)
+	if (!IsClientValid(client) && client != REPORTER_CONSOLE)
 	{
 		return false;
 	}
 	
-	if(!IsClientValid(target))
+	if (!IsClientValid(target))
 	{
 		return false;
 	}
 
 	
 	// Call the forward
-	if(!Forward_OnReportPre(client, target, sReason))
+	if (!Forward_OnReportPre(client, target, sReason))
 	{
 		return false;
 	}
@@ -282,17 +282,17 @@ public OnPluginStart()
 	g_hServerName = FindConVar("hostname");
 	
 	// Shouldn't happen
-	if(g_hHostPort == INVALID_HANDLE)
+	if (g_hHostPort == INVALID_HANDLE)
 	{
 		CallAdmin_LogMessage("Couldn't find cvar 'hostport'");
 		SetFailState("Couldn't find cvar 'hostport'");
 	}
-	if(g_hHostIP == INVALID_HANDLE)
+	if (g_hHostIP == INVALID_HANDLE)
 	{
 		CallAdmin_LogMessage("Couldn't find cvar 'hostip'");
 		SetFailState("Couldn't find cvar 'hostip'");
 	}
-	if(g_hServerName == INVALID_HANDLE)
+	if (g_hServerName == INVALID_HANDLE)
 	{
 		CallAdmin_LogMessage("Couldn't find cvar 'hostname'");
 		SetFailState("Couldn't find cvar 'hostname'");
@@ -359,7 +359,7 @@ public OnPluginStart()
 	
 	
 	// We only create a timer if interval > 0.0
-	if(g_fAdvertInterval != 0.0)
+	if (g_fAdvertInterval != 0.0)
 	{
 		g_hAdvertTimer = CreateTimer(g_fAdvertInterval, Timer_Advert, _, TIMER_REPEAT);
 	}
@@ -386,7 +386,7 @@ public OnPluginStart()
 	g_hOnLogMessageForward          = CreateGlobalForward("CallAdmin_OnLogMessage", ET_Ignore, Param_Cell, Param_String); 
 	
 	// Cookies
-	if(CLIENTPREFS_AVAILABLE())
+	if (CLIENTPREFS_AVAILABLE())
 	{
 		g_hLastReportCookie   = RegClientCookie("CallAdmin_LastReport", "Contains a timestamp when this user has reported the last time", CookieAccess_Private);
 		g_hLastReportedCookie = RegClientCookie("CallAdmin_LastReported", "Contains a timestamp when this user was reported the last time", CookieAccess_Private);
@@ -400,7 +400,7 @@ public OnPluginStart()
 	
 	BuildPath(Path_SM, g_sReasonConfigFile, sizeof(g_sReasonConfigFile), "configs/calladmin_reasons.cfg");
 	
-	if(!FileExists(g_sReasonConfigFile))
+	if (!FileExists(g_sReasonConfigFile))
 	{
 		CreateReasonList();
 	}
@@ -418,7 +418,7 @@ CreateReasonList()
 	hFile = OpenFile(g_sReasonConfigFile, "w");
 	
 	// Failed to open
-	if(hFile == INVALID_HANDLE)
+	if (hFile == INVALID_HANDLE)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_reasons.cfg' for writing");
 		SetFailState("Failed to open configfile 'calladmin_reasons.cfg' for writing");
@@ -447,7 +447,7 @@ ParseReasonList()
 	
 	
 	// Failed to open
-	if(hFile == INVALID_HANDLE)
+	if (hFile == INVALID_HANDLE)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_reasons.cfg' for reading");
 		SetFailState("Failed to open configfile 'calladmin_reasons.cfg' for reading");
@@ -459,9 +459,9 @@ ParseReasonList()
 	
 	
 	new len;
-	while(!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
+	while (!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
 	{
-		if(sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
+		if (sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
 		{
 			continue;
 		}
@@ -473,14 +473,14 @@ ParseReasonList()
 		len = strlen(sReadBuffer);
 		
 		
-		if(len < 3 || len > REASON_MAX_LENGTH)
+		if (len < 3 || len > REASON_MAX_LENGTH)
 		{
 			continue;
 		}
 			
 		
 		// Add the reason to the list if it doesn't exist already
-		if(FindStringInArray(g_hReasonAdt, sReadBuffer) == -1)
+		if (FindStringInArray(g_hReasonAdt, sReadBuffer) == -1)
 		{
 			PushArrayString(g_hReasonAdt, sReadBuffer);
 		}
@@ -497,7 +497,7 @@ public OnClientCookiesCached(client)
 	new String:sCookieBuf[24];
 	GetClientCookie(client, g_hLastReportCookie, sCookieBuf, sizeof(sCookieBuf));
 	
-	if(strlen(sCookieBuf) > 0)
+	if (strlen(sCookieBuf) > 0)
 	{
 		g_iLastReport[client] = StringToInt(sCookieBuf);
 	}
@@ -508,7 +508,7 @@ public OnClientCookiesCached(client)
 	
 	GetClientCookie(client, g_hLastReportedCookie, sCookieBuf, sizeof(sCookieBuf));
 	
-	if(strlen(sCookieBuf) > 0)
+	if (strlen(sCookieBuf) > 0)
 	{
 		g_iLastReported[client] = StringToInt(sCookieBuf);
 	}
@@ -519,9 +519,9 @@ public OnClientCookiesCached(client)
 
 FetchClientCookies()
 {
-	for(new i; i <= MaxClients; i++)
+	for (new i; i <= MaxClients; i++)
 	{
-		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && AreClientCookiesCached(i))
+		if (IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && AreClientCookiesCached(i))
 		{
 			OnClientCookiesCached(i);
 		}
@@ -540,7 +540,7 @@ bool:Forward_OnDrawMenu(client)
 	
 	Call_Finish(result);
 	
-	if(result == Plugin_Continue)
+	if (result == Plugin_Continue)
 	{
 		return true;
 	}
@@ -562,7 +562,7 @@ bool:Forward_OnReportPre(client, target, const String:reason[])
 	
 	Call_Finish(result);
 	
-	if(result == Plugin_Continue)
+	if (result == Plugin_Continue)
 	{
 		return true;
 	}
@@ -594,7 +594,7 @@ bool:Forward_OnDrawOwnReason(client)
 	
 	Call_Finish(result);
 	
-	if(result == Plugin_Continue)
+	if (result == Plugin_Continue)
 	{
 		return true;
 	}
@@ -613,7 +613,7 @@ bool:Forward_OnAddToAdminCount(client)
 	
 	Call_Finish(result);
 	
-	if(result == Plugin_Continue)
+	if (result == Plugin_Continue)
 	{
 		return true;
 	}
@@ -644,7 +644,7 @@ bool:Forward_OnDrawTarget(client, target)
 	
 	Call_Finish(result);
 	
-	if(result == Plugin_Continue)
+	if (result == Plugin_Continue)
 	{
 		return true;
 	}
@@ -681,10 +681,10 @@ Forward_OnLogMessage(Handle:plugin, const String:message[])
 
 public Action:Timer_Advert(Handle:timer)
 {
-	if(g_iCurrentTrackers > 0)
+	if (g_iCurrentTrackers > 0)
 	{
 		// Spelling is different (0 admins, 1 admin, 2 admins, 3 admins...), we account for that :)
-		if(g_iCurrentTrackers == 1)
+		if (g_iCurrentTrackers == 1)
 		{
 			PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_AdvertMessageSingular", g_iCurrentTrackers);
 		}
@@ -702,7 +702,7 @@ public Action:Timer_Advert(Handle:timer)
 
 public OnAllPluginsLoaded()
 {
-    if(LibraryExists("updater"))
+    if (LibraryExists("updater"))
     {
         Updater_AddPlugin(UPDATER_URL);
     }
@@ -713,7 +713,7 @@ public OnAllPluginsLoaded()
 
 public OnLibraryAdded(const String:name[])
 {
-    if(StrEqual(name, "updater"))
+    if (StrEqual(name, "updater"))
     {
         Updater_AddPlugin(UPDATER_URL);
     }
@@ -724,14 +724,14 @@ public OnLibraryAdded(const String:name[])
 
 public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue[])
 {
-	if(cvar == g_hHostPort)
+	if (cvar == g_hHostPort)
 	{
 		g_iHostPort = GetConVarInt(g_hHostPort);
 		
 		// Call forward
 		Forward_OnServerDataChanged(cvar, ServerData_HostPort, oldValue, newValue);
 	}
-	else if(cvar == g_hHostIP)
+	else if (cvar == g_hHostIP)
 	{
 		g_iHostIP = GetConVarInt(g_hHostIP);
 		
@@ -740,21 +740,21 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 		// Call forward
 		Forward_OnServerDataChanged(cvar, ServerData_HostIP, g_sHostIP, g_sHostIP);
 	}
-	else if(cvar == g_hServerName)
+	else if (cvar == g_hServerName)
 	{
 		GetConVarString(g_hServerName, g_sServerName, sizeof(g_sServerName));
 		
 		// Call forward
 		Forward_OnServerDataChanged(cvar, ServerData_HostName, oldValue, newValue);
 	}
-	else if(cvar == g_hVersion)
+	else if (cvar == g_hVersion)
 	{
 		SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
 	}
-	else if(cvar == g_hAdvertInterval)
+	else if (cvar == g_hAdvertInterval)
 	{
 		// Close the old timer
-		if(g_hAdvertTimer != INVALID_HANDLE)
+		if (g_hAdvertTimer != INVALID_HANDLE)
 		{
 			CloseHandle(g_hAdvertTimer);
 			g_hAdvertTimer = INVALID_HANDLE;
@@ -762,32 +762,32 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 		
 		g_fAdvertInterval = GetConVarFloat(g_hAdvertInterval);
 		
-		if(g_fAdvertInterval != 0.0)
+		if (g_fAdvertInterval != 0.0)
 		{
 			g_hAdvertTimer = CreateTimer(g_fAdvertInterval, Timer_Advert, _, TIMER_REPEAT);
 		}
 	}
-	else if(cvar == g_hPublicMessage)
+	else if (cvar == g_hPublicMessage)
 	{
 		g_bPublicMessage = GetConVarBool(g_hPublicMessage);
 	}
-	else if(cvar == g_hOwnReason)
+	else if (cvar == g_hOwnReason)
 	{
 		g_bOwnReason = GetConVarBool(g_hOwnReason);
 	}
-	else if(cvar == g_hConfirmCall)
+	else if (cvar == g_hConfirmCall)
 	{
 		g_bConfirmCall = GetConVarBool(g_hConfirmCall);
 	}
-	else if(cvar == g_hSpamTime)
+	else if (cvar == g_hSpamTime)
 	{
 		g_iSpamTime = GetConVarInt(g_hSpamTime);
 	}
-	else if(cvar == g_hReportTime)
+	else if (cvar == g_hReportTime)
 	{
 		g_iReportTime = GetConVarInt(g_hReportTime);
 	}
-	else if(cvar == g_hAdminAction)
+	else if (cvar == g_hAdminAction)
 	{
 		g_iAdminAction = GetConVarInt(g_hAdminAction);
 	}
@@ -799,7 +799,7 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 public Action:Command_Call(client, args)
 {
 	// Console cannot use this
-	if(client == 0)
+	if (client == 0)
 	{
 		PrintToServer("This command can't be used from console");
 		
@@ -808,19 +808,19 @@ public Action:Command_Call(client, args)
 	
 	
 	// Call the forward
-	if(!Forward_OnDrawMenu(client))
+	if (!Forward_OnDrawMenu(client))
 	{
 		return Plugin_Handled;
 	}
 	
 	
-	if(g_iLastReport[client] == 0 || LastReportTimeCheck(client))
+	if (g_iLastReport[client] == 0 || LastReportTimeCheck(client))
 	{
 		g_bSawMesage[client] = false;
 		
 		ShowClientSelectMenu(client);
 	}
-	else if(!g_bSawMesage[client])
+	else if (!g_bSawMesage[client])
 	{
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_CommandNotAllowed", g_iSpamTime - ( GetTime() - g_iLastReport[client] ));
 		g_bSawMesage[client] = true;
@@ -833,7 +833,7 @@ public Action:Command_Call(client, args)
 
 bool:LastReportTimeCheck(client)
 {
-	if(g_iLastReport[client] <= ( GetTime() - g_iSpamTime ))
+	if (g_iLastReport[client] <= ( GetTime() - g_iSpamTime ))
 	{
 		return true;
 	}
@@ -845,7 +845,7 @@ bool:LastReportTimeCheck(client)
 
 bool:LastReportedTimeCheck(client)
 {
-	if(g_iLastReported[client] <= ( GetTime() - g_iReportTime ))
+	if (g_iLastReported[client] <= ( GetTime() - g_iReportTime ))
 	{
 		return true;
 	}
@@ -865,7 +865,7 @@ SetStates(client, target)
 	
 	
 	// Cookies
-	if(CLIENTPREFS_AVAILABLE())
+	if (CLIENTPREFS_AVAILABLE())
 	{
 		SetClientCookieEx(client, g_hLastReportCookie, "%d", currentTime);
 		SetClientCookieEx(target, g_hLastReportedCookie, "%d", currentTime);
@@ -894,16 +894,16 @@ ConfirmCall(client)
 
 public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 {
-	if(action == MenuAction_Select)
+	if (action == MenuAction_Select)
 	{
 		new String:sInfo[24];
 		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 		
 		// Client has chosen to confirm the call
-		if(StrEqual("Yes", sInfo))
+		if (StrEqual("Yes", sInfo))
 		{
 			// Selected target isn't valid anymore
-			if(!IsClientValid(g_iTarget[client]))
+			if (!IsClientValid(g_iTarget[client]))
 			{
 				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
 				
@@ -912,7 +912,7 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 			
 			
 			// Already reported (race condition)
-			if(!LastReportedTimeCheck(g_iTarget[client]) )
+			if (!LastReportedTimeCheck(g_iTarget[client]) )
 			{
 				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
 				
@@ -921,7 +921,7 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 			
 			
 			// Admins available and we want to notify them instead of sending the report
-			if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+			if (GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
 			{
 				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
 				PrintNotifyMessageToAdmins(client, g_iTarget[client]);
@@ -934,7 +934,7 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 			
 			
 			// Call the forward
-			if(!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
+			if (!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
 			{
 				return;
 			}
@@ -948,7 +948,7 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_CallAborted");
 		}
 	}
-	else if(action == MenuAction_End)
+	else if (action == MenuAction_End)
 	{
 		CloseHandle(menu);
 	}
@@ -965,7 +965,7 @@ ReportPlayer(client, target, String:sReason[])
 	GetClientName(client, clientNameBuf, sizeof(clientNameBuf));
 	GetClientName(target, targetNameBuf, sizeof(targetNameBuf));
 
-	if(g_bPublicMessage)
+	if (g_bPublicMessage)
 	{
 		PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_HasReported", clientNameBuf, targetNameBuf, sReason);
 	}
@@ -994,7 +994,7 @@ public Action:Timer_UpdateTrackersCount(Handle:timer)
 	new temp = GetTotalTrackers();
 	
 	// Call the forward
-	if(temp != g_iCurrentTrackers)
+	if (temp != g_iCurrentTrackers)
 	{
 		Forward_OnTrackerCountChanged(g_iCurrentTrackers, temp);
 	}
@@ -1018,21 +1018,21 @@ GetTotalTrackers()
 	
 	hIter = GetPluginIterator();
 	
-	while(MorePlugins(hIter))
+	while (MorePlugins(hIter))
 	{
 		hPlugin = ReadPlugin(hIter);
 		
-		if(GetPluginStatus(hPlugin) == Plugin_Running)
+		if (GetPluginStatus(hPlugin) == Plugin_Running)
 		{
 			// We check if the plugin has the pesudo forward
-			if( (func = GetFunctionByName(hPlugin, "CallAdmin_OnRequestTrackersCountRefresh") ) != INVALID_FUNCTION)
+			if ( (func = GetFunctionByName(hPlugin, "CallAdmin_OnRequestTrackersCountRefresh") ) != INVALID_FUNCTION)
 			{
 				Call_StartFunction(hPlugin, func);
 				Call_PushCellRef(tempcount);
 				
 				Call_Finish();
 				
-				if(tempcount > 0)
+				if (tempcount > 0)
 				{
 					count += tempcount;
 				}
@@ -1056,9 +1056,9 @@ ShowClientSelectMenu(client)
 	new Handle:menu = CreateMenu(MenuHandler_ClientSelect);
 	SetMenuTitle(menu, "%T", "CallAdmin_SelectClient", client);
 	
-	for(new i; i <= MaxClients; i++)
+	for (new i; i <= MaxClients; i++)
 	{
-		if(i != client && LastReportedTimeCheck(i) && IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && Forward_OnDrawTarget(client, i))
+		if (i != client && LastReportedTimeCheck(i) && IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && Forward_OnDrawTarget(client, i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			Format(sID, sizeof(sID), "%d", GetClientSerial(i));
@@ -1068,12 +1068,12 @@ ShowClientSelectMenu(client)
 	}
 	
 	// Menu has no items, no players to report
-	if(GetMenuItemCount(menu) < 1)
+	if (GetMenuItemCount(menu) < 1)
 	{
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoPlayers");
 		g_iLastReport[client] = GetTime();
 		
-		if(CLIENTPREFS_AVAILABLE())
+		if (CLIENTPREFS_AVAILABLE())
 		{
 			SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
 		}
@@ -1089,7 +1089,7 @@ ShowClientSelectMenu(client)
 
 public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
 {
-	if(action == MenuAction_Select)
+	if (action == MenuAction_Select)
 	{
 		new String:sInfo[24];
 		new iSerial;
@@ -1102,7 +1102,7 @@ public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
 		
 		
 		// Selected target isn't valid anymore
-		if(!IsClientValid(iID))
+		if (!IsClientValid(iID))
 		{
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
 			
@@ -1113,7 +1113,7 @@ public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
 		g_iTarget[client] = iID;
 		
 		// Already reported (race condition)
-		if(!LastReportedTimeCheck(g_iTarget[client]) )
+		if (!LastReportedTimeCheck(g_iTarget[client]) )
 		{
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
 			
@@ -1122,7 +1122,7 @@ public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
 		
 		ShowBanReasonMenu(client);
 	}
-	else if(action == MenuAction_End)
+	else if (action == MenuAction_End)
 	{
 		CloseHandle(menu);
 	}
@@ -1149,9 +1149,9 @@ public OnClientDisconnect_Post(client)
 
 RemoveAsTarget(client)
 {
-	for(new i; i <= MaxClients; i++)
+	for (new i; i <= MaxClients; i++)
 	{
-		if(g_iTarget[i] == client)
+		if (g_iTarget[i] == client)
 		{
 			g_iTarget[i] = 0;
 		}
@@ -1172,11 +1172,11 @@ ShowBanReasonMenu(client)
 	SetMenuTitle(menu, "%T", "CallAdmin_SelectReason", client, g_iTarget[client]);
 	
 	new index;
-	for(new i; i < count; i++)
+	for (new i; i < count; i++)
 	{
 		GetArrayString(g_hReasonAdt, i, sReasonBuffer, sizeof(sReasonBuffer));
 		
-		if(strlen(sReasonBuffer) < 3)
+		if (strlen(sReasonBuffer) < 3)
 		{
 			continue;
 		}
@@ -1186,7 +1186,7 @@ ShowBanReasonMenu(client)
 	}
 	
 	// Own reason, call the forward
-	if(g_bOwnReason && Forward_OnDrawOwnReason(client))
+	if (g_bOwnReason && Forward_OnDrawOwnReason(client))
 	{
 		decl String:sOwnReason[REASON_MAX_LENGTH];
 
@@ -1202,13 +1202,13 @@ ShowBanReasonMenu(client)
 
 public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 {
-	if(action == MenuAction_Select)
+	if (action == MenuAction_Select)
 	{
 		new String:sInfo[REASON_MAX_LENGTH];
 		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 		
 		// Own reason
-		if(StrEqual("Own reason", sInfo))
+		if (StrEqual("Own reason", sInfo))
 		{
 			g_bAwaitingReason[client] = true;
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_TypeOwnReason");
@@ -1219,7 +1219,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		
 		
 		// Selected target isn't valid anymore
-		if(!IsClientValid(g_iTarget[client]))
+		if (!IsClientValid(g_iTarget[client]))
 		{
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
 			
@@ -1228,7 +1228,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		
 		
 		// Already reported (race condition)
-		if(!LastReportedTimeCheck(g_iTarget[client]) )
+		if (!LastReportedTimeCheck(g_iTarget[client]) )
 		{
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
 			
@@ -1237,14 +1237,14 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		
 			
 		// Confirm the report
-		if(g_bConfirmCall)
+		if (g_bConfirmCall)
 		{
 			ConfirmCall(client);
 		}
 		else
 		{
 			// Admins available and we want to notify them instead of sending the report
-			if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+			if (GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
 			{
 				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
 				PrintNotifyMessageToAdmins(client, g_iTarget[client]);
@@ -1257,7 +1257,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 			
 			
 			// Call the forward
-			if(!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
+			if (!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
 			{
 				return;
 			}
@@ -1266,7 +1266,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 			ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
 		}			
 	}
-	else if(action == MenuAction_End)
+	else if (action == MenuAction_End)
 	{
 		CloseHandle(menu);
 	}
@@ -1277,7 +1277,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 
 public Action:ChatListener(client, const String:command[], argc)
 {
-	if(g_bAwaitingReason[client] && !IsChatTrigger())
+	if (g_bAwaitingReason[client] && !IsChatTrigger())
 	{
 		// 2 more for quotes
 		decl String:sReason[REASON_MAX_LENGTH + 2];
@@ -1290,7 +1290,7 @@ public Action:ChatListener(client, const String:command[], argc)
 		
 		
 		// Has aborted
-		if(StrEqual(sReason, "!noreason") || StrEqual(sReason, "!abort"))
+		if (StrEqual(sReason, "!noreason") || StrEqual(sReason, "!abort"))
 		{
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_CallAborted");
 			
@@ -1299,7 +1299,7 @@ public Action:ChatListener(client, const String:command[], argc)
 		
 		
 		// Reason was too short
-		if(strlen(sReason) < 3)
+		if (strlen(sReason) < 3)
 		{
 			g_bAwaitingReason[client] = true;
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_OwnReasonTooShort");
@@ -1309,7 +1309,7 @@ public Action:ChatListener(client, const String:command[], argc)
 		
 		
 		// Selected target isn't valid anymore
-		if(!IsClientValid(g_iTarget[client]))
+		if (!IsClientValid(g_iTarget[client]))
 		{
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
 			
@@ -1318,7 +1318,7 @@ public Action:ChatListener(client, const String:command[], argc)
 		
 		
 		// Already reported (race condition)
-		if(!LastReportedTimeCheck(g_iTarget[client]) )
+		if (!LastReportedTimeCheck(g_iTarget[client]) )
 		{
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
 			
@@ -1327,14 +1327,14 @@ public Action:ChatListener(client, const String:command[], argc)
 		
 		
 		// Send the report
-		if(g_bConfirmCall)
+		if (g_bConfirmCall)
 		{
 			ConfirmCall(client);
 		}
 		else
 		{
 			// Admins available and we want to notify them instead of send the report
-			if(GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+			if (GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
 			{
 				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
 				PrintNotifyMessageToAdmins(client, g_iTarget[client]);
@@ -1347,7 +1347,7 @@ public Action:ChatListener(client, const String:command[], argc)
 			
 			
 			// Call the forward
-			if(!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
+			if (!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
 			{
 				return Plugin_Handled;
 			}
@@ -1369,7 +1369,7 @@ public Action:ChatListener(client, const String:command[], argc)
 
 stock bool:IsClientValid(id)
 {
-	if(id > 0 && id <= MaxClients && IsClientInGame(id))
+	if (id > 0 && id <= MaxClients && IsClientInGame(id))
 	{
 		return true;
 	}
@@ -1383,9 +1383,9 @@ stock GetRealClientCount()
 {
 	new count;
 	
-	for(new i; i <= MaxClients; i++)
+	for (new i; i <= MaxClients; i++)
 	{
-		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i))
+		if (IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i))
 		{
 			count++;
 		}
@@ -1400,9 +1400,9 @@ stock GetAdminCount()
 {
 	new count;
 	
-	for(new i; i <= MaxClients; i++)
+	for (new i; i <= MaxClients; i++)
 	{
-		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false) && Forward_OnAddToAdminCount(i)) 
+		if (IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false) && Forward_OnAddToAdminCount(i)) 
 		{
 			count++;
 		}
@@ -1414,9 +1414,9 @@ stock GetAdminCount()
 
 stock PrintNotifyMessageToAdmins(client, target)
 {
-	for(new i; i <= MaxClients; i++)
+	for (new i; i <= MaxClients; i++)
 	{
-		if(IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false) && Forward_OnAddToAdminCount(i)) 
+		if (IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false) && Forward_OnAddToAdminCount(i)) 
 		{
 			PrintToChat(i, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AdminNotification", client, target, g_sTargetReason[client]);
 		}

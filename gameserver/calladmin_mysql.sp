@@ -89,7 +89,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 {
 	g_bLateLoad = late;
 	
-	if(!g_bLateLoad)
+	if (!g_bLateLoad)
 	{
 		g_bDBDelayedLoad = true;
 	}
@@ -101,7 +101,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 
 public OnConfigsExecuted()
 {
-	if(g_bDBDelayedLoad)
+	if (g_bDBDelayedLoad)
 	{
 		// We are not loaded, yet
 		g_bAllLoaded = false;
@@ -119,7 +119,7 @@ public OnPluginStart()
 {
 	// We only connect directly if it was a lateload, else we connect when configs were executed to grab the cvars
 	// Configs might've not been excuted and we can't grab the hostname/hostport else
-	if(g_bLateLoad)
+	if (g_bLateLoad)
 	{
 		// We are not loaded, yet
 		g_bAllLoaded = false;
@@ -169,7 +169,7 @@ public OnPluginStart()
 InitDB()
 {
 	// Fallback for default if possible
-	if(!SQL_CheckConfig(SQL_DB_CONF) && !SQL_CheckConfig("default"))
+	if (!SQL_CheckConfig(SQL_DB_CONF) && !SQL_CheckConfig("default"))
 	{
 		CallAdmin_LogMessage("Couldn't find database config");
 		SetFailState("Couldn't find database config");
@@ -184,12 +184,12 @@ InitDB()
 
 public OnAllPluginsLoaded()
 {
-	if(!LibraryExists("calladmin"))
+	if (!LibraryExists("calladmin"))
 	{
 		SetFailState("CallAdmin not found");
 	}
 
-	if(LibraryExists("updater"))
+	if (LibraryExists("updater"))
 	{
 		Updater_AddPlugin(UPDATER_URL);
 	}
@@ -204,7 +204,7 @@ public OnAllPluginsLoaded()
 
 public OnLibraryAdded(const String:name[])
 {
-    if(StrEqual(name, "updater"))
+    if (StrEqual(name, "updater"))
     {
         Updater_AddPlugin(UPDATER_URL);
     }
@@ -216,7 +216,7 @@ public OnLibraryAdded(const String:name[])
 public Action:Timer_PruneEntries(Handle:timer)
 {
 	// Prune old entries if enabled
-	if(g_iEntryPruning > 0)
+	if (g_iEntryPruning > 0)
 	{
 		PruneDatabase();
 	}
@@ -238,15 +238,15 @@ public CallAdmin_OnRequestTrackersCountRefresh(&trackers)
 
 public CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const String:oldVal[], const String:newVal[])
 {
-	if(type == ServerData_HostIP)
+	if (type == ServerData_HostIP)
 	{
 		CallAdmin_GetHostIP(g_sHostIP, sizeof(g_sHostIP));
 	}
-	else if(type == ServerData_HostName)
+	else if (type == ServerData_HostName)
 	{
 		CallAdmin_GetHostName(g_sServerName, sizeof(g_sServerName));
 	}
-	else if(type == ServerData_HostPort)
+	else if (type == ServerData_HostPort)
 	{
 		g_iHostPort = CallAdmin_GetHostPort();
 	}
@@ -257,7 +257,7 @@ public CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const Strin
 
 PruneDatabase()
 {
-	if(g_hDbHandle != INVALID_HANDLE && g_bAllLoaded)
+	if (g_hDbHandle != INVALID_HANDLE && g_bAllLoaded)
 	{
 		decl String:query[1024];
 		decl String:sHostIP[16];
@@ -285,7 +285,7 @@ PruneDatabase()
 
 UpdateServerData()
 {
-	if(g_hDbHandle != INVALID_HANDLE && g_bAllLoaded)
+	if (g_hDbHandle != INVALID_HANDLE && g_bAllLoaded)
 	{
 		decl String:query[1024];
 		
@@ -303,19 +303,19 @@ UpdateServerData()
 
 public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue[])
 {
-	if(cvar == g_hEntryPruning)
+	if (cvar == g_hEntryPruning)
 	{
 		g_iEntryPruning = GetConVarInt(g_hEntryPruning);
 	}
-	else if(cvar == g_hServerKey)
+	else if (cvar == g_hServerKey)
 	{
 		GetConVarString(g_hServerKey, g_sServerKey, sizeof(g_sServerKey));
 	}
-	else if(cvar == g_hOhphanedEntryPruning)
+	else if (cvar == g_hOhphanedEntryPruning)
 	{
 		g_iOhphanedEntryPruning = GetConVarInt(g_hOhphanedEntryPruning);
 	}
-	else if(cvar == g_hVersion)
+	else if (cvar == g_hVersion)
 	{
 		SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
 	}
@@ -329,7 +329,7 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 public CallAdmin_OnReportPost(client, target, const String:reason[])
 {
 	// We need all loaded
-	if(!g_bAllLoaded || g_hDbHandle == INVALID_HANDLE)
+	if (!g_bAllLoaded || g_hDbHandle == INVALID_HANDLE)
 	{
 		return;
 	}
@@ -351,7 +351,7 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	
 	
 	// Reporter wasn't a real client (initiated by a module)
-	if(client == REPORTER_CONSOLE)
+	if (client == REPORTER_CONSOLE)
 	{
 		strcopy(clientName, sizeof(clientName), "Server/Console");
 		strcopy(clientAuth, sizeof(clientAuth), "Server/Console");
@@ -385,7 +385,7 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 
 public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
 {
-	if(hndl == INVALID_HANDLE)
+	if (hndl == INVALID_HANDLE)
 	{
 		CallAdmin_LogMessage("ConErr: %s", error);
 		SetFailState("ConErr: %s", error);
@@ -463,7 +463,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 
 public SQLT_ErrorCheckCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
 {
-	if(hndl == INVALID_HANDLE)
+	if (hndl == INVALID_HANDLE)
 	{
 		CallAdmin_LogMessage("QueryErr: %s", error);
 		SetFailState("QueryErr: %s", error);
@@ -478,9 +478,9 @@ public SQLT_CurrentVersion(Handle:owner, Handle:hndl, const String:error[], any:
 	decl String:version[12];
 	decl String:query[512];
 
-	if(hndl != INVALID_HANDLE)
+	if (hndl != INVALID_HANDLE)
 	{
-		if(SQL_FetchRow(hndl))
+		if (SQL_FetchRow(hndl))
 		{
 			SQL_FetchString(hndl, 0, version, sizeof(version));
 
@@ -525,7 +525,7 @@ public SQLT_CurrentVersion(Handle:owner, Handle:hndl, const String:error[], any:
 
 public SQLT_GetRealVersion(Handle:owner, Handle:hndl, const String:error[], any:data)
 {
-	if(hndl == INVALID_HANDLE)
+	if (hndl == INVALID_HANDLE)
 	{
 		// We have the old 0.1.2A
 		ChangeDB("0.1.2A");
@@ -545,7 +545,7 @@ ChangeDB(String:version[])
 	decl String:query[512];
 
 	// Check version < 0.1.3
-	if(!IsVersionNewerOrEqual(version, "0.1.3"))
+	if (!IsVersionNewerOrEqual(version, "0.1.3"))
 	{
 		// Update Table to current structure
 		Format(query, sizeof(query), "ALTER TABLE `%s` \
@@ -587,7 +587,7 @@ public Action:Timer_UpdateTrackersCount(Handle:timer)
 GetCurrentTrackers()
 {
 	// We need all loaded
-	if(g_hDbHandle != INVALID_HANDLE && g_bAllLoaded)
+	if (g_hDbHandle != INVALID_HANDLE && g_bAllLoaded)
 	{
 		decl String:query[1024];
 
@@ -616,14 +616,14 @@ GetCurrentTrackers()
 
 public SQLT_CurrentTrackersCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
 {
-	if(hndl == INVALID_HANDLE)
+	if (hndl == INVALID_HANDLE)
 	{
 		CallAdmin_LogMessage("CurrentTrackersErr: %s", error);
 		SetFailState("CurrentTrackersErr: %s", error);
 	}
 	else
 	{
-		if(SQL_FetchRow(hndl))
+		if (SQL_FetchRow(hndl))
 		{
 			g_iCurrentTrackers = SQL_FetchInt(hndl, 0);
 		}
@@ -639,7 +639,7 @@ OnAllLoaded()
 
 
 	// Prune old entries if enabled
-	if(g_iEntryPruning > 0)
+	if (g_iEntryPruning > 0)
 	{
 		PruneDatabase();
 	}
@@ -656,7 +656,7 @@ OnAllLoaded()
 
 stock bool:IsClientValid(id)
 {
-	if(id > 0 && id <= MaxClients && IsClientInGame(id))
+	if (id > 0 && id <= MaxClients && IsClientInGame(id))
 	{
 		return true;
 	}
