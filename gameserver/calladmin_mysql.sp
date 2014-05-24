@@ -265,7 +265,7 @@ PruneDatabase()
 		CallAdmin_GetHostIP(sHostIP, sizeof(sHostIP));
 		
 		// Prune main table (this server)
-		Format(query, sizeof(query), "DELETE FROM `%s` WHERE serverIP = '%s' AND serverPort = '%d' AND TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(reportedAt), NOW()) > %d", g_sTableName, sHostIP, iHostPort, g_iEntryPruning);
+		Format(query, sizeof(query), "DELETE FROM `%s` WHERE serverIP = '%s' AND serverPort = %d AND TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(reportedAt), NOW()) > %d", g_sTableName, sHostIP, iHostPort, g_iEntryPruning);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 		
 		
@@ -293,7 +293,7 @@ UpdateServerData()
 		SQL_EscapeString(g_hDbHandle, g_sServerName, sHostName, sizeof(sHostName));
 		
 		// Update the servername
-		Format(query, sizeof(query), "UPDATE IGNORE `%s` SET serverName = '%s', serverKey = '%s' WHERE serverIP = '%s' AND serverPort = '%d'", g_sTableName, sHostName, g_sServerKey, g_sHostIP, g_iHostPort);
+		Format(query, sizeof(query), "UPDATE IGNORE `%s` SET serverName = '%s', serverKey = '%s' WHERE serverIP = '%s' AND serverPort = %d", g_sTableName, sHostName, g_sServerKey, g_sHostIP, g_iHostPort);
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 	}
 }
@@ -375,7 +375,7 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	Format(query, sizeof(query), "INSERT INTO `%s`\
 												(serverIP, serverPort, serverName, serverKey, targetName, targetID, targetReason, clientName, clientID, callHandled, reportedAt)\
 											VALUES\
-												('%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', 0, UNIX_TIMESTAMP())",
+												('%s', %d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', 0, UNIX_TIMESTAMP())",
 											g_sTableName, g_sHostIP, g_iHostPort, serverName, sKey, targetName, targetAuth, sReason, clientName, clientAuth);
 	SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, query);
 }
