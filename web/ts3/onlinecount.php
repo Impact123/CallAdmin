@@ -46,7 +46,6 @@ if (!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key'
 }
 
 
-f
 $ts3 = new TeamSpeak3();
 
 try
