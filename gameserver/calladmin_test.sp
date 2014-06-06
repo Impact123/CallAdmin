@@ -148,3 +148,11 @@ public CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const Strin
 	PrintToServer("Convar: %x (type: %d) was changed from '%s' to '%s'", convar, type, oldVal, newVal);
 }
 
+
+
+public CallAdmin_OnReportHandled(client)
+{
+	new iReportID = CallAdmin_GetReportID();
+	PrintToServer("ReportID: %d was handled by: %N", iReportID, client);
+}
+
