@@ -235,6 +235,28 @@ forward CallAdmin_OnLogMessage(Handle:plugin, const String:message[]);
 
 
 
+/**
+ * Returns the servers current report id.
+ * This is a temporary value and is increased with each report.
+ *
+ * @return      Current report id of the server.
+ */
+native CallAdmin_GetReportID();
+
+
+
+
+/**
+ * Called when a report was handled.
+ *
+ * @param client       Admin who handled the report.
+ * @noreturn
+ */
+forward CallAdmin_OnReportHandled(client);
+
+
+
+
 /* Do not edit below this line */
 public SharedPlugin:__pl_calladmin = 
 {
