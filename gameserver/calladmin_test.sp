@@ -111,16 +111,16 @@ public Action:CallAdmin_OnReportPre(client, target, const String:reason[])
 
 
 
-public CallAdmin_OnReportPost(client, target, const String:reason[])
+public CallAdmin_OnReportPost2(client, target, id, const String:reason[])
 {
 	// Reporter wasn't a real client (initiated by a module)
 	if (client == REPORTER_CONSOLE)
 	{
-		PrintToServer("%N was reported by Server for %s", target, reason);
+		PrintToServer("%N (ReportID: %i) was reported by Server for %s", target, id, reason);
 	}
 	else
 	{
-		PrintToServer("%N was reported by %N for %s", target, client, reason);
+		PrintToServer("%N (ReportID: %i) was reported by %N for %s", target, id, client, reason);
 	}
 }
 
@@ -150,9 +150,8 @@ public CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const Strin
 
 
 
-public CallAdmin_OnReportHandled(client)
+public CallAdmin_OnReportHandled(client, id)
 {
-	new iReportID = CallAdmin_GetReportID();
-	PrintToServer("ReportID: %d was handled by: %N", iReportID, client);
+	PrintToServer("ReportID: %d was handled by: %N", id, client);
 }
 
