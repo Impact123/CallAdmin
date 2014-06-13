@@ -131,7 +131,6 @@ new Handle:g_hLastReportedCookie;
 // Api
 new Handle:g_hOnReportPreForward;
 new Handle:g_hOnReportPostForward;
-new Handle:g_hOnReportPostForward2;
 new Handle:g_hOnDrawMenuForward;
 new Handle:g_hOnDrawOwnReasonForward;
 new Handle:g_hOnTrackerCountChangedForward;
@@ -174,6 +173,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 	CreateNative("CallAdmin_GetHostPort", Native_GetHostPort);
 	CreateNative("CallAdmin_ReportClient", Native_ReportClient);
 	CreateNative("CallAdmin_LogMessage", Native_LogMessage);
+	CreateNative("CallAdmin_GetReportID", Native_GetReportID);
 	
 	
 	return APLRes_Success;
@@ -288,6 +288,14 @@ public Native_LogMessage(Handle:plugin, numParams)
 
 
 
+public Native_GetReportID(Handle:plugin, numParams)
+{
+	return g_iCurrentReportID;
+}
+
+
+
+
 public OnPluginStart()
 {
 	BuildPath(Path_SM, g_sLogFile, sizeof(g_sLogFile), "logs/calladmin.log");
@@ -395,7 +403,6 @@ public OnPluginStart()
 	// Api
 	g_hOnReportPreForward           = CreateGlobalForward("CallAdmin_OnReportPre", ET_Event, Param_Cell, Param_Cell, Param_String);
 	g_hOnReportPostForward          = CreateGlobalForward("CallAdmin_OnReportPost", ET_Ignore, Param_Cell, Param_Cell, Param_String);
-	g_hOnReportPostForward2         = CreateGlobalForward("CallAdmin_OnReportPost2", ET_Ignore, Param_Cell, Param_Cell, Param_String, Param_Cell);
 	g_hOnDrawMenuForward            = CreateGlobalForward("CallAdmin_OnDrawMenu", ET_Event, Param_Cell);
 	g_hOnDrawOwnReasonForward       = CreateGlobalForward("CallAdmin_OnDrawOwnReason", ET_Event, Param_Cell);
 	g_hOnTrackerCountChangedForward = CreateGlobalForward("CallAdmin_OnTrackerCountChanged", ET_Ignore, Param_Cell, Param_Cell);
@@ -602,16 +609,6 @@ Forward_OnReportPost(client, target, const String:reason[])
 	Call_PushCell(client);
 	Call_PushCell(target);
 	Call_PushString(reason);
-	
-	Call_Finish();
-
-
-	// New Forward
-	Call_StartForward(g_hOnReportPostForward2);
-	Call_PushCell(client);
-	Call_PushCell(target);
-	Call_PushString(reason);
-	Call_PushCell(g_iCurrentReportID);
 	
 	Call_Finish();
 }

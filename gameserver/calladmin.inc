@@ -90,23 +90,7 @@ forward Action:CallAdmin_OnReportPre(client, target, const String:reason[]);
  * @param reason        Reason selected by the client for the report.
  * @noreturn
  */
-#pragma deprecated Use CallAdmin_OnReportPost2 instead!
 forward CallAdmin_OnReportPost(client, target, const String:reason[]);
-
-
-
-
-/**
- * Called after an client (or module) has reported another player.
- * Be sure to check that client != REPORTER_CONSOLE if you expect a valid client index.
- *
- * @param client        Client index of the caller.
- * @param target        Client index of the target.
- * @param id            ID of the report.
- * @param reason        Reason selected by the client for the report.
- * @noreturn
- */
-forward CallAdmin_OnReportPost2(client, target, id, const String:reason[]);
 
 
 
@@ -252,6 +236,17 @@ forward CallAdmin_OnLogMessage(Handle:plugin, const String:message[]);
 
 
 /**
+ * Returns the servers current report id.
+ * This is a temporary value and is increased with each report.
+ *
+ * @return      Current report id of the server.
+ */
+native CallAdmin_GetReportID();
+
+
+
+
+/**
  * Called when a report was handled.
  *
  * @param client       Admin who handled the report.
@@ -288,5 +283,6 @@ public __pl_calladmin_SetNTVOptional()
 	MarkNativeAsOptional("CallAdmin_GetHostPort");
 	MarkNativeAsOptional("CallAdmin_ReportClient");
 	MarkNativeAsOptional("CallAdmin_LogMessage");
+	MarkNativeAsOptional("CallAdmin_GetReportID");
 }
 #endif

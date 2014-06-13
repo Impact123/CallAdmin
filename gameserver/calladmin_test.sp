@@ -111,8 +111,10 @@ public Action:CallAdmin_OnReportPre(client, target, const String:reason[])
 
 
 
-public CallAdmin_OnReportPost2(client, target, id, const String:reason[])
+public CallAdmin_OnReportPost(client, target, const String:reason[])
 {
+	new id = CallAdmin_GetReportID();
+	
 	// Reporter wasn't a real client (initiated by a module)
 	if (client == REPORTER_CONSOLE)
 	{
