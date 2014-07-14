@@ -394,6 +394,12 @@ public BaseComm_OnClientGag(client, bool:gagState)
 }
 
 
+public OnClientDisconnect_Post(client)
+{
+	g_bClientOnBlacklist[client] = false;
+	g_bClientImmune[client] = false;
+}
+
 
 
 /*
