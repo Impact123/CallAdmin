@@ -71,6 +71,8 @@ new String:g_sSteamIDConfigFile[PLATFORM_MAX_PATH];
 new String:g_sGroupIDConfigFile[PLATFORM_MAX_PATH];
 
 
+new g_iLastReportID;
+
 
 enum AuthStringType
 {
@@ -465,12 +467,28 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	GetClientName(target, sTargetName, sizeof(sTargetName));
 	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
 	
+	g_iLastReportID = CallAdmin_GetReportID();
+	
 	decl String:sMessage[4096];
-	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s\nJoin server: steam://connect/%s:%d", sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, reason, sServerIP, serverPort);
+	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReportID: %d\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s\nJoin server: steam://connect/%s:%d\nWhen in game, type calladmin_handle <id> in chat to handle this report in game", sServerName, sServerIP, serverPort, g_iLastReportID, sClientName, sClientID, sTargetName, sTargetID, reason, sServerIP, serverPort);
 							 
 	MessageBot_SendMessage(OnMessageResultReceived, sMessage);
 }
 
+
+
+public CallAdmin_OnReportHandled(client, id)
+{
+	if (id != g_iLastReportID)
+	{
+		return;
+	}
+	
+	decl String:sMessage[1024];
+	Format(sMessage, sizeof(sMessage), "\nLast report (%d) was handled by: %N", g_iLastReportID, client);
+	
+	MessageBot_SendMessage(OnMessageResultReceived, sMessage);
+}
 
 
 

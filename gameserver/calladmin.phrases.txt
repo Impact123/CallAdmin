@@ -103,4 +103,24 @@
 		"en"		"Player {1} reported {2} for {3}"
 		"de"		"Spieler {1} hat {2} wegen {3} gemeldet"
 	}
+	"CallAdmin_ReportAlreadyHandled"
+	{
+		"en"		"This report was already handled"
+		"de"		"Diese Meldung wurde bereits erledigt"
+	}
+	"CallAdmin_NoAdmin"
+	{
+		"en"		"Only admins have access to this command"
+		"de"		"Nur Admins können diesen Befehl ausführen"
+	}
+	"CallAdmin_WrongNumberOfArguments"
+	{
+		"en"		"You used a wrong number of arguments"
+		"de"		"Du hast eine falsche Anzahl an Argumenten benutzt"
+	}
+	"CallAdmin_WrongReportID"
+	{
+		"en"		"You used a wrong report id"
+		"de"		"Du hast eine falsche Melde-id benutzt"
+	}
 }

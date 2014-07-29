@@ -79,6 +79,14 @@ new g_iAdminAction;
 
 
 
+// Reportid used for handling
+new g_iCurrentReportID;
+
+// List of not handled ID's
+new Handle:g_hActiveReports;
+
+
+
 // Logfile
 new String:g_sLogFile[PLATFORM_MAX_PATH];
 
@@ -130,6 +138,7 @@ new Handle:g_hOnDrawTargetForward;
 new Handle:g_hOnAddToAdminCountForward;
 new Handle:g_hOnServerDataChangedForward;
 new Handle:g_hOnLogMessageForward;
+new Handle:g_hOnReportHandledForward;
 
 
 
@@ -164,6 +173,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 	CreateNative("CallAdmin_GetHostPort", Native_GetHostPort);
 	CreateNative("CallAdmin_ReportClient", Native_ReportClient);
 	CreateNative("CallAdmin_LogMessage", Native_LogMessage);
+	CreateNative("CallAdmin_GetReportID", Native_GetReportID);
 	
 	
 	return APLRes_Success;
@@ -245,6 +255,11 @@ public Native_ReportClient(Handle:plugin, numParams)
 		return false;
 	}
 
+
+	// Set the report id
+	g_iCurrentReportID++;
+	PushArrayCell(g_hActiveReports, g_iCurrentReportID);
+
 	
 	// Call the forward
 	Forward_OnReportPost(client, target, sReason);
@@ -268,6 +283,14 @@ public Native_LogMessage(Handle:plugin, numParams)
 	
 	// Call the forward
 	Forward_OnLogMessage(plugin, sMessage);
+}
+
+
+
+
+public Native_GetReportID(Handle:plugin, numParams)
+{
+	return g_iCurrentReportID;
 }
 
 
@@ -301,6 +324,9 @@ public OnPluginStart()
 	
 	RegConsoleCmd("sm_call", Command_Call);
 	RegConsoleCmd("sm_calladmin", Command_Call);
+	
+	RegConsoleCmd("sm_call_handle", Command_HandleCall);
+	RegConsoleCmd("sm_calladmin_handle", Command_HandleCall);
 	
 	
 	AutoExecConfig_SetFile("plugin.calladmin");
@@ -383,7 +409,8 @@ public OnPluginStart()
 	g_hOnDrawTargetForward          = CreateGlobalForward("CallAdmin_OnDrawTarget", ET_Event, Param_Cell, Param_Cell);
 	g_hOnAddToAdminCountForward     = CreateGlobalForward("CallAdmin_OnAddToAdminCount", ET_Event, Param_Cell);
 	g_hOnServerDataChangedForward   = CreateGlobalForward("CallAdmin_OnServerDataChanged", ET_Ignore, Param_Cell, Param_Cell, Param_String, Param_String);
-	g_hOnLogMessageForward          = CreateGlobalForward("CallAdmin_OnLogMessage", ET_Ignore, Param_Cell, Param_String); 
+	g_hOnLogMessageForward          = CreateGlobalForward("CallAdmin_OnLogMessage", ET_Ignore, Param_Cell, Param_String);
+	g_hOnReportHandledForward       = CreateGlobalForward("CallAdmin_OnReportHandled", ET_Ignore, Param_Cell, Param_Cell); 
 	
 	// Cookies
 	if (CLIENTPREFS_AVAILABLE())
@@ -394,6 +421,9 @@ public OnPluginStart()
 		FetchClientCookies();
 	}
 	
+
+	// Report handling
+	g_hActiveReports = CreateArray();
 	
 	// Reason handling
 	g_hReasonAdt = CreateArray(REASON_MAX_LENGTH);
@@ -678,6 +708,17 @@ Forward_OnLogMessage(Handle:plugin, const String:message[])
 
 
 
+Forward_OnReportHandled(client, id)
+{
+	Call_StartForward(g_hOnReportHandledForward);
+	Call_PushCell(client);
+	Call_PushCell(id);
+	
+	Call_Finish();
+}
+
+
+
 
 public Action:Timer_Advert(Handle:timer)
 {
@@ -831,6 +872,69 @@ public Action:Command_Call(client, args)
 
 
 
+public Action:Command_HandleCall(client, args)
+{
+	// Console cannot use this
+	if (client == 0)
+	{
+		PrintToServer("This command can't be used from console");
+		
+		return Plugin_Handled;
+	}
+	
+	
+	// Only admins can access this command
+	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
+	{
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
+		
+		return Plugin_Handled;
+	}
+	
+	
+	// We need exactly 1 argument
+	if (GetCmdArgs() != 1)
+	{
+		decl String:cmdName[64];
+		GetCmdArg(0, cmdName, sizeof(cmdName));
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t: %s <id>", "CallAdmin_WrongNumberOfArguments", cmdName);
+		
+		return Plugin_Handled;
+	}
+	
+	
+	decl String:sArgID[10];
+	new reportID;
+	
+	GetCmdArg(1, sArgID, sizeof(sArgID));
+	reportID = StringToInt(sArgID);
+	
+	
+	if (reportID > g_iCurrentReportID)
+	{
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_WrongReportID");
+		
+		return Plugin_Handled;	
+	}
+	
+	
+	// Report was already handled
+	if (!FindValueInArray(g_hActiveReports, reportID))
+	{
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_ReportAlreadyHandled");
+		
+		return Plugin_Handled;	
+	}
+	
+	
+	RemoveFromArray(g_hActiveReports, reportID);
+	Forward_OnReportHandled(client, reportID);
+
+	return Plugin_Handled;
+}
+
+
+
 bool:LastReportTimeCheck(client)
 {
 	if (g_iLastReport[client] <= ( GetTime() - g_iSpamTime ))
@@ -939,7 +1043,6 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 				return;
 			}
 			
-			
 			// Send the report
 			ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
 		}
@@ -976,6 +1079,12 @@ ReportPlayer(client, target, String:sReason[])
 	
 	// States
 	SetStates(client, target);
+
+	
+	// Set the report id
+	g_iCurrentReportID++;
+	PushArrayCell(g_hActiveReports, g_iCurrentReportID);
+
 	
 	// Call the forward
 	Forward_OnReportPost(client, target, sReason);
