@@ -470,7 +470,7 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	g_iLastReportID = CallAdmin_GetReportID();
 	
 	decl String:sMessage[4096];
-	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReportID: %d\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s\nJoin server: steam://connect/%s:%d\nWhen in game, type calladmin_handle <id> in chat to handle this report in game", sServerName, sServerIP, serverPort, g_iLastReportID, sClientName, sClientID, sTargetName, sTargetID, reason, sServerIP, serverPort);
+	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReportID: %d\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s\nJoin server: steam://connect/%s:%d\nWhen in game, type !calladmin_handle <id> or /calladmin_handle <id> in chat to handle this report", sServerName, sServerIP, serverPort, g_iLastReportID, sClientName, sClientID, sTargetName, sTargetID, reason, sServerIP, serverPort);
 							 
 	MessageBot_SendMessage(OnMessageResultReceived, sMessage);
 }
