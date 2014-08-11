@@ -5,39 +5,46 @@
 		"#format"	"{1:d}"
 		"en"		"You are not allowed to use this command for the next {1} seconds"
 		"de"		"Du darfst diesen Befehl nicht innerhalb der nächsten {1} Sekunden benutzen"
+		"fr"		"Vous ne pouvez pas utiliser cette commande avant {1} secondes"
 	}
 	"CallAdmin_HasReported"
 	{
 		"#format"	"{1:s},{2:s},{3:s}"
 		"en"		"{1} reported {2} for {3}"
 		"de"		"{1} hat {2} wegen {3} gemeldet"
+		"fr"		"{1} a signalé {2} pour {3}"
 	}
 	"CallAdmin_YouHaveReported"
 	{
 		"#format"	"{1:s},{2:s}"
 		"en"		"You have reported {1} for {2}"
 		"de"		"Du hast {1} wegen {2} gemeldet"
+		"fr"		"Vous avez signalé {1} pour {2}"
 	}
 	"CallAdmin_NoPlayers"
 	{
 		"en"		"There are no players you can report at this time"
 		"de"		"Es sind derzeit keine Spieler vorhanden die du melden kannst"
+		"fr"		"Aucun joueur ne peut être signalé pour le moment"
 	}
 	"CallAdmin_NotInGame"
 	{
 		"en"		"Player is not on the server anymore"
 		"de"		"Spieler ist nicht mehr auf dem Server"
+		"fr"		"Le joueur n'est plus sur le serveur"
 	}
 	"CallAdmin_SelectClient"
 	{
 		"en"		"Select a client to report"
 		"de"		"Wähle einen Spieler zum Melden"
+		"fr"		"Sélectionnez un joueur à signaler"
 	}
 	"CallAdmin_SelectReason"
 	{
 		"#format"	"{1:N}"
 		"en"		"Select a reason to report {1}"
 		"de"		"Wähle einen Grund um {1} zu melden"
+		"fr"		"Sélectionnez une raison pour signaler {1}"
 	}
 	// Used when exactly 1 admin is available
 	"CallAdmin_AdvertMessageSingular"
@@ -45,63 +52,75 @@
 		"#format"	"{1:d}"
 		"en"		"There is {1} admin available, type !call or /call in chat to report a player"
 		"de"		"Es ist {1} Admin verfügbar, tippe !call oder /call in den Chat um einen Spieler zu melden"
+		"fr"		"Il y a {1} admin disponible , tapez !call ou /call dans le chat pour signaler un joueur"
 	}
 	"CallAdmin_AdvertMessagePlural"
 	{
 		"#format"	"{1:d}"
 		"en"		"There are {1} admins available, type !call or /call in chat to report a player"
 		"de"		"Es sind {1} Admins verfügbar, tippe !call oder /call in den Chat um einen Spieler zu melden"
+		"fr"		"Il y a {1} admins disponibles , tapez !call ou /call dans le chat pour signaler un joueur"
 	}
 	"CallAdmin_OwnReason"
 	{
 		"en"		"Own reason"
 		"de"		"Eigener Grund"
+		"fr"		"Raison personnelle"
 	}
 	"CallAdmin_TypeOwnReason"
 	{
 		"en"		"You now can type an own banreason in the chat, please keep it short\nType '!noreason' or '!abort' to abort"
 		"de"		"Du kannst nun einen eigenen Bangrund in den Chat schreiben, fasse dich bitte kurz\nSchreibe '!noreason' oder '!abort' um abzubrechen"
+		"fr"		"Vous pouvez maintenant écrire une raison personnelle dans le chat , écrivez une raison abrégée s'il vous plait\nEcrivez '!noreason' ou '!abort' pour annuler"
 	}
 	"CallAdmin_CallAborted"
 	{
 		"en"		"Your call has been aborted"
 		"de"		"Der Meldevorgang wurde abgebrochen"
+		"fr"		"Votre appel à été annulé"
 	}
 	"CallAdmin_OwnReasonTooShort"
 	{
 		"en"		"Your banreason is too short, try again"
 		"de"		"Dein Bangrund ist zu kurz, versuche es erneut"
+		"fr"		"La raison du ban est trop courte , veuillez réessayer"
 	}
 	"CallAdmin_ConfirmCall"
 	{
 		"en"		"Are you sure you want to call an admin?, abuse will be punished"
 		"de"		"Bist du sicher dass du einen Admin rufen willst?, Missbrauch wird bestraft"
+		"fr"		"Voulez-vous vraiment appeler un admin ?, les abus seront sanctionnés"
 	}
 	"CallAdmin_Yes"
 	{
 		"en"		"Yes"
 		"de"		"Ja"
+		"fr"		"Oui"
 	}
 	"CallAdmin_No"
 	{
 		"en"		"No"
 		"de"		"Nein"
+		"fr"		"Non"
 	}
 	"CallAdmin_AlreadyReported"
 	{
 		"en"		"Player was already reported"
 		"de"		"Spieler wurde bereits gemeldet"
+		"fr"		"Joueur déjà signalé"
 	}
 	"CallAdmin_IngameAdminNotified"
 	{
 		"en"		"An admin inGame was notified about your report"
 		"de"		"Ein Admin inGame wurde über deine Meldung benachrichtigt"
+		"fr"		"Un admin en jeu a été notifié de votre signalement"
 	}
 	"CallAdmin_AdminNotification"
 	{
 		"#format"	"{1:N},{2:N},{3:s}"
 		"en"		"Player {1} reported {2} for {3}"
 		"de"		"Spieler {1} hat {2} wegen {3} gemeldet"
+		"fr"		"Le joueur {1} à signalé {2} pour {3}"
 	}
 	"CallAdmin_ReportAlreadyHandled"
 	{
