@@ -40,7 +40,7 @@ $helpers = new CallAdmin_Helpers();
 // Key set and no key given or key is wrong
 if (!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
-	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Notice");
+	$helpers->printXmlError2("APP_AUTH_FAILURE", "Given access key does not exist", "CallAdmin_Notice");
 }
 
 
@@ -51,7 +51,8 @@ $dbi = new mysqli($host, $username, $password, $database, $dbport);
 // Oh noes, we couldn't connect
 if ($dbi->connect_errno != 0)
 {
-	$helpers->printXmlError("DB_CONNECT_FAILURE", "CallAdmin_Notice");
+	$detailError = sprintf("Errorcode '%d': %s", $dbi->connect_errno, $dbi->connect_error);
+	$helpers->printXmlError2("DB_CONNECT_FAILURE", $detailError, "CallAdmin_Notice");
 }
 
 
@@ -84,8 +85,10 @@ if ($uniqueArray)
 	// delete failed
 	if ($deleteresult === FALSE)
 	{
+		$detailError = sprintf("Errorcode '%d': %s", $dbi->errno, $dbi->error);
+		
 		$dbi->close();
-		$helpers->printXmlError("DB_DELETE_FAILURE", "CallAdmin_Notice");
+		$helpers->printXmlError2("DB_DELETE_FAILURE", $detailError, "CallAdmin_Notice");
 	}
 	
 	// Start with zero
@@ -103,8 +106,10 @@ if ($uniqueArray)
 		// Insert failed
 		if ($insertresult === FALSE)
 		{
+			$detailError = sprintf("Errorcode '%d': %s", $dbi->errno, $dbi->error);
+		
 			$dbi->close();
-			$helpers->printXmlError("DB_UPDATE_FAILURE", "CallAdmin_Notice");
+			$helpers->printXmlError2("DB_UPDATE_FAILURE", $detailError, "CallAdmin_Notice");
 		}
 		
 		if ($current + 1 >= 64)
@@ -199,8 +204,10 @@ $fetchresult = $dbi->query("SELECT
 // Retrieval failed
 if ($fetchresult === FALSE)
 {
+	$detailError = sprintf("Errorcode '%d': %s", $dbi->errno, $dbi->error);
+	
 	$dbi->close();
-	$helpers->printXmlError("DB_RETRIEVE_FAILURE", "CallAdmin_Notice");
+	$helpers->printXmlError2("DB_RETRIEVE_FAILURE", $detailError, "CallAdmin_Notice");
 }
 
 
@@ -232,8 +239,10 @@ if (isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
 	// Insert failed
 	if ($insertresult === FALSE)
 	{
+		$detailError = sprintf("Errorcode '%d': %s", $dbi->errno, $dbi->error);
+		
 		$dbi->close();
-		$helpers->printXmlError("DB_UPDATE_FAILURE", "CallAdmin_Notice");
+		$helpers->printXmlError2("DB_UPDATE_FAILURE", $detailError, "CallAdmin_Notice");
 	}
 }
 
