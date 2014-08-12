@@ -41,7 +41,7 @@ $helpers = new CallAdmin_Helpers();
 // Key set and no key given or key is wrong
 if (!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
-	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Trackers");
+	$helpers->printXmlError2("APP_AUTH_FAILURE", "Given access key doesn't exist", "CallAdmin_Trackers");
 }
 
 
@@ -52,7 +52,8 @@ $dbi = new mysqli($host, $username, $password, $database, $dbport);
 // Oh noes, we couldn't connect
 if ($dbi->connect_errno != 0)
 {
-	$helpers->printXmlError("DB_CONNECT_FAILURE", "CallAdmin_Trackers");
+	$detailError = sprintf("Errorcode '%d': %s", $dbi->connect_errno, $dbi->connect_error);
+	$helpers->printXmlError2("DB_CONNECT_FAILURE", $detailError, "CallAdmin_Trackers");
 }
 
 
@@ -145,8 +146,10 @@ $fetchresult = $dbi->query("SELECT
 // Retrieval failed
 if ($fetchresult === FALSE)
 {
+	$detailError = sprintf("Errorcode '%d': %s", $dbi->errno, $dbi->error);
+	
 	$dbi->close();
-	$helpers->printXmlError("DB_RETRIEVE_FAILURE", "CallAdmin_Trackers");
+	$helpers->printXmlError2("DB_RETRIEVE_FAILURE", $detailError, "CallAdmin_Trackers");
 }
 
 $dbi->close();
