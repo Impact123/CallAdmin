@@ -117,6 +117,31 @@ class CallAdmin_Helpers
 		exit;
 	}
 	
+	
+	
+	/**
+	 * Prints an detailed xmlerror and dies
+	 * 
+	 * @var    string
+	 * @var    string
+	 * @var    string
+	 * @noreturn
+	 */
+	public function printXmlError2($error, $detailMsg, $tag)
+	{
+		if (!headers_sent())
+		{
+			header("Content-type: text/xml; charset=utf-8"); 
+		}
+
+		$xml = new SimpleXMLElement("<$tag/>");
+
+		$xml->addChild("error", $error);
+		$xml->addChild("detailError", $detailMsg);
+		echo $xml->asXML();
+		exit;
+	}
+	
 
 	
 	/**
