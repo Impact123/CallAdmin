@@ -37,6 +37,7 @@ require_once("include/TeamSpeak3/TeamSpeak3.php");
 
 
 $helpers = new CallAdmin_Helpers();
+$alreadyAdded = Array();
 
 
 // Key set and no key given or key is wrong
@@ -61,9 +62,19 @@ try
 		//$name = (string)$ts3_Client['client_nickname'];
 		
 		
+		// If already added, skip this uid
+		if (in_array($uid, $alreadyAdded))
+		{
+			continue;
+		}
+		
+		
 		// Is listed as admin, add him to the count
 		if (in_array($uid, $access_keys[$_GET['key']]))
 		{
+			// Add to already added list 
+			array_push($alreadyAdded, $uid);
+			
 			$count++;
 		}
 	}

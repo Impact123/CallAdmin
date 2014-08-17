@@ -37,6 +37,7 @@ require_once("include/TeamSpeak3/TeamSpeak3.php");
 
 
 $helpers = new CallAdmin_Helpers();
+$alreadyAdded = Array();
 
 
 // Key set and no key given or key is wrong
@@ -68,10 +69,19 @@ try
 			continue;
 		}
 		
+		// If already added, skip this uid
+		if (in_array($uid, $alreadyAdded))
+		{
+			continue;
+		}
+		
 		$child = $usersChild->addChild("singleUser");
 
 		$child->addChild("name", $name);
 		$child->addChild("uid", $uid);
+		
+		// Add to already added list 
+		array_push($alreadyAdded, $uid);
 	}
 }
 catch(TeamSpeak3_Adapter_ServerQuery_Exception $e)

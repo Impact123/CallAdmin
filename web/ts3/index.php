@@ -89,6 +89,7 @@ $connect = "[url=steam://connect/" . $serverIP . "]connect now[/url]";
 
 require_once("include/TeamSpeak3/TeamSpeak3.php");
 $ts3 = new TeamSpeak3();
+$alreadyAdded = Array();
 
 try
 {
@@ -102,9 +103,19 @@ try
 		//$name = (string)$ts3_Client['client_nickname'];
 		
 		
+		// If already added, skip this uid
+		if (in_array($uid, $alreadyAdded))
+		{
+			continue;
+		}
+		
+		
 		// Is listed as admin, go send him a message
 		if (in_array($uid, $access_keys[$_GET['key']]))
 		{
+			// Add to already added list 
+			array_push($alreadyAdded, $uid);
+			
 			$ts3_Client->message("----------------------------------------------------");
 			$ts3_Client->message("[CallAdmin] New report on:   $serverName ($serverIP) $connect");
 			$ts3_Client->message("[CallAdmin] Reporter:        $clientName ($clientCommBB)");
