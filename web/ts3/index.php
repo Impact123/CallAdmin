@@ -42,7 +42,7 @@ $helpers = new CallAdmin_Helpers();
 // Key set and no key given or key is wrong
 if (!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
-	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Ts3");
+	$helpers->printXmlError2("APP_AUTH_FAILURE", "Given access key doesn't exist", "CallAdmin_Ts3");
 }
 
 
@@ -54,7 +54,7 @@ if (!isset($_GET['targetid'])
 		|| !isset($_GET['servername'])
 		|| !isset($_GET['serverip']))
 {
-	$helpers->printXmlError("APP_INPUT_FAILURE", "CallAdmin_Ts3");
+	$helpers->printXmlError2("APP_INPUT_FAILURE", "Required meta data was missing or given in invalid format", "CallAdmin_Ts3");
 }
 
 
