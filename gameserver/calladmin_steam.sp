@@ -64,6 +64,7 @@ new Handle:g_hSteamPassword;
 new String:g_sSteamPassword[128];
 
 new Handle:g_hSteamIDRegex;
+new Handle:g_hSteamIDRegex2;
 new Handle:g_hCommunityIDRegex;
 
 
@@ -77,6 +78,7 @@ new g_iLastReportID;
 enum AuthStringType
 {
 	AuthString_SteamID,
+	AuthString_SteamID2,
 	AuthString_CommunityID,
 	AuthString_Unknown
 }
@@ -122,6 +124,7 @@ public OnPluginStart()
 	
 	// Just for simple validation usage
 	g_hSteamIDRegex     = CompileRegex("^STEAM_[0-1]{1}:[0-1]{1}:[0-9]+$");
+	g_hSteamIDRegex2    = CompileRegex("^\\[U:1:[0-9]{3,11}+\\]$");
 	g_hCommunityIDRegex = CompileRegex("^[0-9]{4,17}+$");
 	
 	
@@ -262,6 +265,14 @@ ParseSteamIDList()
 		if (type == AuthString_SteamID)
 		{
 			GetRegexSubString(g_hSteamIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
+		}
+		// Is a steamid2
+		else if (type == AuthString_SteamID2)
+		{
+			GetRegexSubString(g_hSteamIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
+			
+			// Convert it to an steamid
+			SteamID2ToSteamId(sReadBuffer, sReadBuffer, sizeof(sReadBuffer));
 		}
 		// Is a communityid
 		else if (type == AuthString_CommunityID)
@@ -676,12 +687,30 @@ stock AuthStringType:GetAuthIDType(String:auth[])
 	{
 		return AuthString_SteamID;
 	}
+	else if (MatchRegex(g_hSteamIDRegex2, auth) == 1)
+	{
+		return AuthString_SteamID2;
+	}
 	else if (MatchRegex(g_hCommunityIDRegex, auth) == 1)
 	{
 		return AuthString_CommunityID;
 	}
 	
 	return AuthString_Unknown;
+}
+
+
+
+stock SteamID2ToSteamId(const String:steamID2[], String:dest[], max_len)
+{
+	decl String:sTemp[21];
+	strcopy(sTemp, sizeof(sTemp), steamID2);
+	
+	sTemp[strlen(sTemp)] = '\0';
+	
+	new temp = StringToInt(sTemp[5]);
+	
+	Format(dest, max_len, "STEAM_0:%d%d", temp & 1, temp >> 1);
 }
 
 
