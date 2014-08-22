@@ -274,12 +274,22 @@ while (($row = $fetchresult->fetch_assoc()))
 	$clientLink = "INVALID";
 	if ($helpers->IsValidSteamID($clientID))
 	{
+		if ($helpers->GetAuthIDType($clientID) == AuthIDType::AuthString_SteamID2)
+		{
+			$clientID = $helpers->SteamID2ToSteamId($clientID);
+		}
+		
 		$clientLink = sprintf("<a href=\"http://steamcommunity.com/profiles/%s\">%s</a>", $helpers->SteamIDToComm($clientID), $clientName);
 	}
 	
 	$targetLink = "INVALID";
 	if ($helpers->IsValidSteamID($targetID))
 	{
+		if ($helpers->GetAuthIDType($targetID) == AuthIDType::AuthString_SteamID2)
+		{
+			$targetID = $helpers->SteamID2ToSteamId($targetID);
+		}
+		
 		$targetLink = sprintf("<a href=\"http://steamcommunity.com/profiles/%s\">%s</a>", $helpers->SteamIDToComm($targetID), $targetName);
 	}
 	
