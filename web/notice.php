@@ -221,6 +221,12 @@ if (isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
 	// Steamid was submitted, this must have come from the client
 	if (isset($_GET['steamid']) && $helpers->IsValidSteamID($_GET['steamid']))
 	{
+		if ($helpers->GetAuthIDType($_GET['steamid']) == AuthIDType::AuthString_SteamID2)
+		{
+			// This is bad, fix it
+			$_GET['steamid'] = $helpers->SteamID2ToSteamId($_GET['steamid']);
+		}
+		
 		$trackerID = $dbi->escape_string($_GET['steamid']);
 	}
 	
