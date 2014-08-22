@@ -23,7 +23,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  */
- 
+class AuthIDType
+{
+	const AuthString_SteamID     = 0;
+	const AuthString_SteamID2    = 1;
+	const AuthString_CommunityID = 2;
+	const AuthString_Unknown     = 3;
+}
+
 class CallAdmin_Helpers
 {
 	/**
@@ -37,6 +44,24 @@ class CallAdmin_Helpers
 		return str_replace(array("&", "<", ">", "\"", "'"), array("&amp;", "&lt;", "&gt;", "&quot;", "&apos;"), $input);
 	}
 
+	
+	public function GetAuthIDType($steamID)
+	{
+		if (preg_match("/^STEAM_[0-1]:[0-1]:[0-9]{3,11}+$/", $steamID))
+		{
+			return AuthIDType::AuthString_SteamID;
+		}
+		else if (preg_match("/^\[U:1:[0-9]{3,11}+\]$/", $steamID))
+		{
+			return AuthIDType::AuthString_SteamID2;
+		}
+		else if (preg_match("/^[0-9]{4,17}+$/", $steamID))
+		{
+			return AuthIDType::AuthString_CommunityID;
+		}
+
+		return AuthIDType::AuthString_Unknown;
+	}
 
 	
 	/**
@@ -47,10 +72,24 @@ class CallAdmin_Helpers
 	 */
 	public function IsValidSteamID($steamID)
 	{
-		return preg_match("/^STEAM_[0-1]:[0-1]:[0-9]{3,11}+$/", $steamID);
+		return self::GetAuthIDType($steamID) != AuthIDType::AuthString_Unknown;
 	}
 	
 	
+	
+	/**
+	 * Converts an steamid2 to an steamid
+	 * 
+	 * @var       string
+	 * @return    string
+	 */
+	public function SteamID2ToSteamId($steamId)
+	{
+		$temp = substr($steamId, 5, strlen($steamId) - 6);
+		$temp = intval($temp);
+		
+		return ("STEAM_0:" . ($temp & 1) . ":" . ($temp >> 1));
+	}
 	
 	
 	/**
@@ -61,6 +100,11 @@ class CallAdmin_Helpers
 	 */
 	function SteamIDToComm($steamId)
 	{
+		if (GetAuthIDType($steamId) == AuthIDType::AuthString_SteamID2)
+		{
+			$steamId = SteamID2ToSteamId($steamId);
+		}
+		
 		//Example SteamID: "STEAM_X:Y:ZZZZZZZZ"
 		$gameType   = 0; //This is X.  It's either 0 or 1 depending on which game you are playing (CSS, L4D, TF2, etc)
 		$authServer = 0; //This is Y.  Some people have a 0, some people have a 1
@@ -81,7 +125,6 @@ class CallAdmin_Helpers
 	}
 	
 	
-
 	
 	/**
 	 * Converts the last token pair of an ip to 0
