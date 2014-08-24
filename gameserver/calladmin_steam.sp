@@ -710,7 +710,7 @@ stock SteamID2ToSteamId(const String:steamID2[], String:dest[], max_len)
 	
 	new temp = StringToInt(sTemp[5]);
 	
-	Format(dest, max_len, "STEAM_0:%d%d", temp & 1, temp >> 1);
+	Format(dest, max_len, "STEAM_0:%d:%d", temp & 1, temp >> 1);
 }
 
 
