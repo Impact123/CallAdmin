@@ -632,7 +632,7 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any:pack)
 				}
 				
 				// No match :(
-				if (MatchRegex(g_hCommunityIDRegex, Split[i]) != 1)
+				if (GetAuthIDType(Split[i]) != AuthString_CommunityID)
 				{
 					continue;
 				}
