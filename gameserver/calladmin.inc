@@ -153,6 +153,16 @@ forward CallAdmin_OnRequestTrackersCountRefresh(&trackers);
 
 
 
+enum ServerData
+{
+	ServerData_HostName,     /**< This is the hostname of the server, gathered from the `hostname` convar */
+	ServerData_HostIP,       /**< This is the hostip of the server, gathered and converted from the `hostip` convar */
+	ServerData_HostPort      /**< This is the hostport of the server, gathered from the `hostport` convar */
+};
+
+
+
+
 /**
  * Called when the serverdata data is changed.
  *
@@ -164,15 +174,6 @@ forward CallAdmin_OnRequestTrackersCountRefresh(&trackers);
  */
 forward CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const String:oldVal[], const String:newVal[]);
 
-
-
-
-enum ServerData
-{
-	ServerData_HostName,     /**< This is the hostname of the server, gathered from the `hostname` convar */
-	ServerData_HostIP,       /**< This is the hostip of the server, gathered and converted from the `hostip` convar */
-	ServerData_HostPort      /**< This is the hostport of the server, gathered from the `hostport` convar */
-};
 
 
 
