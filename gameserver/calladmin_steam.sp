@@ -181,7 +181,7 @@ public OnPluginStart()
 
 
 
-public OnMessageResultReceived(MessageBotResult:result, error)
+public OnMessageResultReceived(MessageBotResult:result, MessageBotError:error)
 {
 	if (result != RESULT_NO_ERROR)
 	{
