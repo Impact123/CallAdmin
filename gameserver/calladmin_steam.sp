@@ -183,9 +183,15 @@ public OnPluginStart()
 
 public OnMessageResultReceived(MessageBotResult:result, MessageBotError:error)
 {
+	static String:resultString[][] = {"No error", "Error while trying to login", "Operation timed out",
+	                                  "No recipients were setup prior to sending a message", "Couldn't send to any recipient"};
+
+
 	if (result != RESULT_NO_ERROR)
 	{
-		CallAdmin_LogMessage("Failed to send message, result was: (%d, %d)", result, error);
+		decl String:sSteamMethod[24];
+		Format(sSteamMethod, sizeof(sSteamMethod), "%s", g_bSteamMethod ? "Steamworks" : "Web API");
+		CallAdmin_LogMessage("Failed to send steam message via %s: (result: %d [%s] | error: %d)", result, resultString[result], error);
 	}
 }
 
