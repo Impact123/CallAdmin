@@ -191,7 +191,7 @@ public OnMessageResultReceived(MessageBotResult:result, MessageBotError:error)
 	{
 		decl String:sSteamMethod[24];
 		Format(sSteamMethod, sizeof(sSteamMethod), "%s", g_bSteamMethod ? "Steamworks" : "Web API");
-		CallAdmin_LogMessage("Failed to send steam message via %s: (result: %d [%s] | error: %d)", result, resultString[result], error);
+		CallAdmin_LogMessage("Failed to send steam message via %s: (result: %d [%s] | error: %d)", sSteamMethod, result, resultString[result], error);
 	}
 }
 
