@@ -110,9 +110,6 @@ new String:g_sTargetReason[MAXPLAYERS + 1][REASON_MAX_LENGTH];
 // Is this player writing his own reason?
 new bool:g_bAwaitingReason[MAXPLAYERS +1];
 
-// Is this player waiting for an admin?
-new bool:g_bAwaitingAdmin[MAXPLAYERS +1];
-
 // When has this user reported the last time
 new g_iLastReport[MAXPLAYERS +1];
 
@@ -1248,7 +1245,6 @@ public OnClientDisconnect_Post(client)
 	g_iLastReported[client]    = 0;
 	g_bSawMesage[client]       = false;
 	g_bAwaitingReason[client]  = false;
-	g_bAwaitingAdmin[client]   = false;
 	
 	RemoveAsTarget(client);
 }
