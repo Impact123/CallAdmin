@@ -27,6 +27,7 @@
 #include <sourcemod>
 #include <autoexecconfig>
 #include "calladmin"
+#include "calladmin_stocks"
 
 #undef REQUIRE_PLUGIN
 #include <updater>
@@ -398,24 +399,4 @@ public OnClientDisconnect_Post(client)
 {
 	g_bClientOnBlacklist[client] = false;
 	g_bClientImmune[client] = false;
-}
-
-
-
-/*
-
-STOCKS
-
-*/
-
-
-// Is Client valid
-stock bool:IsClientValid(client)
-{
-	if (client > 0 && client <= MaxClients && IsClientInGame(client))
-	{
-		return true;
-	}
-	
-	return false;
 }
