@@ -26,6 +26,7 @@
 #include <sourcemod>
 #include <autoexecconfig>
 #include "calladmin"
+#include "calladmin_stocks"
 
 #undef REQUIRE_PLUGIN
 #include <updater>
@@ -1412,19 +1413,6 @@ public Action:ChatListener(client, const String:command[], argc)
 	}
 	
 	return Plugin_Continue;
-}
-
-
-
-
-stock bool:IsClientValid(id)
-{
-	if (id > 0 && id <= MaxClients && IsClientInGame(id))
-	{
-		return true;
-	}
-	
-	return false;
 }
 
 
