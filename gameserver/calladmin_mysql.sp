@@ -621,16 +621,3 @@ OnAllLoaded()
 	// Update Serverdata
 	UpdateServerData();
 }
-
-
-
-
-stock bool:IsClientValid(id)
-{
-	if (id > 0 && id <= MaxClients && IsClientInGame(id))
-	{
-		return true;
-	}
-	
-	return false;
-}
