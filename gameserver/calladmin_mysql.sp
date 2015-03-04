@@ -49,8 +49,7 @@ new g_iOhphanedEntryPruning;
 new Handle:g_hVersion;
 
 new bool:g_bAllLoaded;
-new bool:g_bLateLoad;
-new bool:g_bDBDelayedLoad;
+new bool:g_bDbInitTriggered;
 
 new g_iHostPort;
 new String:g_sServerName[64];
@@ -85,29 +84,15 @@ public Plugin:myinfo =
 
 
 
-public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
-{
-	g_bLateLoad = late;
-	
-	if (!g_bLateLoad)
-	{
-		g_bDBDelayedLoad = true;
-	}
-
-	return APLRes_Success;
-}
-
-
-
 public OnConfigsExecuted()
 {
-	if (g_bDBDelayedLoad)
+	// This convar is the only one which isn't hooked, we need to fetch its content here
+	GetConVarString(g_hTableName, g_sTableName, sizeof(g_sTableName));
+	
+	if (!g_bDbInitTriggered)
 	{
-		// We are not loaded, yet
-		g_bAllLoaded = false;
-
 		InitDB();
-		g_bDBDelayedLoad = false;
+		g_bDbInitTriggered = true;
 	}
 }
 
@@ -117,18 +102,6 @@ public OnConfigsExecuted()
 
 public OnPluginStart()
 {
-	// We only connect directly if it was a lateload, else we connect when configs were executed to grab the cvars
-	// Configs might've not been excuted and we can't grab the hostname/hostport else
-	if (g_bLateLoad)
-	{
-		// We are not loaded, yet
-		g_bAllLoaded = false;
-
-		InitDB();
-	}
-	
-	
-	
 	AutoExecConfig_SetFile("plugin.calladmin_mysql");
 	
 	g_hVersion                = AutoExecConfig_CreateConVar("sm_calladmin_mysql_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
@@ -150,8 +123,6 @@ public OnPluginStart()
 
 	g_iEntryPruning = GetConVarInt(g_hEntryPruning);
 	HookConVarChange(g_hEntryPruning, OnCvarChanged);
-
-	GetConVarString(g_hTableName, g_sTableName, sizeof(g_sTableName));
 
 	GetConVarString(g_hServerKey, g_sServerKey, sizeof(g_sServerKey));
 	HookConVarChange(g_hServerKey, OnCvarChanged);
