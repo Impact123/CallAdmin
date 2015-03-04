@@ -2,19 +2,21 @@ language: c
 
 before_script:
     - sudo apt-get update -qq
-    - sudo apt-get install libc6-i386
+    - sudo apt-get install unzip libc6-i386 lib32stdc++6 -y
     - wget http://sourcemod.gameconnect.net/files/sourcemod-1.6.0-linux.tar.gz
     - wget http://sourcemod.gameconnect.net/files/sourcemod-1.7.0-linux.tar.gz
     - mkdir sm16 sm17
-    - tar vxfz sourcemod-1.6.0-linux.tar.gz -C sm16
-    - tar vxfz sourcemod-1.7.0-linux.tar.gz -C sm17
-    - ls sm17
+    - tar xfz sourcemod-1.6.0-linux.tar.gz -C sm16
+    - tar xfz sourcemod-1.7.0-linux.tar.gz -C sm17
     - export SM16=$(pwd)/sm16/addons/sourcemod/scripting
     - export SM17=$(pwd)/sm17/addons/sourcemod/scripting
-    - ls $SM17
     - wget https://raw.githubusercontent.com/Impact123/AutoExecConfig/master/autoexecconfig.inc -P sharedinclude
     - wget https://raw.githubusercontent.com/popoklopsi/MessageBot/master/messagebot.inc -P sharedinclude
     - wget https://bitbucket.org/GoD_Tony/updater/raw/default/include/updater.inc -P sharedinclude
+    - wget -O socket.zip "https://forums.alliedmods.net/attachment.php?attachmentid=83286&d=1299423920"
+    - unzip socket.zip addons/sourcemod/scripting/include/socket.inc -d sharedinclude
+    
+    
 
 script:
     - $SM16/spcomp -isharedinclude gameserver/calladmin.sp
