@@ -1003,45 +1003,11 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 		// Client has chosen to confirm the call
 		if (StrEqual("Yes", sInfo))
 		{
-			// Selected target isn't valid anymore
-			if (!IsClientValid(g_iTarget[client]))
-			{
-				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
-				
-				return;
-			}
-			
-			
-			// Already reported (race condition)
-			if (!LastReportedTimeCheck(g_iTarget[client]) )
-			{
-				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
-				
-				return;					
-			}
-			
-			
-			// Admins available and we want to notify them instead of sending the report
-			if (GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
-			{
-				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
-				PrintNotifyMessageToAdmins(client, g_iTarget[client]);
-				
-				// States
-				SetStates(client, g_iTarget[client]);
-				
-				return;
-			}
-			
-			
-			// Call the forward
-			if (!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
-			{
-				return;
-			}
-			
 			// Send the report
-			ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
+			if (!ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]))
+			{
+				return;
+			}
 		}
 		else
 		{
@@ -1055,10 +1021,57 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 }
 
 
-
-
-ReportPlayer(client, target, String:sReason[])
+bool:PreReportCheck(client, target)
 {
+	// Selected target isn't valid anymore
+	if (!IsClientValid(target))
+	{
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
+		
+		return false;
+	}
+	
+	
+	// Already reported (race condition)
+	if (!LastReportedTimeCheck(target))
+	{
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
+		
+		return false;					
+	}
+	
+	return true;
+}
+
+
+
+bool:ReportPlayer(client, target, String:sReason[])
+{
+	if (!PreReportCheck(client, target))
+	{
+		return false;
+	}
+	
+	
+	// Admins available and we want to notify them instead of sending the report
+	if (GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+	{
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
+		PrintNotifyMessageToAdmins(client, g_iTarget[client]);
+		
+		// States
+		SetStates(client, g_iTarget[client]);
+		
+		return false;
+	}
+	
+	
+	// Call the forward
+	if (!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
+	{
+		return false;
+	}
+	
 	new String:clientNameBuf[MAX_NAME_LENGTH];
 	new String:targetNameBuf[MAX_NAME_LENGTH];
 
@@ -1085,6 +1098,8 @@ ReportPlayer(client, target, String:sReason[])
 	
 	// Call the forward
 	Forward_OnReportPost(client, target, sReason);
+	
+	return true;
 }
 
 
@@ -1206,25 +1221,13 @@ public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
 		iSerial = StringToInt(sInfo);
 		iID     = GetClientFromSerial(iSerial);
 		
-		
-		// Selected target isn't valid anymore
-		if (!IsClientValid(iID))
+
+		if (!PreReportCheck(client, iID))
 		{
-			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
-			
-			return;
-		}
-		
-		
-		g_iTarget[client] = iID;
-		
-		// Already reported (race condition)
-		if (!LastReportedTimeCheck(g_iTarget[client]) )
-		{
-			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
-			
 			return;					
 		}
+		
+		g_iTarget[client] = iID;
 		
 		ShowBanReasonMenu(client);
 	}
@@ -1323,21 +1326,9 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		Format(g_sTargetReason[client], sizeof(g_sTargetReason[]), sInfo);
 		
 		
-		// Selected target isn't valid anymore
-		if (!IsClientValid(g_iTarget[client]))
+		if (!PreReportCheck(client, g_iTarget[client]))
 		{
-			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
-			
 			return;
-		}
-		
-		
-		// Already reported (race condition)
-		if (!LastReportedTimeCheck(g_iTarget[client]) )
-		{
-			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
-			
-			return;					
 		}
 		
 			
@@ -1348,27 +1339,10 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		}
 		else
 		{
-			// Admins available and we want to notify them instead of sending the report
-			if (GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
-			{
-				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
-				PrintNotifyMessageToAdmins(client, g_iTarget[client]);
-				
-				// States
-				SetStates(client, g_iTarget[client]);
-				
-				return;
-			}
-			
-			
-			// Call the forward
-			if (!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
+			if (!ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]))
 			{
 				return;
 			}
-			
-			
-			ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
 		}			
 	}
 	else if (action == MenuAction_End)
@@ -1413,21 +1387,9 @@ public Action:ChatListener(client, const String:command[], argc)
 		}
 		
 		
-		// Selected target isn't valid anymore
-		if (!IsClientValid(g_iTarget[client]))
+		if (!PreReportCheck(client, g_iTarget[client]))
 		{
-			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NotInGame");
-			
 			return Plugin_Handled;
-		}
-		
-		
-		// Already reported (race condition)
-		if (!LastReportedTimeCheck(g_iTarget[client]) )
-		{
-			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_AlreadyReported");
-			
-			return Plugin_Handled;					
 		}
 		
 		
@@ -1438,27 +1400,10 @@ public Action:ChatListener(client, const String:command[], argc)
 		}
 		else
 		{
-			// Admins available and we want to notify them instead of send the report
-			if (GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
-			{
-				PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
-				PrintNotifyMessageToAdmins(client, g_iTarget[client]);
-				
-				// States
-				SetStates(client, g_iTarget[client]);
-				
-				return Plugin_Handled;
-			}
-			
-			
-			// Call the forward
-			if (!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
+			if (!ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]))
 			{
 				return Plugin_Handled;
 			}
-			
-			
-			ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]);
 		}
 		
 		
