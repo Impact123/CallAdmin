@@ -1,6 +1,8 @@
 language: c
 
 before_script:
+    - sudo apt-get update -qq
+    - sudo apt-get install libc6-i386
     - wget http://sourcemod.gameconnect.net/files/sourcemod-1.6.0-linux.tar.gz
     - wget http://sourcemod.gameconnect.net/files/sourcemod-1.7.0-linux.tar.gz
     - mkdir sm16 sm17
