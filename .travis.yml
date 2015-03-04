@@ -14,7 +14,7 @@ before_script:
     - wget https://raw.githubusercontent.com/popoklopsi/MessageBot/master/messagebot.inc -P sharedinclude
     - wget https://bitbucket.org/GoD_Tony/updater/raw/default/include/updater.inc -P sharedinclude
     - wget -O socket.zip "https://forums.alliedmods.net/attachment.php?attachmentid=83286&d=1299423920"
-    - unzip socket.zip addons/sourcemod/scripting/include/socket.inc -d sharedinclude
+    - unzip -p socket.zip addons/sourcemod/scripting/include/socket.inc > sharedinclude/socket.inc
     
     
 
