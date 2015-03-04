@@ -86,11 +86,11 @@ public Plugin:myinfo =
 
 public OnConfigsExecuted()
 {
-	// This convar is the only one which isn't hooked, we need to fetch its content here
-	GetConVarString(g_hTableName, g_sTableName, sizeof(g_sTableName));
-	
 	if (!g_bDbInitTriggered)
 	{
+		// This convar is the only one which isn't hooked, we only fetch its content once before the connection to the database is made
+		GetConVarString(g_hTableName, g_sTableName, sizeof(g_sTableName));
+		
 		InitDB();
 		g_bDbInitTriggered = true;
 	}
