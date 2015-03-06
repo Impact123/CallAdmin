@@ -191,7 +191,6 @@ public Native_GetCurrentTrackers(Handle:plugin, numParams)
 
 public Native_RequestTrackersCountRefresh(Handle:plugin, numParams)
 {
-	// Fire the internal update
 	Timer_UpdateTrackersCount(INVALID_HANDLE);
 }
 
@@ -245,23 +244,17 @@ public Native_ReportClient(Handle:plugin, numParams)
 	{
 		return false;
 	}
-
 	
-	// Call the forward
 	if (!Forward_OnReportPre(client, target, sReason))
 	{
 		return false;
 	}
 
-
 	// Set the report id
 	g_iCurrentReportID++;
 	PushArrayCell(g_hActiveReports, g_iCurrentReportID);
 
-	
-	// Call the forward
 	Forward_OnReportPost(client, target, sReason);
-	
 
 	return true;
 }
@@ -279,7 +272,6 @@ public Native_LogMessage(Handle:plugin, numParams)
 	
 	LogToFileEx(g_sLogFile, "[%s] %s", sPluginName, sMessage);
 	
-	// Call the forward
 	Forward_OnLogMessage(plugin, sMessage);
 }
 
@@ -382,7 +374,6 @@ public OnPluginStart()
 	HookConVarChange(g_hAdminAction, OnCvarChanged);
 	
 	
-	// We only create a timer if interval > 0.0
 	if (g_fAdvertInterval != 0.0)
 	{
 		g_hAdvertTimer = CreateTimer(g_fAdvertInterval, Timer_Advert, _, TIMER_REPEAT);
@@ -391,6 +382,7 @@ public OnPluginStart()
 	
 	// Modules must create their own updaters
 	CreateTimer(10.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
+	
 	
 	// Used for the own reason
 	AddCommandListener(ChatListener, "say");
@@ -433,7 +425,6 @@ public OnPluginStart()
 		CreateReasonList();
 	}
 	
-	// Read in all those Reasons
 	ParseReasonList();
 }
 
@@ -445,7 +436,6 @@ CreateReasonList()
 	new Handle:hFile;
 	hFile = OpenFile(g_sReasonConfigFile, "w");
 	
-	// Failed to open
 	if (hFile == INVALID_HANDLE)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_reasons.cfg' for writing");
@@ -474,7 +464,6 @@ ParseReasonList()
 	hFile = OpenFile(g_sReasonConfigFile, "r");
 	
 	
-	// Failed to open
 	if (hFile == INVALID_HANDLE)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_reasons.cfg' for reading");
@@ -507,7 +496,7 @@ ParseReasonList()
 		}
 			
 		
-		// Add the reason to the list if it doesn't exist already
+		// Add the reason to the list only if it doesn't already exist
 		if (FindStringInArray(g_hReasonAdt, sReadBuffer) == -1)
 		{
 			PushArrayString(g_hReasonAdt, sReadBuffer);
@@ -767,7 +756,6 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	{
 		g_iHostPort = GetConVarInt(g_hHostPort);
 		
-		// Call forward
 		Forward_OnServerDataChanged(cvar, ServerData_HostPort, oldValue, newValue);
 	}
 	else if (cvar == g_hHostIP)
@@ -776,14 +764,12 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 		
 		LongToIp(g_iHostIP, g_sHostIP, sizeof(g_sHostIP));
 		
-		// Call forward
 		Forward_OnServerDataChanged(cvar, ServerData_HostIP, g_sHostIP, g_sHostIP);
 	}
 	else if (cvar == g_hServerName)
 	{
 		GetConVarString(g_hServerName, g_sServerName, sizeof(g_sServerName));
 		
-		// Call forward
 		Forward_OnServerDataChanged(cvar, ServerData_HostName, oldValue, newValue);
 	}
 	else if (cvar == g_hVersion)
@@ -792,7 +778,6 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	}
 	else if (cvar == g_hAdvertInterval)
 	{
-		// Close the old timer
 		if (g_hAdvertTimer != INVALID_HANDLE)
 		{
 			CloseHandle(g_hAdvertTimer);
@@ -846,7 +831,6 @@ public Action:Command_Call(client, args)
 	}
 	
 	
-	// Call the forward
 	if (!Forward_OnDrawMenu(client))
 	{
 		return Plugin_Handled;
@@ -872,7 +856,6 @@ public Action:Command_Call(client, args)
 
 public Action:Command_HandleCall(client, args)
 {
-	// Console cannot use this
 	if (client == 0)
 	{
 		PrintToServer("This command can't be used from console");
@@ -881,7 +864,6 @@ public Action:Command_HandleCall(client, args)
 	}
 	
 	
-	// Only admins can access this command
 	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
 	{
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
@@ -890,7 +872,6 @@ public Action:Command_HandleCall(client, args)
 	}
 	
 	
-	// We need exactly 1 argument
 	if (GetCmdArgs() != 1)
 	{
 		decl String:cmdName[64];
@@ -1004,7 +985,6 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 		// Client has chosen to confirm the call
 		if (StrEqual("Yes", sInfo))
 		{
-			// Send the report
 			if (!ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]))
 			{
 				return;
@@ -1060,14 +1040,12 @@ bool:ReportPlayer(client, target, String:sReason[])
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
 		PrintNotifyMessageToAdmins(client, g_iTarget[client]);
 		
-		// States
 		SetStates(client, g_iTarget[client]);
 		
 		return false;
 	}
 	
 	
-	// Call the forward
 	if (!Forward_OnReportPre(client, g_iTarget[client], g_sTargetReason[client]))
 	{
 		return false;
@@ -1088,16 +1066,12 @@ bool:ReportPlayer(client, target, String:sReason[])
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_YouHaveReported", targetNameBuf, sReason);
 	}
 	
-	// States
 	SetStates(client, target);
-
 	
 	// Set the report id
 	g_iCurrentReportID++;
 	PushArrayCell(g_hActiveReports, g_iCurrentReportID);
 
-	
-	// Call the forward
 	Forward_OnReportPost(client, target, sReason);
 	
 	return true;
@@ -1112,16 +1086,13 @@ bool:ReportPlayer(client, target, String:sReason[])
 
 public Action:Timer_UpdateTrackersCount(Handle:timer)
 {
-	// Get current trackers
 	new temp = GetTotalTrackers();
 	
-	// Call the forward
 	if (temp != g_iCurrentTrackers)
 	{
 		Forward_OnTrackerCountChanged(g_iCurrentTrackers, temp);
 	}
 	
-	// Set the new count
 	g_iCurrentTrackers = temp;
 	
 	return Plugin_Continue;
@@ -1316,7 +1287,7 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		new String:sInfo[REASON_MAX_LENGTH];
 		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 		
-		// Own reason
+		// User has chosen to use his own reason
 		if (StrEqual("Own reason", sInfo))
 		{
 			g_bAwaitingReason[client] = true;
@@ -1326,14 +1297,12 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 		
 		Format(g_sTargetReason[client], sizeof(g_sTargetReason[]), sInfo);
 		
-		
 		if (!PreReportCheck(client, g_iTarget[client]))
 		{
 			return;
 		}
 		
 			
-		// Confirm the report
 		if (g_bConfirmCall)
 		{
 			ConfirmCall(client);
@@ -1394,7 +1363,6 @@ public Action:ChatListener(client, const String:command[], argc)
 		}
 		
 		
-		// Send the report
 		if (g_bConfirmCall)
 		{
 			ConfirmCall(client);
