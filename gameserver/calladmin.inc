@@ -33,7 +33,7 @@ forward Action:CallAdmin_OnDrawMenu(client);
 
 
 /**
- * Called when own reason selection is enabled and the select item for it is about to be drawn for a client.
+ * Called when the own reason selection is enabled and the select item for it is about to be drawn for a client.
  *
  * @param client        Client index of the caller.
  * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
@@ -44,7 +44,7 @@ forward Action:CallAdmin_OnDrawOwnReason(client);
 
 
 /**
- * Called when an client is about to be drawn to the target selection menu for an client.
+ * Called when a target is about to be drawn to the target selection menu for a client.
  * Note: Called *n-1 times for the client selection menu where n is the amount of valid targets including the caller.
  *
  * @param client        Client index of the caller.
@@ -69,7 +69,7 @@ forward CallAdmin_OnTrackerCountChanged(oldVal, newVal);
 
 
 /**
- * Called before an client (or module) has reported another player.
+ * Called before a client (or module) has reported another client.
  *
  * @param client        Client index of the caller.
  * @param target        Client index of the target.
@@ -82,7 +82,7 @@ forward Action:CallAdmin_OnReportPre(client, target, const String:reason[]);
 
 
 /**
- * Called after an client (or module) has reported another player.
+ * Called after a client (or module) has reported another client.
  * Be sure to check that client != REPORTER_CONSOLE if you expect a valid client index.
  *
  * @param client        Client index of the caller.
@@ -97,7 +97,7 @@ forward CallAdmin_OnReportPost(client, target, const String:reason[]);
 
 /**
  * Initiates an report call.
- * If you report automatically (via a module for example) set the clientindex to REPORTER_CONSOLE
+ * If you report automatically (via a module for example) set the clientindex to REPORTER_CONSOLE.
  *
  * @param client        Client index of the caller.
  * @param target        Client index of the target.
@@ -110,7 +110,7 @@ native bool:CallAdmin_ReportClient(client, target, const String:reason[]);
 
 
 /**
- * Called when an admin is  about to be added to the inGame admincount.
+ * Called when an admin is about to be added to the in-game admin count.
  *
  * @param client        Client index of the admin.
  * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
@@ -131,8 +131,8 @@ native CallAdmin_GetTrackersCount();
 
 
 /**
- * Requests an forced refresh of the trackers count.
- * Note that most module's work asynchronous and only return their own cached count.
+ * Requests a forced refresh of the trackers count.
+ * Note that most modules work asynchronous and only return their own cached count.
  *
  * @noreturn
  */
@@ -143,7 +143,7 @@ native CallAdmin_RequestTrackersCountRefresh();
 
 /**
  * Called when the trackercount of a module is requested.
- * This is either called periodically via the base calladmin or when RequestTrackersCountRefresh is invoked.
+ * This is either called periodically via the base calladmin, or when RequestTrackersCountRefresh is invoked.
  *
  * @param trackers      By ref value of your trackers.
  * @noreturn
@@ -178,7 +178,7 @@ forward CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const Stri
 
 
 /**
- * Returns the servers hostname.
+ * Returns the server's hostname.
  *
  * @param buffer        String to copy hostname to.
  * @param max_size      Maximum size of buffer.
@@ -190,7 +190,7 @@ native CallAdmin_GetHostName(String:buffer[], max_size);
 
 
 /**
- * Returns the servers IP String.
+ * Returns the server's IP String.
  *
  * @param buffer        String to copy hostip to.
  * @param max_size      Maximum size of buffer.
@@ -202,7 +202,7 @@ native CallAdmin_GetHostIP(String:buffer[], max_size);
 
 
 /**
- * Returns the servers HostPort.
+ * Returns the server's HostPort.
  *
  * @return              Hostport.
  */
@@ -213,7 +213,7 @@ native CallAdmin_GetHostPort();
 
 /**
  * Logs a message to the calladmin logfile.
- * The message has this format "[Pluginname] Message", where the pluginname is gathered automatically.
+ * The message has this format "[Pluginname] Message", where the plugin name is detected automatically.
  *
  * @param format        Formatting rules.
  * @param ...           Variable number of format parameters.
@@ -237,7 +237,7 @@ forward CallAdmin_OnLogMessage(Handle:plugin, const String:message[]);
 
 
 /**
- * Returns the servers current report id.
+ * Returns the server's current report id.
  * This is a temporary value and is increased with each report.
  *
  * @return      Current report id of the server.
