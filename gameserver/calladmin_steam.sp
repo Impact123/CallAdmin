@@ -546,7 +546,7 @@ FetchGroupMembers(String:groupID[])
 
 
 
-public OnSocketConnect(Handle:socket, any:pack)
+public OnSocketConnect(Handle:socket, any pack)
 {
 	// If socket is connected, should be since this is the callback that is called if it is connected
 	if (SocketIsConnected(socket))
@@ -587,7 +587,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 
 
 
-public OnSocketReceive(Handle:socket, String:data[], const size, any:pack) 
+public OnSocketReceive(Handle:socket, String:data[], const size, any pack) 
 {
 	if (socket != INVALID_HANDLE)
 	{
@@ -663,7 +663,7 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any:pack)
 
 
 
-public OnSocketDisconnect(Handle:socket, any:pack)
+public OnSocketDisconnect(Handle:socket, any pack)
 {
 	if (socket != INVALID_HANDLE)
 	{
@@ -674,7 +674,7 @@ public OnSocketDisconnect(Handle:socket, any:pack)
 
 
 
-public OnSocketError(Handle:socket, const errorType, const errorNum, any:pack)
+public OnSocketError(Handle:socket, const errorType, const errorNum, any pack)
 {
 	CallAdmin_LogMessage("Socket Error: %d, %d", errorType, errorNum);
 	
@@ -723,9 +723,9 @@ stock SteamID2ToSteamId(const String:steamID2[], String:dest[], max_len)
 
 
 // Written by Peace-Maker (i guess), formatted for better readability
-stock URLEncode(String:sString[], maxlen, String:safe[] = "/", bool:bFormat = false)
+stock URLEncode(String:sString[], maxlen, String:safe[] = "/", bool bFormat = false)
 {
-	decl String:sAlwaysSafe[256];
+	char sAlwaysSafe[256];
 	Format(sAlwaysSafe, sizeof(sAlwaysSafe), "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-%s", safe);
 	
 	// Need 2 '%' since sp's Format parses one as a parameter to replace
@@ -740,8 +740,8 @@ stock URLEncode(String:sString[], maxlen, String:safe[] = "/", bool:bFormat = fa
 	}
 	
 	
-	new String:sChar[8];
-	new String:sReplaceChar[8];
+	char sChar[8];
+	char sReplaceChar[8];
 	
 	for (new i = 1; i < 256; i++)
 	{
