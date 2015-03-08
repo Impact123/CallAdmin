@@ -14,7 +14,7 @@
  * @param client       The Client.
  * @return             True if client is immune, false otherwise.
  */
-native bool:CallAdmin_IsClientImmune(client);
+native bool CallAdmin_IsClientImmune(int client);
 
 
 
@@ -26,7 +26,7 @@ native bool:CallAdmin_IsClientImmune(client);
  * @param client       The Client.
  * @return             True if client is on blacklist, false otherwise.
  */
-native bool:CallAdmin_IsClientOnBlacklist(client);
+native bool CallAdmin_IsClientOnBlacklist(int client);
 
 
 
@@ -39,7 +39,7 @@ native bool:CallAdmin_IsClientOnBlacklist(client);
  * @param immune       True to immune client, false otherwise.
  * @noreturn
  */
-native CallAdmin_SetClientImmune(client, bool:immune);
+native void CallAdmin_SetClientImmune(int client, bool immune);
 
 
 
@@ -52,13 +52,13 @@ native CallAdmin_SetClientImmune(client, bool:immune);
  * @param add          True to add client to blacklist, false to remove.
  * @noreturn
  */
-native CallAdmin_SetClientOnBlacklist(client, bool:add);
+native void CallAdmin_SetClientOnBlacklist(int client, bool add);
 
 
 
 
 /* Do not edit below this line */
-public SharedPlugin:__pl_calladmin_usermanager = 
+public SharedPlugin __pl_calladmin_usermanager = 
 {
 	name = "calladmin_usermanager",
 	file = "calladmin_usermanager.smx",
