@@ -32,23 +32,24 @@
 #undef REQUIRE_PLUGIN
 #include <updater>
 #pragma semicolon 1
+#pragma newdecls required
 
 
 
 // Global stuff
-new Handle:g_hVersion;
+Handle g_hVersion;
 
 
-new Handle:g_hUrl;
-new String:g_sUrl[PLATFORM_MAX_PATH];
-new String:g_sRealUrl[PLATFORM_MAX_PATH];
-new String:g_sRealPath[PLATFORM_MAX_PATH];
+Handle g_hUrl;
+char g_sUrl[PLATFORM_MAX_PATH];
+char g_sRealUrl[PLATFORM_MAX_PATH];
+char g_sRealPath[PLATFORM_MAX_PATH];
 
 
-new Handle:g_hKey;
-new String:g_sKey[PLATFORM_MAX_PATH];
+Handle g_hKey;
+char g_sKey[PLATFORM_MAX_PATH];
 
-new g_iCurrentTrackers;
+int g_iCurrentTrackers;
 
 
 
@@ -56,7 +57,7 @@ new g_iCurrentTrackers;
 #define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_ts3.txt"
 
 
-public Plugin:myinfo = 
+public Plugin myinfo = 
 {
 	name = "CallAdmin: Ts3 module",
 	author = "Impact, Popoklopsi",
@@ -69,7 +70,7 @@ public Plugin:myinfo =
 
 
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	AutoExecConfig_SetFile("plugin.calladmin_ts3");
 	
@@ -98,7 +99,7 @@ public OnPluginStart()
 
 
 
-public Action:Timer_UpdateTrackersCount(Handle:timer)
+public Action Timer_UpdateTrackersCount(Handle timer)
 {
 	// Get current trackers
 	GetCurrentTrackers();
@@ -108,10 +109,10 @@ public Action:Timer_UpdateTrackersCount(Handle:timer)
 
 
 
-GetCurrentTrackers()
+int GetCurrentTrackers()
 {
-	// Create a new socket
-	new Handle:Socket = SocketCreate(SOCKET_TCP, OnSocketError);
+	// Create a socket
+	Handle Socket = SocketCreate(SOCKET_TCP, OnSocketError);
 	
 	
 	// Optional tweaking stuff
@@ -126,7 +127,7 @@ GetCurrentTrackers()
 
 
 
-PreFormatUrl()
+void PreFormatUrl()
 {
 	// We work on a copy
 	strcopy(g_sRealUrl, sizeof(g_sRealUrl), g_sUrl);
@@ -149,7 +150,7 @@ PreFormatUrl()
 	}
 	
 	
-	new index;
+	int index;
 	
 	// We strip from / of the url to get the path
 	if ( (index = StrContains(g_sRealUrl, "/")) != -1 )
@@ -159,7 +160,7 @@ PreFormatUrl()
 		
 		
 		// Strip the slash of the path if there is one
-		new len = strlen(g_sRealPath);
+		int len = strlen(g_sRealPath);
 		if (len > 0 && g_sRealPath[len - 1] == '/')
 		{
 			g_sRealPath[len -1] = '\0';
@@ -173,7 +174,7 @@ PreFormatUrl()
 
 
 
-public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue[])
+public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newValue)
 {
 	if (cvar == g_hVersion)
 	{
@@ -192,7 +193,7 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 
 
 
-public OnAllPluginsLoaded()
+public void OnAllPluginsLoaded()
 {
 	if (!LibraryExists("calladmin"))
 	{
@@ -207,7 +208,7 @@ public OnAllPluginsLoaded()
 
 
 
-public OnLibraryAdded(const String:name[])
+public void OnLibraryAdded(const char[] name)
 {
     if (StrEqual(name, "updater"))
     {
@@ -218,17 +219,17 @@ public OnLibraryAdded(const String:name[])
 
 
 // Pseudo forward
-public CallAdmin_OnRequestTrackersCountRefresh(&trackers)
+public void CallAdmin_OnRequestTrackersCountRefresh(int &trackers)
 {
 	trackers = g_iCurrentTrackers;
 }
 
 
 
-public CallAdmin_OnReportPost(client, target, const String:reason[])
+public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 {
-	// Create a new socket
-	new Handle:Socket = SocketCreate(SOCKET_TCP, OnSocketError);
+	// Create a socket
+	Handle Socket = SocketCreate(SOCKET_TCP, OnSocketError);
 	
 	
 	// Optional tweaking stuff
@@ -238,15 +239,15 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	
 	
 	// Create a datapack
-	new Handle:pack = CreateDataPack();
+	Handle pack = CreateDataPack();
 	
 	
 	// Buffers
-	decl String:sClientID[21];
-	decl String:sClientName[MAX_NAME_LENGTH];
+	char sClientID[21];
+	char sClientName[MAX_NAME_LENGTH];
 	
-	decl String:sTargetID[21];
-	decl String:sTargetName[MAX_NAME_LENGTH];
+	char sTargetID[21];
+	char sTargetName[MAX_NAME_LENGTH];
 	
 	
 	// Reporter wasn't a real client (initiated by a module)
@@ -287,24 +288,24 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 
 
 
-public OnSocketConnect(Handle:socket, any:pack)
+public int OnSocketConnect(Handle socket, any pack)
 {
 	// If socket is connected, should be since this is the callback that is called if it is connected
 	if (SocketIsConnected(socket))
 	{
 		// Buffers
-		decl String:sRequestString[2048];
-		decl String:sRequestParams[2048];
+		char sRequestString[2048];
+		char sRequestParams[2048];
 		
 		// Params
-		decl String:sClientID[21];
-		decl String:sClientName[MAX_NAME_LENGTH * 4];
+		char sClientID[21];
+		char sClientName[MAX_NAME_LENGTH * 4];
 		
-		decl String:sTargetID[21];
-		decl String:sTargetName[MAX_NAME_LENGTH * 4];
+		char sTargetID[21];
+		char sTargetName[MAX_NAME_LENGTH * 4];
 		
-		decl String:sServerName[64 * 4];
-		decl String:sServerIP[16 + 5];
+		char sServerName[64 * 4];
+		char sServerIP[16 + 5];
 		
 		
 		// Fetch serverdata here...
@@ -314,7 +315,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 		
 		
 		// Currently maximum 48 in length
-		decl String:sReason[REASON_MAX_LENGTH * 4];
+		char sReason[REASON_MAX_LENGTH * 4];
 		
 		
 		// Reset the pack
@@ -363,7 +364,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 
 
 
-public OnSocketReceive(Handle:socket, String:data[], const size, any:pack) 
+public int OnSocketReceive(Handle socket, char[] data, const int size, any pack) 
 {
 	if (socket != INVALID_HANDLE)
 	{
@@ -380,7 +381,7 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any:pack)
 
 
 
-public OnSocketDisconnect(Handle:socket, any:pack)
+public int OnSocketDisconnect(Handle socket, any pack)
 {
 	if (socket != INVALID_HANDLE)
 	{
@@ -390,7 +391,7 @@ public OnSocketDisconnect(Handle:socket, any:pack)
 
 
 
-public OnSocketError(Handle:socket, const errorType, const errorNum, any:pack)
+public int OnSocketError(Handle socket, const int errorType, const int errorNum, any pack)
 {
 	CallAdmin_LogMessage("Socket Error: %d, %d", errorType, errorNum);
 	
@@ -404,14 +405,14 @@ public OnSocketError(Handle:socket, const errorType, const errorNum, any:pack)
 
 
 // Onlinecount callback
-public OnSocketConnectCount(Handle:socket, any:pack)
+public int OnSocketConnectCount(Handle socket, any pack)
 {
 	// If socket is connected, should be since this is the callback that is called if it is connected
 	if (SocketIsConnected(socket))
 	{
 		// Buffers
-		decl String:sRequestString[2048];
-		decl String:sRequestParams[2048];
+		char sRequestString[2048];
+		char sRequestParams[2048];
 
 		
 		// Params
@@ -431,7 +432,7 @@ public OnSocketConnectCount(Handle:socket, any:pack)
 
 
 // Onlinecount callback
-public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack) 
+public int OnSocketReceiveCount(Handle socket, char[] data, const int size, any pack) 
 {
 	if (socket != INVALID_HANDLE)
 	{
@@ -445,15 +446,15 @@ public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack)
 		}
 		
 		
-		new String:Split[2][48];
+		char Split[2][48];
 		
 		ExplodeString(data, "<onlineCount>", Split, sizeof(Split), sizeof(Split[]));
 		
 		
 		// Run though count
-		new splitsize = sizeof(Split);
-		new index;
-		for (new i; i < splitsize; i++)
+		int splitsize = sizeof(Split);
+		int index;
+		for (int i; i < splitsize; i++)
 		{
 			if (strlen(Split[i]) > 0)
 			{
@@ -471,7 +472,7 @@ public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack)
 		{
 			if (SimpleRegexMatch(Split[1], "^[0-9]+$"))
 			{
-				new temp = StringToInt(Split[1]);
+				int temp = StringToInt(Split[1]);
 				
 				if (temp > 0)
 				{
@@ -493,9 +494,9 @@ public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack)
 
 
 // Written by Peace-Maker (i guess), formatted for better readability
-stock URLEncode(String:sString[], maxlen, String:safe[] = "/", bool:bFormat = false)
+stock void URLEncode(char[] sString, int maxlen, char safe[] = "/", bool bFormat = false)
 {
-	decl String:sAlwaysSafe[256];
+	char sAlwaysSafe[256];
 	Format(sAlwaysSafe, sizeof(sAlwaysSafe), "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-%s", safe);
 	
 	// Need 2 '%' since sp's Format parses one as a parameter to replace
@@ -510,10 +511,10 @@ stock URLEncode(String:sString[], maxlen, String:safe[] = "/", bool:bFormat = fa
 	}
 	
 	
-	new String:sChar[8];
-	new String:sReplaceChar[8];
+	char sChar[8];
+	char sReplaceChar[8];
 	
-	for (new i = 1; i < 256; i++)
+	for (int i = 1; i < 256; i++)
 	{
 		// Skip the '%' double replace ftw..
 		if (i==37)
