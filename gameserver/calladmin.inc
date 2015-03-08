@@ -172,7 +172,7 @@ enum ServerData
  * @param newVal       Value of data after change.
  * @noreturn
  */
-forward void CallAdmin_OnServerDataChanged(Handle convar, ServerData type, const char[] oldVal, const char[] newVal);
+forward void CallAdmin_OnServerDataChanged(ConVar convar, ServerData type, const char[] oldVal, const char[] newVal);
 
 
 

@@ -40,43 +40,43 @@
 
 
 // Banreasons
-Handle g_hReasonAdt;
+ArrayList g_hReasonAdt;
 char g_sReasonConfigFile[PLATFORM_MAX_PATH];
 
 
 // Global Stuff
-Handle g_hServerName;
+ConVar g_hServerName;
 char g_sServerName[64];
 
-Handle g_hVersion;
+ConVar g_hVersion;
 
-Handle g_hHostPort;
+ConVar g_hHostPort;
 int g_iHostPort;
 
-Handle g_hHostIP;
+ConVar g_hHostIP;
 int g_iHostIP;
 char g_sHostIP[16];
 
 Handle g_hAdvertTimer;
-Handle g_hAdvertInterval;
+ConVar g_hAdvertInterval;
 float g_fAdvertInterval;
 
-Handle g_hPublicMessage;
+ConVar g_hPublicMessage;
 bool g_bPublicMessage;
 
-Handle g_hOwnReason;
+ConVar g_hOwnReason;
 bool g_bOwnReason;
 
-Handle g_hConfirmCall;
+ConVar g_hConfirmCall;
 bool g_bConfirmCall;
 
-Handle g_hSpamTime;
+ConVar g_hSpamTime;
 int g_iSpamTime;
 
-Handle g_hReportTime;
+ConVar g_hReportTime;
 int g_iReportTime;
 
-Handle g_hAdminAction;
+ConVar g_hAdminAction;
 int g_iAdminAction;
 
 
@@ -85,7 +85,7 @@ int g_iAdminAction;
 int g_iCurrentReportID;
 
 // List of not handled ID's
-Handle g_hActiveReports;
+ArrayList g_hActiveReports;
 
 
 
@@ -252,7 +252,7 @@ public int Native_ReportClient(Handle plugin, int numParams)
 
 	// Set the report id
 	g_iCurrentReportID++;
-	PushArrayCell(g_hActiveReports, g_iCurrentReportID);
+	g_hActiveReports.Push(g_iCurrentReportID);
 
 	Forward_OnReportPost(client, target, sReason);
 
@@ -321,14 +321,14 @@ public void OnPluginStart()
 	
 	AutoExecConfig_SetFile("plugin.calladmin");
 	
-	g_hVersion                = AutoExecConfig_CreateConVar("sm_calladmin_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hAdvertInterval         = AutoExecConfig_CreateConVar("sm_calladmin_advert_interval", "60.0",  "Interval to advert the use of calladmin, 0.0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 1800.0);
-	g_hPublicMessage          = AutoExecConfig_CreateConVar("sm_calladmin_public_message", "1",  "Whether or not an report should be notified to all players or only the reporter.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_hOwnReason              = AutoExecConfig_CreateConVar("sm_calladmin_own_reason", "1",  "Whether or not client can submit their own reason.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_hConfirmCall            = AutoExecConfig_CreateConVar("sm_calladmin_confirm_call", "1",  "Whether or not an call must be confirmed by the client", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_hSpamTime               = AutoExecConfig_CreateConVar("sm_calladmin_spamtime", "25", "An user must wait this many seconds after an report before he can issue a new one", FCVAR_PLUGIN, true, 0.0);
-	g_hReportTime             = AutoExecConfig_CreateConVar("sm_calladmin_reporttime", "300", "An user cannot be reported again for this many seconds", FCVAR_PLUGIN, true, 0.0);
-	g_hAdminAction            = AutoExecConfig_CreateConVar("sm_calladmin_admin_action", "0", "What happens when admins are ingame on report: 0 - Do nothing, let the report pass, 1 - Block the report and notify the caller and admins", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_hVersion                = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hAdvertInterval         = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_advert_interval", "60.0",  "Interval to advert the use of calladmin, 0.0 deactivates the feature", FCVAR_PLUGIN, true, 0.0, true, 1800.0);
+	g_hPublicMessage          = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_public_message", "1",  "Whether or not an report should be notified to all players or only the reporter.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_hOwnReason              = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_own_reason", "1",  "Whether or not client can submit their own reason.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_hConfirmCall            = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_confirm_call", "1",  "Whether or not an call must be confirmed by the client", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_hSpamTime               = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_spamtime", "25", "An user must wait this many seconds after an report before he can issue a new one", FCVAR_PLUGIN, true, 0.0);
+	g_hReportTime             = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_reporttime", "300", "An user cannot be reported again for this many seconds", FCVAR_PLUGIN, true, 0.0);
+	g_hAdminAction            = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_admin_action", "0", "What happens when admins are ingame on report: 0 - Do nothing, let the report pass, 1 - Block the report and notify the caller and admins", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 
 	
 	
@@ -339,38 +339,38 @@ public void OnPluginStart()
 	LoadTranslations("calladmin.phrases");
 	
 	
-	SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
+	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
 	
-	GetConVarString(g_hServerName, g_sServerName, sizeof(g_sServerName));
+	g_hServerName.GetString(g_sServerName, sizeof(g_sServerName));
 	HookConVarChange(g_hServerName, OnCvarChanged);
 	
-	g_iHostPort = GetConVarInt(g_hHostPort);
+	g_iHostPort = g_hHostPort.IntValue;
 	HookConVarChange(g_hHostPort, OnCvarChanged);
 	
-	g_iHostIP = GetConVarInt(g_hHostIP);
+	g_iHostIP = g_hHostIP.IntValue;
 	LongToIp(g_iHostIP, g_sHostIP, sizeof(g_sHostIP));
 	HookConVarChange(g_hHostIP, OnCvarChanged);
 	
-	g_fAdvertInterval = GetConVarFloat(g_hAdvertInterval);
+	g_fAdvertInterval = g_hAdvertInterval.FloatValue;
 	HookConVarChange(g_hAdvertInterval, OnCvarChanged);
 	
-	g_bPublicMessage = GetConVarBool(g_hPublicMessage);
+	g_bPublicMessage = g_hPublicMessage.BoolValue;
 	HookConVarChange(g_hPublicMessage, OnCvarChanged);
 	
-	g_bOwnReason = GetConVarBool(g_hOwnReason);
+	g_bOwnReason = g_hOwnReason.BoolValue;
 	HookConVarChange(g_hOwnReason, OnCvarChanged);
 	
-	g_bConfirmCall = GetConVarBool(g_hConfirmCall);
+	g_bConfirmCall = g_hConfirmCall.BoolValue;
 	HookConVarChange(g_hConfirmCall, OnCvarChanged);
 	
-	g_iSpamTime = GetConVarInt(g_hSpamTime);
+	g_iSpamTime = g_hSpamTime.IntValue;
 	HookConVarChange(g_hSpamTime, OnCvarChanged);
 	
-	g_iReportTime = GetConVarInt(g_hReportTime);
+	g_iReportTime = g_hReportTime.IntValue;
 	HookConVarChange(g_hReportTime, OnCvarChanged);
 	
-	g_iAdminAction = GetConVarInt(g_hAdminAction);
+	g_iAdminAction = g_hAdminAction.IntValue;
 	HookConVarChange(g_hAdminAction, OnCvarChanged);
 	
 	
@@ -413,7 +413,7 @@ public void OnPluginStart()
 	
 
 	// Report handling
-	g_hActiveReports = CreateArray();
+	g_hActiveReports = new ArrayList();
 	
 	// Reason handling
 	g_hReasonAdt = CreateArray(REASON_MAX_LENGTH);
@@ -433,7 +433,7 @@ public void OnPluginStart()
 
 void CreateReasonList()
 {
-	Handle hFile;
+	File hFile;
 	hFile = OpenFile(g_sReasonConfigFile, "w");
 	
 	if (hFile == null)
@@ -442,16 +442,16 @@ void CreateReasonList()
 		SetFailState("Failed to open configfile 'calladmin_reasons.cfg' for writing");
 	}
 	
-	WriteFileLine(hFile, "// List of reasons seperated by a new line, max %d in length", REASON_MAX_LENGTH);
-	WriteFileLine(hFile, "Aimbot");
-	WriteFileLine(hFile, "Wallhack");
-	WriteFileLine(hFile, "Speedhack");
-	WriteFileLine(hFile, "Spinhack");
-	WriteFileLine(hFile, "Multihack");
-	WriteFileLine(hFile, "No-Recoil Hack");
-	WriteFileLine(hFile, "Other");
+	hFile.WriteLine("// List of reasons seperated by a new line, max %d in length", REASON_MAX_LENGTH);
+	hFile.WriteLine("Aimbot");
+	hFile.WriteLine("Wallhack");
+	hFile.WriteLine("Speedhack");
+	hFile.WriteLine("Spinhack");
+	hFile.WriteLine("Multihack");
+	hFile.WriteLine("No-Recoil Hack");
+	hFile.WriteLine("Other");
 	
-	CloseHandle(hFile);
+	hFile.Close();
 }
 
 
@@ -459,7 +459,7 @@ void CreateReasonList()
 
 void ParseReasonList()
 {
-	Handle hFile;
+	File hFile;
 	
 	hFile = OpenFile(g_sReasonConfigFile, "r");
 	
@@ -476,7 +476,7 @@ void ParseReasonList()
 	
 	
 	int len;
-	while (!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
+	while (!hFile.EndOfFile() && hFile.ReadLine(sReadBuffer, sizeof(sReadBuffer)))
 	{
 		if (sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
 		{
@@ -497,13 +497,13 @@ void ParseReasonList()
 			
 		
 		// Add the reason to the list only if it doesn't already exist
-		if (FindStringInArray(g_hReasonAdt, sReadBuffer) == -1)
+		if (g_hReasonAdt.FindString(sReadBuffer) == -1)
 		{
 			PushArrayString(g_hReasonAdt, sReadBuffer);
 		}
 	}
 	
-	CloseHandle(hFile);
+	hFile.Close();
 }
 
 
@@ -671,7 +671,7 @@ bool Forward_OnDrawTarget(int client, int target)
 
 
 
-void Forward_OnServerDataChanged(Handle convar, ServerData type, const char[] oldVal, const char[] newVal)
+void Forward_OnServerDataChanged(ConVar convar, ServerData type, const char[] oldVal, const char[] newVal)
 {
 	Call_StartForward(g_hOnServerDataChangedForward);
 	Call_PushCell(convar);
@@ -750,17 +750,17 @@ public void OnLibraryAdded(const char[] name)
 
 
 
-public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newValue)
+public void OnCvarChanged(ConVar cvar, const char[] oldValue, const char[] newValue)
 {
 	if (cvar == g_hHostPort)
 	{
-		g_iHostPort = GetConVarInt(g_hHostPort);
+		g_iHostPort = g_hHostPort.IntValue;
 		
 		Forward_OnServerDataChanged(cvar, ServerData_HostPort, oldValue, newValue);
 	}
 	else if (cvar == g_hHostIP)
 	{
-		g_iHostIP = GetConVarInt(g_hHostIP);
+		g_iHostIP = g_hHostIP.IntValue;
 		
 		LongToIp(g_iHostIP, g_sHostIP, sizeof(g_sHostIP));
 		
@@ -768,13 +768,13 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 	}
 	else if (cvar == g_hServerName)
 	{
-		GetConVarString(g_hServerName, g_sServerName, sizeof(g_sServerName));
+		g_hServerName.GetString(g_sServerName, sizeof(g_sServerName));
 		
 		Forward_OnServerDataChanged(cvar, ServerData_HostName, oldValue, newValue);
 	}
 	else if (cvar == g_hVersion)
 	{
-		SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
+		g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	}
 	else if (cvar == g_hAdvertInterval)
 	{
@@ -784,7 +784,7 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 			g_hAdvertTimer = null;
 		}
 		
-		g_fAdvertInterval = GetConVarFloat(g_hAdvertInterval);
+		g_fAdvertInterval = g_hAdvertInterval.FloatValue;
 		
 		if (g_fAdvertInterval != 0.0)
 		{
@@ -793,27 +793,27 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 	}
 	else if (cvar == g_hPublicMessage)
 	{
-		g_bPublicMessage = GetConVarBool(g_hPublicMessage);
+		g_bPublicMessage = g_hPublicMessage.BoolValue;
 	}
 	else if (cvar == g_hOwnReason)
 	{
-		g_bOwnReason = GetConVarBool(g_hOwnReason);
+		g_bOwnReason = g_hOwnReason.BoolValue;
 	}
 	else if (cvar == g_hConfirmCall)
 	{
-		g_bConfirmCall = GetConVarBool(g_hConfirmCall);
+		g_bConfirmCall = g_hConfirmCall.BoolValue;
 	}
 	else if (cvar == g_hSpamTime)
 	{
-		g_iSpamTime = GetConVarInt(g_hSpamTime);
+		g_iSpamTime = g_hSpamTime.IntValue;
 	}
 	else if (cvar == g_hReportTime)
 	{
-		g_iReportTime = GetConVarInt(g_hReportTime);
+		g_iReportTime = g_hReportTime.IntValue;
 	}
 	else if (cvar == g_hAdminAction)
 	{
-		g_iAdminAction = GetConVarInt(g_hAdminAction);
+		g_iAdminAction = g_hAdminAction.IntValue;
 	}
 }
 
@@ -898,7 +898,7 @@ public Action Command_HandleCall(int client, int args)
 	
 	
 	// Report was already handled
-	if (!FindValueInArray(g_hActiveReports, reportID))
+	if (!g_hActiveReports.FindValue(reportID))
 	{
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_ReportAlreadyHandled");
 		
@@ -906,7 +906,7 @@ public Action Command_HandleCall(int client, int args)
 	}
 	
 	
-	RemoveFromArray(g_hActiveReports, reportID);
+	g_hActiveReports.Erase(reportID);
 	Forward_OnReportHandled(client, reportID);
 
 	return Plugin_Handled;
@@ -959,28 +959,28 @@ void SetStates(int client, int target)
 
 void ConfirmCall(int client)
 {
-	Handle menu = CreateMenu(MenuHandler_ConfirmCall);
-	SetMenuTitle(menu, "%T", "CallAdmin_ConfirmCall", client);
+	Menu menu = CreateMenu(MenuHandler_ConfirmCall);
+	menu.SetTitle("%T", "CallAdmin_ConfirmCall", client);
 	
 	char sConfirm[24];
 	
 	Format(sConfirm, sizeof(sConfirm), "%T", "CallAdmin_Yes", client);
-	AddMenuItem(menu, "Yes", sConfirm);
+	menu.AddItem("Yes", sConfirm);
 	
 	Format(sConfirm, sizeof(sConfirm), "%T", "CallAdmin_No", client);
-	AddMenuItem(menu, "No", sConfirm);
+	menu.AddItem("No", sConfirm);
 	
-	DisplayMenu(menu, client, 30);
+	menu.Display(client, 30);
 }
 
 
 
-public int MenuHandler_ConfirmCall(Handle menu, MenuAction action, int client, int param2)
+public int MenuHandler_ConfirmCall(Menu menu, MenuAction action, int client, int param2)
 {
 	if (action == MenuAction_Select)
 	{
 		char sInfo[24];
-		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
+		menu.GetItem(param2, sInfo, sizeof(sInfo));
 		
 		// Client has chosen to confirm the call
 		if (StrEqual("Yes", sInfo))
@@ -997,7 +997,7 @@ public int MenuHandler_ConfirmCall(Handle menu, MenuAction action, int client, i
 	}
 	else if (action == MenuAction_End)
 	{
-		CloseHandle(menu);
+		menu.Close();
 	}
 }
 
@@ -1070,7 +1070,7 @@ bool ReportPlayer(int client, int target, char[] sReason)
 	
 	// Set the report id
 	g_iCurrentReportID++;
-	PushArrayCell(g_hActiveReports, g_iCurrentReportID);
+	g_hActiveReports.Push(g_iCurrentReportID);
 
 	Forward_OnReportPost(client, target, sReason);
 	
@@ -1146,8 +1146,8 @@ void ShowClientSelectMenu(int client)
 	char sName[MAX_NAME_LENGTH];
 	char sID[24];
 	
-	Handle menu = CreateMenu(MenuHandler_ClientSelect);
-	SetMenuTitle(menu, "%T", "CallAdmin_SelectClient", client);
+	Menu menu = CreateMenu(MenuHandler_ClientSelect);
+	menu.SetTitle("%T", "CallAdmin_SelectClient", client);
 	
 	for (int i; i <= MaxClients; i++)
 	{
@@ -1156,12 +1156,12 @@ void ShowClientSelectMenu(int client)
 			GetClientName(i, sName, sizeof(sName));
 			Format(sID, sizeof(sID), "%d", GetClientSerial(i));
 			
-			AddMenuItem(menu, sID, sName);
+			menu.AddItem(sID, sName);
 		}
 	}
 	
 	// Menu has no items, no players to report
-	if (GetMenuItemCount(menu) < 1)
+	if (menu.ItemCount < 1)
 	{
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoPlayers");
 		g_iLastReport[client] = GetTime();
@@ -1173,14 +1173,14 @@ void ShowClientSelectMenu(int client)
 	}
 	else
 	{
-		DisplayMenu(menu, client, 30);
+		menu.Display(client, 30);
 	}
 }
 
 
 
 
-public int MenuHandler_ClientSelect(Handle menu, MenuAction action, int client, int param2)
+public int MenuHandler_ClientSelect(Menu menu, MenuAction action, int client, int param2)
 {
 	if (action == MenuAction_Select)
 	{
@@ -1188,7 +1188,7 @@ public int MenuHandler_ClientSelect(Handle menu, MenuAction action, int client, 
 		int iSerial;
 		int iID;
 		
-		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
+		menu.GetItem(param2, sInfo, sizeof(sInfo));
 		
 		iSerial = StringToInt(sInfo);
 		iID     = GetClientFromSerial(iSerial);
@@ -1205,7 +1205,7 @@ public int MenuHandler_ClientSelect(Handle menu, MenuAction action, int client, 
 	}
 	else if (action == MenuAction_End)
 	{
-		CloseHandle(menu);
+		menu.Close();
 	}
 }
 
@@ -1245,16 +1245,16 @@ void ShowBanReasonMenu(int client)
 {
 	int count;
 	char sReasonBuffer[REASON_MAX_LENGTH];
-	count = GetArraySize(g_hReasonAdt);
+	count = g_hReasonAdt.Length;
 
 	
-	Handle menu = CreateMenu(MenuHandler_BanReason);
-	SetMenuTitle(menu, "%T", "CallAdmin_SelectReason", client, g_iTarget[client]);
+	Menu menu = CreateMenu(MenuHandler_BanReason);
+	menu.SetTitle("%T", "CallAdmin_SelectReason", client, g_iTarget[client]);
 	
 	int index;
 	for (int i; i < count; i++)
 	{
-		GetArrayString(g_hReasonAdt, i, sReasonBuffer, sizeof(sReasonBuffer));
+		g_hReasonAdt.GetString(i, sReasonBuffer, sizeof(sReasonBuffer));
 		
 		if (strlen(sReasonBuffer) < 3)
 		{
@@ -1262,7 +1262,7 @@ void ShowBanReasonMenu(int client)
 		}
 
 		
-		AddMenuItem(menu, sReasonBuffer[index], sReasonBuffer[index]);
+		menu.AddItem(sReasonBuffer[index], sReasonBuffer[index]);
 	}
 	
 	// Own reason, call the forward
@@ -1271,21 +1271,21 @@ void ShowBanReasonMenu(int client)
 		char sOwnReason[REASON_MAX_LENGTH];
 
 		Format(sOwnReason, sizeof(sOwnReason), "%T", "CallAdmin_OwnReason", client);
-		AddMenuItem(menu, "Own reason", sOwnReason);
+		menu.AddItem("Own reason", sOwnReason);
 	}
 	
-	DisplayMenu(menu, client, 30);
+	menu.Display(client, 30);
 }
 
 
 
 
-public int MenuHandler_BanReason(Handle menu, MenuAction action, int client, int param2)
+public int MenuHandler_BanReason(Menu menu, MenuAction action, int client, int param2)
 {
 	if (action == MenuAction_Select)
 	{
 		char sInfo[REASON_MAX_LENGTH];
-		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
+		menu.GetItem(param2, sInfo, sizeof(sInfo));
 		
 		// User has chosen to use his own reason
 		if (StrEqual("Own reason", sInfo))
@@ -1317,7 +1317,7 @@ public int MenuHandler_BanReason(Handle menu, MenuAction action, int client, int
 	}
 	else if (action == MenuAction_End)
 	{
-		CloseHandle(menu);
+		menu.Close();
 	}
 }
 
