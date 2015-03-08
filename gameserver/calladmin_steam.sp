@@ -205,7 +205,7 @@ void CreateSteamIDList()
 	hFile = OpenFile(g_sSteamIDConfigFile, "w");
 	
 	// Failed to open
-	if (hFile == INVALID_HANDLE)
+	if (hFile == null)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for writing");
 		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for writing");
@@ -227,7 +227,7 @@ void ParseSteamIDList()
 	
 	
 	// Failed to open
-	if (hFile == INVALID_HANDLE)
+	if (hFile == null)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for reading");
 		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for reading");
@@ -309,7 +309,7 @@ void CreateGroupIDList()
 	hFile = OpenFile(g_sGroupIDConfigFile, "w");
 	
 	// Failed to open
-	if (hFile == INVALID_HANDLE)
+	if (hFile == null)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for writing");
 		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for writing");
@@ -331,7 +331,7 @@ void ParseGroupIDList()
 	
 	
 	// Failed to open
-	if (hFile == INVALID_HANDLE)
+	if (hFile == null)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for reading");
 		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for reading");
@@ -590,7 +590,7 @@ public int OnSocketConnect(Handle socket, any pack)
 
 public int OnSocketReceive(Handle socket, char[] data, const int size, any pack) 
 {
-	if (socket != INVALID_HANDLE)
+	if (socket != null)
 	{
 		// This fixes an bug on windowsservers
 		// The receivefunction for socket is getting called twice on these systems, once for the headers, and a second time for the body
@@ -666,7 +666,7 @@ public int OnSocketReceive(Handle socket, char[] data, const int size, any pack)
 
 public int OnSocketDisconnect(Handle socket, any pack)
 {
-	if (socket != INVALID_HANDLE)
+	if (socket != null)
 	{
 		CloseHandle(socket);
 	}
@@ -679,7 +679,7 @@ public int OnSocketError(Handle socket, const int errorType, const int errorNum,
 {
 	CallAdmin_LogMessage("Socket Error: %d, %d", errorType, errorNum);
 	
-	if (socket != INVALID_HANDLE)
+	if (socket != null)
 	{
 		CloseHandle(socket);
 	}
