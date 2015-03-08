@@ -7,7 +7,7 @@
 
 
 
-stock bool:IsClientValid(id)
+stock bool IsClientValid(int id)
 {
 	if (id > 0 && id <= MaxClients && IsClientInGame(id))
 	{
