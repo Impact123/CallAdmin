@@ -32,6 +32,7 @@
 #include <updater>
 #include <clientprefs>
 #pragma semicolon 1
+#pragma newdecls required
 
 
 #define CLIENTPREFS_AVAILABLE()      (LibraryExists("clientprefs"))
@@ -39,104 +40,104 @@
 
 
 // Banreasons
-new Handle:g_hReasonAdt;
-new String:g_sReasonConfigFile[PLATFORM_MAX_PATH];
+Handle g_hReasonAdt;
+char g_sReasonConfigFile[PLATFORM_MAX_PATH];
 
 
 // Global Stuff
-new Handle:g_hServerName;
-new String:g_sServerName[64];
+Handle g_hServerName;
+char g_sServerName[64];
 
-new Handle:g_hVersion;
+Handle g_hVersion;
 
-new Handle:g_hHostPort;
-new g_iHostPort;
+Handle g_hHostPort;
+int g_iHostPort;
 
-new Handle:g_hHostIP;
-new g_iHostIP;
-new String:g_sHostIP[16];
+Handle g_hHostIP;
+int g_iHostIP;
+char g_sHostIP[16];
 
-new Handle:g_hAdvertTimer;
-new Handle:g_hAdvertInterval;
-new Float:g_fAdvertInterval;
+Handle g_hAdvertTimer;
+Handle g_hAdvertInterval;
+float g_fAdvertInterval;
 
-new Handle:g_hPublicMessage;
-new bool:g_bPublicMessage;
+Handle g_hPublicMessage;
+bool g_bPublicMessage;
 
-new Handle:g_hOwnReason;
-new bool:g_bOwnReason;
+Handle g_hOwnReason;
+bool g_bOwnReason;
 
-new Handle:g_hConfirmCall;
-new bool:g_bConfirmCall;
+Handle g_hConfirmCall;
+bool g_bConfirmCall;
 
-new Handle:g_hSpamTime;
-new g_iSpamTime;
+Handle g_hSpamTime;
+int g_iSpamTime;
 
-new Handle:g_hReportTime;
-new g_iReportTime;
+Handle g_hReportTime;
+int g_iReportTime;
 
-new Handle:g_hAdminAction;
-new g_iAdminAction;
+Handle g_hAdminAction;
+int g_iAdminAction;
 
 
 
 // Reportid used for handling
-new g_iCurrentReportID;
+int g_iCurrentReportID;
 
 // List of not handled ID's
-new Handle:g_hActiveReports;
+Handle g_hActiveReports;
 
 
 
 // Logfile
-new String:g_sLogFile[PLATFORM_MAX_PATH];
+char g_sLogFile[PLATFORM_MAX_PATH];
 
 
 #define ADMIN_ACTION_PASS          0
 #define ADMIN_ACTION_BLOCK_MESSAGE 1
 
 
-new bool:g_bLateLoad;
+bool g_bLateLoad;
 #pragma unused g_bLateLoad
 
 
-new g_iCurrentTrackers;
+int g_iCurrentTrackers;
 
 
 
 // User info
-new g_iTarget[MAXPLAYERS + 1];
-new String:g_sTargetReason[MAXPLAYERS + 1][REASON_MAX_LENGTH];
+g_iTarget[MAXPLAYERS + 1];
+char g_sTargetReason[MAXPLAYERS + 1][REASON_MAX_LENGTH];
 
 // Is this player writing his own reason?
-new bool:g_bAwaitingReason[MAXPLAYERS +1];
+bool g_bAwaitingReason[MAXPLAYERS +1];
 
 // When has this user reported the last time
-new g_iLastReport[MAXPLAYERS +1];
+g_iLastReport[MAXPLAYERS +1];
 
 // When was this user reported the last time?
-new g_iLastReported[MAXPLAYERS +1];
+g_iLastReported[MAXPLAYERS +1];
 
 // Player saw the antispam message
-new bool:g_bSawMesage[MAXPLAYERS +1];
+bool g_bSawMesage[MAXPLAYERS +1];
 
 
 // Cookies, yummy
-new Handle:g_hLastReportCookie;
-new Handle:g_hLastReportedCookie;
+Handle g_hLastReportCookie;
+Handle g_hLastReportedCookie;
 
 
 // Api
-new Handle:g_hOnReportPreForward;
-new Handle:g_hOnReportPostForward;
-new Handle:g_hOnDrawMenuForward;
-new Handle:g_hOnDrawOwnReasonForward;
-new Handle:g_hOnTrackerCountChangedForward;
-new Handle:g_hOnDrawTargetForward;
-new Handle:g_hOnAddToAdminCountForward;
-new Handle:g_hOnServerDataChangedForward;
-new Handle:g_hOnLogMessageForward;
-new Handle:g_hOnReportHandledForward;
+Handle g_hOnReportPreForward;
+Handle g_hOnReportPostForward;
+Handle g_hOnDrawMenuForward;
+Handle g_hOnDrawOwnReasonForward;
+Handle g_hOnTrackerCountChangedForward;
+Handle g_hOnDrawTargetForward;
+Handle g_hOnAddToAdminCountForward;
+Handle g_hOnServerDataChangedForward;
+Handle g_hOnLogMessageForward;
+Handle g_hOnReportHandledForward;
 
 
 
@@ -145,7 +146,7 @@ new Handle:g_hOnReportHandledForward;
 #define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin.txt"
 
 
-public Plugin:myinfo = 
+public Plugin myinfo = 
 {
 	name = "CallAdmin",
 	author = "Impact, Popoklopsi",
@@ -156,7 +157,7 @@ public Plugin:myinfo =
 
 
 
-public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	g_bLateLoad = late;
 	
@@ -167,7 +168,6 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 	CreateNative("CallAdmin_GetTrackersCount", Native_GetCurrentTrackers);
 	CreateNative("CallAdmin_RequestTrackersCountRefresh", Native_RequestTrackersCountRefresh);
 	CreateNative("CallAdmin_GetHostName", Native_GetHostName);
-	CreateNative("CallAdmin_GetHostIP", Native_GetHostIP);
 	CreateNative("CallAdmin_GetHostPort", Native_GetHostPort);
 	CreateNative("CallAdmin_ReportClient", Native_ReportClient);
 	CreateNative("CallAdmin_LogMessage", Native_LogMessage);
@@ -181,7 +181,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 
 
 
-public Native_GetCurrentTrackers(Handle:plugin, numParams)
+public int Native_GetCurrentTrackers(Handle plugin, int numParams)
 {
 	return g_iCurrentTrackers;
 }
@@ -189,33 +189,33 @@ public Native_GetCurrentTrackers(Handle:plugin, numParams)
 
 
 
-public Native_RequestTrackersCountRefresh(Handle:plugin, numParams)
+public int Native_RequestTrackersCountRefresh(Handle plugin, int numParams)
 {
-	Timer_UpdateTrackersCount(INVALID_HANDLE);
+	Timer_UpdateTrackersCount(null);
 }
 
 
 
 
-public Native_GetHostName(Handle:plugin, numParams)
+public int Native_GetHostName(Handle plugin, int numParams)
 {
-	new max_size = GetNativeCell(2);
+	int max_size = GetNativeCell(2);
 	SetNativeString(1, g_sServerName, max_size);
 }
 
 
 
 
-public Native_GetHostIP(Handle:plugin, numParams)
+public int Native_GetHostIP(Handle plugin, int numParams)
 {
-	new max_size = GetNativeCell(2);
+	int max_size = GetNativeCell(2);
 	SetNativeString(1, g_sHostIP, max_size);
 }
 
 
 
 
-public Native_GetHostPort(Handle:plugin, numParams)
+public int Native_GetHostPort(Handle plugin, int numParams)
 {
 	return g_iHostPort;
 }
@@ -223,11 +223,11 @@ public Native_GetHostPort(Handle:plugin, numParams)
 
 
 
-public Native_ReportClient(Handle:plugin, numParams)
+public int Native_ReportClient(Handle plugin, int numParams)
 {
-	new client;
-	new target;
-	new String:sReason[REASON_MAX_LENGTH];
+	int client;
+	int target;
+	char sReason[REASON_MAX_LENGTH];
 	
 	client = GetNativeCell(1);
 	target = GetNativeCell(2);
@@ -262,10 +262,10 @@ public Native_ReportClient(Handle:plugin, numParams)
 
 
 
-public Native_LogMessage(Handle:plugin, numParams)
+public int Native_LogMessage(Handle plugin, int numParams)
 {
-	new String:sPluginName[64];
-	new String:sMessage[256];
+	char sPluginName[64];
+	char sMessage[256];
 	GetPluginInfo(plugin, PlInfo_Name, sPluginName, sizeof(sPluginName));
 	
 	FormatNativeString(0, 1, 2, sizeof(sMessage), _, sMessage);
@@ -278,7 +278,7 @@ public Native_LogMessage(Handle:plugin, numParams)
 
 
 
-public Native_GetReportID(Handle:plugin, numParams)
+public int Native_GetReportID(Handle plugin, int numParams)
 {
 	return g_iCurrentReportID;
 }
@@ -286,7 +286,7 @@ public Native_GetReportID(Handle:plugin, numParams)
 
 
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	BuildPath(Path_SM, g_sLogFile, sizeof(g_sLogFile), "logs/calladmin.log");
 	
@@ -295,17 +295,17 @@ public OnPluginStart()
 	g_hServerName = FindConVar("hostname");
 	
 	// Shouldn't happen
-	if (g_hHostPort == INVALID_HANDLE)
+	if (g_hHostPort == null)
 	{
 		CallAdmin_LogMessage("Couldn't find cvar 'hostport'");
 		SetFailState("Couldn't find cvar 'hostport'");
 	}
-	if (g_hHostIP == INVALID_HANDLE)
+	if (g_hHostIP == null)
 	{
 		CallAdmin_LogMessage("Couldn't find cvar 'hostip'");
 		SetFailState("Couldn't find cvar 'hostip'");
 	}
-	if (g_hServerName == INVALID_HANDLE)
+	if (g_hServerName == null)
 	{
 		CallAdmin_LogMessage("Couldn't find cvar 'hostname'");
 		SetFailState("Couldn't find cvar 'hostname'");
@@ -431,12 +431,12 @@ public OnPluginStart()
 
 
 
-CreateReasonList()
+void CreateReasonList()
 {
-	new Handle:hFile;
+	Handle hFile;
 	hFile = OpenFile(g_sReasonConfigFile, "w");
 	
-	if (hFile == INVALID_HANDLE)
+	if (hFile == null)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_reasons.cfg' for writing");
 		SetFailState("Failed to open configfile 'calladmin_reasons.cfg' for writing");
@@ -457,14 +457,14 @@ CreateReasonList()
 
 
 
-ParseReasonList()
+void ParseReasonList()
 {
-	new Handle:hFile;
+	Handle hFile;
 	
 	hFile = OpenFile(g_sReasonConfigFile, "r");
 	
 	
-	if (hFile == INVALID_HANDLE)
+	if (hFile == null)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_reasons.cfg' for reading");
 		SetFailState("Failed to open configfile 'calladmin_reasons.cfg' for reading");
@@ -472,10 +472,10 @@ ParseReasonList()
 	
 	
 	// Buffer must be a little bit bigger to have enough room for possible comments and being able to check for too long reasons
-	decl String:sReadBuffer[PLATFORM_MAX_PATH];
+	char sReadBuffer[PLATFORM_MAX_PATH];
 	
 	
-	new len;
+	int len;
 	while (!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
 	{
 		if (sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
@@ -509,9 +509,9 @@ ParseReasonList()
 
 
 
-public OnClientCookiesCached(client)
+public void OnClientCookiesCached(int client)
 {
-	new String:sCookieBuf[24];
+	char sCookieBuf[24];
 	GetClientCookie(client, g_hLastReportCookie, sCookieBuf, sizeof(sCookieBuf));
 	
 	if (strlen(sCookieBuf) > 0)
@@ -534,9 +534,9 @@ public OnClientCookiesCached(client)
 
 
 
-FetchClientCookies()
+void FetchClientCookies()
 {
-	for (new i; i <= MaxClients; i++)
+	for (int i; i <= MaxClients; i++)
 	{
 		if (IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && AreClientCookiesCached(i))
 		{
@@ -548,9 +548,9 @@ FetchClientCookies()
 
 
 
-bool:Forward_OnDrawMenu(client)
+bool Forward_OnDrawMenu(int client)
 {
-	new Action:result;
+	Action result;
 	
 	Call_StartForward(g_hOnDrawMenuForward);
 	Call_PushCell(client);
@@ -568,9 +568,9 @@ bool:Forward_OnDrawMenu(client)
 
 
 
-bool:Forward_OnReportPre(client, target, const String:reason[])
+bool Forward_OnReportPre(int client, int target, const char[] reason)
 {
-	new Action:result;
+	Action result;
 	
 	Call_StartForward(g_hOnReportPreForward);
 	Call_PushCell(client);
@@ -590,7 +590,7 @@ bool:Forward_OnReportPre(client, target, const String:reason[])
 
 
 
-Forward_OnReportPost(client, target, const String:reason[])
+void Forward_OnReportPost(int client, int target, const char[] reason)
 {
 	Call_StartForward(g_hOnReportPostForward);
 	Call_PushCell(client);
@@ -602,9 +602,9 @@ Forward_OnReportPost(client, target, const String:reason[])
 
 
 
-bool:Forward_OnDrawOwnReason(client)
+bool Forward_OnDrawOwnReason(int client)
 {
-	new Action:result;
+	Action result;
 	
 	Call_StartForward(g_hOnDrawOwnReasonForward);
 	Call_PushCell(client);
@@ -621,9 +621,9 @@ bool:Forward_OnDrawOwnReason(client)
 
 
 
-bool:Forward_OnAddToAdminCount(client)
+bool Forward_OnAddToAdminCount(int client)
 {
-	new Action:result;
+	Action result;
 	
 	Call_StartForward(g_hOnAddToAdminCountForward);
 	Call_PushCell(client);
@@ -640,7 +640,7 @@ bool:Forward_OnAddToAdminCount(client)
 
 
 
-Forward_OnTrackerCountChanged(oldVal, newVal)
+void Forward_OnTrackerCountChanged(int oldVal, int newVal)
 {
 	Call_StartForward(g_hOnTrackerCountChangedForward);
 	Call_PushCell(oldVal);
@@ -651,9 +651,9 @@ Forward_OnTrackerCountChanged(oldVal, newVal)
 
 
 
-bool:Forward_OnDrawTarget(client, target)
+bool Forward_OnDrawTarget(int client, int target)
 {
-	new Action:result;
+	Action result;
 	
 	Call_StartForward(g_hOnDrawTargetForward);
 	Call_PushCell(client);
@@ -671,7 +671,7 @@ bool:Forward_OnDrawTarget(client, target)
 
 
 
-Forward_OnServerDataChanged(Handle:convar, ServerData:type, const String:oldVal[], const String:newVal[])
+void Forward_OnServerDataChanged(Handle convar, ServerData type, const char[] oldVal, const char[] newVal)
 {
 	Call_StartForward(g_hOnServerDataChangedForward);
 	Call_PushCell(convar);
@@ -684,7 +684,7 @@ Forward_OnServerDataChanged(Handle:convar, ServerData:type, const String:oldVal[
 
 
 
-Forward_OnLogMessage(Handle:plugin, const String:message[])
+void Forward_OnLogMessage(Handle plugin, const char[] message)
 {
 	Call_StartForward(g_hOnLogMessageForward);
 	Call_PushCell(plugin);
@@ -695,7 +695,7 @@ Forward_OnLogMessage(Handle:plugin, const String:message[])
 
 
 
-Forward_OnReportHandled(client, id)
+void Forward_OnReportHandled(int client, int id)
 {
 	Call_StartForward(g_hOnReportHandledForward);
 	Call_PushCell(client);
@@ -707,7 +707,7 @@ Forward_OnReportHandled(client, id)
 
 
 
-public Action:Timer_Advert(Handle:timer)
+public Action Timer_Advert(Handle timer)
 {
 	if (g_iCurrentTrackers > 0)
 	{
@@ -728,7 +728,7 @@ public Action:Timer_Advert(Handle:timer)
 
 
 
-public OnAllPluginsLoaded()
+public void OnAllPluginsLoaded()
 {
     if (LibraryExists("updater"))
     {
@@ -739,7 +739,7 @@ public OnAllPluginsLoaded()
 
 
 
-public OnLibraryAdded(const String:name[])
+public void OnLibraryAdded(const char[] name)
 {
     if (StrEqual(name, "updater"))
     {
@@ -750,7 +750,7 @@ public OnLibraryAdded(const String:name[])
 
 
 
-public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue[])
+public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newValue)
 {
 	if (cvar == g_hHostPort)
 	{
@@ -778,10 +778,10 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 	}
 	else if (cvar == g_hAdvertInterval)
 	{
-		if (g_hAdvertTimer != INVALID_HANDLE)
+		if (g_hAdvertTimer != null)
 		{
 			CloseHandle(g_hAdvertTimer);
-			g_hAdvertTimer = INVALID_HANDLE;
+			g_hAdvertTimer = null;
 		}
 		
 		g_fAdvertInterval = GetConVarFloat(g_hAdvertInterval);
@@ -820,7 +820,7 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 
 
 
-public Action:Command_Call(client, args)
+public Action Command_Call(int client, int args)
 {
 	// Console cannot use this
 	if (client == 0)
@@ -854,7 +854,7 @@ public Action:Command_Call(client, args)
 
 
 
-public Action:Command_HandleCall(client, args)
+public Action Command_HandleCall(int client, int args)
 {
 	if (client == 0)
 	{
@@ -874,7 +874,7 @@ public Action:Command_HandleCall(client, args)
 	
 	if (GetCmdArgs() != 1)
 	{
-		decl String:cmdName[64];
+		char cmdName[64];
 		GetCmdArg(0, cmdName, sizeof(cmdName));
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t: %s <id>", "CallAdmin_WrongNumberOfArguments", cmdName);
 		
@@ -882,8 +882,8 @@ public Action:Command_HandleCall(client, args)
 	}
 	
 	
-	decl String:sArgID[10];
-	new reportID;
+	char sArgID[10];
+	int reportID;
 	
 	GetCmdArg(1, sArgID, sizeof(sArgID));
 	reportID = StringToInt(sArgID);
@@ -914,7 +914,7 @@ public Action:Command_HandleCall(client, args)
 
 
 
-bool:LastReportTimeCheck(client)
+bool LastReportTimeCheck(int client)
 {
 	if (g_iLastReport[client] <= ( GetTime() - g_iSpamTime ))
 	{
@@ -926,7 +926,7 @@ bool:LastReportTimeCheck(client)
 
 
 
-bool:LastReportedTimeCheck(client)
+bool LastReportedTimeCheck(int client)
 {
 	if (g_iLastReported[client] <= ( GetTime() - g_iReportTime ))
 	{
@@ -939,9 +939,9 @@ bool:LastReportedTimeCheck(client)
 
 
 // Updates the timestamps of lastreport and lastreported
-SetStates(client, target)
+void SetStates(int client, int target)
 {
-	new currentTime = GetTime();
+	int currentTime = GetTime();
 	
 	g_iLastReport[client]   = currentTime;
 	g_iLastReported[target] = currentTime;
@@ -957,12 +957,12 @@ SetStates(client, target)
 
 
 
-ConfirmCall(client)
+void ConfirmCall(int client)
 {
-	new Handle:menu = CreateMenu(MenuHandler_ConfirmCall);
+	Handle menu = CreateMenu(MenuHandler_ConfirmCall);
 	SetMenuTitle(menu, "%T", "CallAdmin_ConfirmCall", client);
 	
-	decl String:sConfirm[24];
+	char sConfirm[24];
 	
 	Format(sConfirm, sizeof(sConfirm), "%T", "CallAdmin_Yes", client);
 	AddMenuItem(menu, "Yes", sConfirm);
@@ -975,11 +975,11 @@ ConfirmCall(client)
 
 
 
-public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
+public int MenuHandler_ConfirmCall(Handle menu, MenuAction action, int client, int param2)
 {
 	if (action == MenuAction_Select)
 	{
-		new String:sInfo[24];
+		char sInfo[24];
 		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 		
 		// Client has chosen to confirm the call
@@ -1002,7 +1002,7 @@ public MenuHandler_ConfirmCall(Handle:menu, MenuAction:action, client, param2)
 }
 
 
-bool:PreReportCheck(client, target)
+bool PreReportCheck(int client, int target)
 {
 	// Selected target isn't valid anymore
 	if (!IsClientValid(target))
@@ -1026,7 +1026,7 @@ bool:PreReportCheck(client, target)
 
 
 
-bool:ReportPlayer(client, target, String:sReason[])
+bool ReportPlayer(int client, int target, char[] sReason)
 {
 	if (!PreReportCheck(client, target))
 	{
@@ -1051,8 +1051,8 @@ bool:ReportPlayer(client, target, String:sReason[])
 		return false;
 	}
 	
-	new String:clientNameBuf[MAX_NAME_LENGTH];
-	new String:targetNameBuf[MAX_NAME_LENGTH];
+	char clientNameBuf[MAX_NAME_LENGTH];
+	char targetNameBuf[MAX_NAME_LENGTH];
 
 	GetClientName(client, clientNameBuf, sizeof(clientNameBuf));
 	GetClientName(target, targetNameBuf, sizeof(targetNameBuf));
@@ -1084,9 +1084,9 @@ bool:ReportPlayer(client, target, String:sReason[])
 
 
 
-public Action:Timer_UpdateTrackersCount(Handle:timer)
+public Action Timer_UpdateTrackersCount(Handle timer)
 {
-	new temp = GetTotalTrackers();
+	int temp = GetTotalTrackers();
 	
 	if (temp != g_iCurrentTrackers)
 	{
@@ -1101,13 +1101,13 @@ public Action:Timer_UpdateTrackersCount(Handle:timer)
 
 
 
-GetTotalTrackers()
+int GetTotalTrackers()
 {
-	new Handle:hIter;
-	new Handle:hPlugin;
-	new Function:func;
-	new count;
-	new tempcount;
+	Handle hIter;
+	Handle hPlugin;
+	Function func;
+	int count;
+	int tempcount;
 	
 	hIter = GetPluginIterator();
 	
@@ -1141,15 +1141,15 @@ GetTotalTrackers()
 
 
 
-ShowClientSelectMenu(client)
+void ShowClientSelectMenu(int client)
 {
-	decl String:sName[MAX_NAME_LENGTH];
-	decl String:sID[24];
+	char sName[MAX_NAME_LENGTH];
+	char sID[24];
 	
-	new Handle:menu = CreateMenu(MenuHandler_ClientSelect);
+	Handle menu = CreateMenu(MenuHandler_ClientSelect);
 	SetMenuTitle(menu, "%T", "CallAdmin_SelectClient", client);
 	
-	for (new i; i <= MaxClients; i++)
+	for (int i; i <= MaxClients; i++)
 	{
 		if (i != client && LastReportedTimeCheck(i) && IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && Forward_OnDrawTarget(client, i))
 		{
@@ -1180,13 +1180,13 @@ ShowClientSelectMenu(client)
 
 
 
-public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
+public int MenuHandler_ClientSelect(Handle menu, MenuAction action, int client, int param2)
 {
 	if (action == MenuAction_Select)
 	{
-		new String:sInfo[24];
-		new iSerial;
-		new iID;
+		char sInfo[24];
+		int iSerial;
+		int iID;
 		
 		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 		
@@ -1212,7 +1212,7 @@ public MenuHandler_ClientSelect(Handle:menu, MenuAction:action, client, param2)
 
 
 
-public OnClientDisconnect_Post(client)
+public void OnClientDisconnect_Post(int client)
 {
 	g_iTarget[client]          = 0;
 	g_sTargetReason[client][0] = '\0';
@@ -1227,9 +1227,9 @@ public OnClientDisconnect_Post(client)
 
 
 
-RemoveAsTarget(client)
+void RemoveAsTarget(int client)
 {
-	for (new i; i <= MaxClients; i++)
+	for (int i; i <= MaxClients; i++)
 	{
 		if (g_iTarget[i] == client)
 		{
@@ -1241,18 +1241,18 @@ RemoveAsTarget(client)
 
 
 
-ShowBanReasonMenu(client)
+void ShowBanReasonMenu(int client)
 {
-	new count;
-	new String:sReasonBuffer[REASON_MAX_LENGTH];
+	int count;
+	char sReasonBuffer[REASON_MAX_LENGTH];
 	count = GetArraySize(g_hReasonAdt);
 
 	
-	new Handle:menu = CreateMenu(MenuHandler_BanReason);
+	Handle menu = CreateMenu(MenuHandler_BanReason);
 	SetMenuTitle(menu, "%T", "CallAdmin_SelectReason", client, g_iTarget[client]);
 	
-	new index;
-	for (new i; i < count; i++)
+	int index;
+	for (int i; i < count; i++)
 	{
 		GetArrayString(g_hReasonAdt, i, sReasonBuffer, sizeof(sReasonBuffer));
 		
@@ -1268,7 +1268,7 @@ ShowBanReasonMenu(client)
 	// Own reason, call the forward
 	if (g_bOwnReason && Forward_OnDrawOwnReason(client))
 	{
-		decl String:sOwnReason[REASON_MAX_LENGTH];
+		char sOwnReason[REASON_MAX_LENGTH];
 
 		Format(sOwnReason, sizeof(sOwnReason), "%T", "CallAdmin_OwnReason", client);
 		AddMenuItem(menu, "Own reason", sOwnReason);
@@ -1280,11 +1280,11 @@ ShowBanReasonMenu(client)
 
 
 
-public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
+public int MenuHandler_BanReason(Handle menu, MenuAction action, int client, int param2)
 {
 	if (action == MenuAction_Select)
 	{
-		new String:sInfo[REASON_MAX_LENGTH];
+		char sInfo[REASON_MAX_LENGTH];
 		GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 		
 		// User has chosen to use his own reason
@@ -1324,12 +1324,12 @@ public MenuHandler_BanReason(Handle:menu, MenuAction:action, client, param2)
 
 
 
-public Action:ChatListener(client, const String:command[], argc)
+public Action ChatListener(int client, const char[] command, int argc)
 {
 	if (g_bAwaitingReason[client] && !IsChatTrigger())
 	{
 		// 2 more for quotes
-		decl String:sReason[REASON_MAX_LENGTH + 2];
+		char sReason[REASON_MAX_LENGTH + 2];
 		
 		GetCmdArgString(sReason, sizeof(sReason));
 		StripQuotes(sReason);
@@ -1385,11 +1385,11 @@ public Action:ChatListener(client, const String:command[], argc)
 
 
 
-stock GetRealClientCount()
+stock int GetRealClientCount()
 {
-	new count;
+	count;
 	
-	for (new i; i <= MaxClients; i++)
+	for (i; i <= MaxClients; i++)
 	{
 		if (IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i))
 		{
@@ -1402,11 +1402,11 @@ stock GetRealClientCount()
 
 
 
-stock GetAdminCount()
+stock int GetAdminCount()
 {
-	new count;
+	int count;
 	
-	for (new i; i <= MaxClients; i++)
+	for (int i; i <= MaxClients; i++)
 	{
 		if (IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false) && Forward_OnAddToAdminCount(i)) 
 		{
@@ -1418,9 +1418,9 @@ stock GetAdminCount()
 }
 
 
-stock PrintNotifyMessageToAdmins(client, target)
+stock void PrintNotifyMessageToAdmins(int client, int target)
 {
-	for (new i; i <= MaxClients; i++)
+	for (int i; i <= MaxClients; i++)
 	{
 		if (IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false) && Forward_OnAddToAdminCount(i)) 
 		{
@@ -1431,9 +1431,9 @@ stock PrintNotifyMessageToAdmins(client, target)
 
 
 
-stock LongToIp(long, String:str[], maxlen)
+stock void LongToIp(int long, char[] str, int maxlen)
 {
-	new pieces[4];
+	int pieces[4];
 	
 	pieces[0] = (long >>> 24 & 255);
 	pieces[1] = (long >>> 16 & 255);
@@ -1446,9 +1446,9 @@ stock LongToIp(long, String:str[], maxlen)
 
 
 // Gnah, this should be the default behavior
-stock SetClientCookieEx(client, Handle:cookie, const String:format[], any:...)
+stock void SetClientCookieEx(int client, Handle cookie, const char[] format, any:...)
 {
-	decl String:sFormatBuf[1024];
+	char sFormatBuf[1024];
 	VFormat(sFormatBuf, sizeof(sFormatBuf), format, 4);
 	
 	SetClientCookie(client, cookie, sFormatBuf);

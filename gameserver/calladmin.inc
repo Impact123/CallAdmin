@@ -27,7 +27,7 @@
  * @param client        Client index of the caller.
  * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
  */
-forward Action:CallAdmin_OnDrawMenu(client);
+forward Action CallAdmin_OnDrawMenu(int client);
 
 
 
@@ -38,7 +38,7 @@ forward Action:CallAdmin_OnDrawMenu(client);
  * @param client        Client index of the caller.
  * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
  */
-forward Action:CallAdmin_OnDrawOwnReason(client);
+forward Action CallAdmin_OnDrawOwnReason(int client);
 
 
 
@@ -51,7 +51,7 @@ forward Action:CallAdmin_OnDrawOwnReason(client);
  * @param target        Client index of the target about to be drawed.
  * @return              Plugin_Continue to allow the target to be drawn, Plugin_Handled otherwise.
  */
-forward Action:CallAdmin_OnDrawTarget(client, target);
+forward Action CallAdmin_OnDrawTarget(int client, int target);
 
 
 
@@ -63,7 +63,7 @@ forward Action:CallAdmin_OnDrawTarget(client, target);
  * @param newVal        Trackercount after update.
  * @noreturn
  */
-forward CallAdmin_OnTrackerCountChanged(oldVal, newVal);
+forward void CallAdmin_OnTrackerCountChanged(int oldVal, int newVal);
 
 
 
@@ -76,7 +76,7 @@ forward CallAdmin_OnTrackerCountChanged(oldVal, newVal);
  * @param reason        Reason selected by the client for the report.
  * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
  */
-forward Action:CallAdmin_OnReportPre(client, target, const String:reason[]);
+forward Action CallAdmin_OnReportPre(int client, int target, const char[] reason);
 
 
 
@@ -90,7 +90,7 @@ forward Action:CallAdmin_OnReportPre(client, target, const String:reason[]);
  * @param reason        Reason selected by the client for the report.
  * @noreturn
  */
-forward CallAdmin_OnReportPost(client, target, const String:reason[]);
+forward void CallAdmin_OnReportPost(int client, int target, const char[] reason);
 
 
 
@@ -104,7 +104,7 @@ forward CallAdmin_OnReportPost(client, target, const String:reason[]);
  * @param reason        Reason for the report.
  * @return              True if target could be reported, false otherwise.
  */
-native bool:CallAdmin_ReportClient(client, target, const String:reason[]);
+native bool CallAdmin_ReportClient(int client, int target, const char[] reason);
 
 
 
@@ -115,7 +115,7 @@ native bool:CallAdmin_ReportClient(client, target, const String:reason[]);
  * @param client        Client index of the admin.
  * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
  */
-forward Action:CallAdmin_OnAddToAdminCount(client);
+forward Action CallAdmin_OnAddToAdminCount(int client);
 
 
 
@@ -125,7 +125,7 @@ forward Action:CallAdmin_OnAddToAdminCount(client);
  *
  * @return              Count of current trackers.
  */
-native CallAdmin_GetTrackersCount();
+native int CallAdmin_GetTrackersCount();
 
 
 
@@ -136,7 +136,7 @@ native CallAdmin_GetTrackersCount();
  *
  * @noreturn
  */
-native CallAdmin_RequestTrackersCountRefresh();
+native void CallAdmin_RequestTrackersCountRefresh();
 
 
 
@@ -148,7 +148,7 @@ native CallAdmin_RequestTrackersCountRefresh();
  * @param trackers      By ref value of your trackers.
  * @noreturn
  */
-forward CallAdmin_OnRequestTrackersCountRefresh(&trackers);
+forward void CallAdmin_OnRequestTrackersCountRefresh(int &trackers);
 
 
 
@@ -172,7 +172,7 @@ enum ServerData
  * @param newVal       Value of data after change.
  * @noreturn
  */
-forward CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const String:oldVal[], const String:newVal[]);
+forward void CallAdmin_OnServerDataChanged(Handle convar, ServerData type, const char[] oldVal, const char[] newVal);
 
 
 
@@ -184,7 +184,7 @@ forward CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const Stri
  * @param max_size      Maximum size of buffer.
  * @noreturn
  */
-native CallAdmin_GetHostName(String:buffer[], max_size);
+native void CallAdmin_GetHostName(char[] buffer, int max_size);
 
 
 
@@ -196,7 +196,7 @@ native CallAdmin_GetHostName(String:buffer[], max_size);
  * @param max_size      Maximum size of buffer.
  * @noreturn
  */
-native CallAdmin_GetHostIP(String:buffer[], max_size);
+native void CallAdmin_GetHostIP(char[] buffer, int max_size);
 
 
 
@@ -206,7 +206,7 @@ native CallAdmin_GetHostIP(String:buffer[], max_size);
  *
  * @return              Hostport.
  */
-native CallAdmin_GetHostPort();
+native int CallAdmin_GetHostPort();
 
 
 
@@ -219,7 +219,7 @@ native CallAdmin_GetHostPort();
  * @param ...           Variable number of format parameters.
  * @noreturn
  */
-native CallAdmin_LogMessage(const String:format[], any:...);
+native void CallAdmin_LogMessage(const char[] format, any ...);
 
 
 
@@ -231,7 +231,7 @@ native CallAdmin_LogMessage(const String:format[], any:...);
  * @param message      Message which was logged.
  * @noreturn
  */
-forward CallAdmin_OnLogMessage(Handle:plugin, const String:message[]);
+forward void CallAdmin_OnLogMessage(Handle plugin, const char[] message);
 
 
 
@@ -242,7 +242,7 @@ forward CallAdmin_OnLogMessage(Handle:plugin, const String:message[]);
  *
  * @return      Current report id of the server.
  */
-native CallAdmin_GetReportID();
+native int CallAdmin_GetReportID();
 
 
 
@@ -254,13 +254,13 @@ native CallAdmin_GetReportID();
  * @param id           ID of the handled report.
  * @noreturn
  */
-forward CallAdmin_OnReportHandled(client, id);
+forward void CallAdmin_OnReportHandled(int client, int id);
 
 
 
 
 /* Do not edit below this line */
-public SharedPlugin:__pl_calladmin = 
+public SharedPlugin __pl_calladmin = 
 {
 	name = "calladmin",
 	file = "calladmin.smx",
