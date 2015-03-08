@@ -3,10 +3,10 @@ language: c
 before_script:
     - sudo apt-get update -qq
     - sudo apt-get install unzip libc6-i386 lib32stdc++6 -y
-    - wget http://sourcemod.gameconnect.net/files/sourcemod-1.7.0-linux.tar.gz
-    - mkdir sm17 sharedinclude
-    - tar xfz sourcemod-1.7.0-linux.tar.gz -C sm17
-    - export SM17=$(pwd)/sm17/addons/sourcemod/scripting
+    - wget http://www.sourcemod.net/smdrop/1.8/sourcemod-1.8.0-git5346-linux.tar.gz
+    - mkdir sm18 sharedinclude
+    - tar xfz sourcemod-1.8.0-git5346-linux.tar.gz -C sm18
+    - export sm18=$(pwd)/sm18/addons/sourcemod/scripting
     - wget https://raw.githubusercontent.com/Impact123/AutoExecConfig/master/autoexecconfig.inc -P sharedinclude
     - wget https://raw.githubusercontent.com/popoklopsi/MessageBot/master/messagebot.inc -P sharedinclude
     - wget https://bitbucket.org/GoD_Tony/updater/raw/default/include/updater.inc -P sharedinclude
@@ -15,9 +15,9 @@ before_script:
 
 
 script:
-    - $SM17/spcomp -isharedinclude gameserver/calladmin.sp
-    - $SM17/spcomp -isharedinclude gameserver/calladmin_steam.sp
-    - $SM17/spcomp -isharedinclude gameserver/calladmin_mysql.sp
-    - $SM17/spcomp -isharedinclude gameserver/calladmin_ts3.sp
-    - $SM17/spcomp -isharedinclude gameserver/calladmin_test.sp
-    - $SM17/spcomp -isharedinclude gameserver/calladmin_usermanager.sp
+    - $sm18/spcomp -isharedinclude gameserver/calladmin.sp
+    - $sm18/spcomp -isharedinclude gameserver/calladmin_steam.sp
+    - $sm18/spcomp -isharedinclude gameserver/calladmin_mysql.sp
+    - $sm18/spcomp -isharedinclude gameserver/calladmin_ts3.sp
+    - $sm18/spcomp -isharedinclude gameserver/calladmin_test.sp
+    - $sm18/spcomp -isharedinclude gameserver/calladmin_usermanager.sp
