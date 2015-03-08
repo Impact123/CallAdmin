@@ -30,39 +30,39 @@
 #undef REQUIRE_PLUGIN
 #include <updater>
 #pragma semicolon 1
-
+#pragma newdecls required
 
 
 // Global Stuff
-new Handle:g_hEntryPruning;
-new g_iEntryPruning;
+Handle g_hEntryPruning;
+char g_iEntryPruning;
 
-new Handle:g_hTableName;
-new String:g_sTableName[32];
+Handle g_hTableName;
+char g_sTableName[32];
 
-new Handle:g_hServerKey;
-new String:g_sServerKey[32];
+Handle g_hServerKey;
+char g_sServerKey[32];
 
-new Handle:g_hOhphanedEntryPruning;
-new g_iOhphanedEntryPruning;
+Handle g_hOhphanedEntryPruning;
+char g_iOhphanedEntryPruning;
 
-new Handle:g_hVersion;
+Handle g_hVersion;
 
-new bool:g_bAllLoaded;
-new bool:g_bDbInitTriggered;
+bool g_bAllLoaded;
+bool g_bDbInitTriggered;
 
-new g_iHostPort;
-new String:g_sServerName[64];
-new String:g_sHostIP[16];
+char g_iHostPort;
+char g_sServerName[64];
+char g_sHostIP[16];
 
 
 #define PRUNE_TRACKERS_TIME 3
-new g_iCurrentTrackers;
+char g_iCurrentTrackers;
 
 
 
 // Dbstuff
-new Handle:g_hDbHandle;
+Handle g_hDbHandle;
 
 
 #define SQL_DB_CONF "CallAdmin"
@@ -73,7 +73,7 @@ new Handle:g_hDbHandle;
 #define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_mysql.txt"
 
 
-public Plugin:myinfo = 
+public Plugin myinfo = 
 {
 	name = "CallAdmin: Mysql module",
 	author = "Impact, Popoklopsi",
@@ -84,7 +84,7 @@ public Plugin:myinfo =
 
 
 
-public OnConfigsExecuted()
+public void OnConfigsExecuted()
 {
 	if (!g_bDbInitTriggered)
 	{
@@ -100,7 +100,7 @@ public OnConfigsExecuted()
 
 
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	AutoExecConfig_SetFile("plugin.calladmin_mysql");
 	
@@ -137,7 +137,7 @@ public OnPluginStart()
 
 
 
-InitDB()
+void InitDB()
 {
 	// Fallback for default if possible
 	if (!SQL_CheckConfig(SQL_DB_CONF) && !SQL_CheckConfig("default"))
@@ -153,7 +153,7 @@ InitDB()
 
 
 
-public OnAllPluginsLoaded()
+public void OnAllPluginsLoaded()
 {
 	if (!LibraryExists("calladmin"))
 	{
@@ -173,7 +173,7 @@ public OnAllPluginsLoaded()
 
 
 
-public OnLibraryAdded(const String:name[])
+public void OnLibraryAdded(const char[] name)
 {
     if (StrEqual(name, "updater"))
     {
@@ -184,7 +184,7 @@ public OnLibraryAdded(const String:name[])
 
 
 
-public Action:Timer_PruneEntries(Handle:timer)
+public Action Timer_PruneEntries(Handle timer)
 {
 	// Prune old entries if enabled
 	if (g_iEntryPruning > 0)
@@ -199,7 +199,7 @@ public Action:Timer_PruneEntries(Handle:timer)
 
 
 // Pseudo forward
-public CallAdmin_OnRequestTrackersCountRefresh(&trackers)
+public void CallAdmin_OnRequestTrackersCountRefresh(int &trackers)
 {
 	trackers = g_iCurrentTrackers;
 }
@@ -207,7 +207,7 @@ public CallAdmin_OnRequestTrackersCountRefresh(&trackers)
 
 
 
-public CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const String:oldVal[], const String:newVal[])
+public void CallAdmin_OnServerDataChanged(Handle convar, ServerData type, const char[] oldVal, const char[] newVal)
 {
 	if (type == ServerData_HostIP)
 	{
@@ -226,13 +226,13 @@ public CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const Strin
 
 
 
-PruneDatabase()
+void PruneDatabase()
 {
-	if (g_hDbHandle != INVALID_HANDLE && g_bAllLoaded)
+	if (g_hDbHandle != null && g_bAllLoaded)
 	{
-		decl String:query[1024];
-		decl String:sHostIP[16];
-		new iHostPort = CallAdmin_GetHostPort();
+		char query[1024];
+		char sHostIP[16];
+		int iHostPort = CallAdmin_GetHostPort();
 		CallAdmin_GetHostIP(sHostIP, sizeof(sHostIP));
 		
 		// Prune main table (this server)
@@ -254,13 +254,13 @@ PruneDatabase()
 
 
 
-UpdateServerData()
+void UpdateServerData()
 {
-	if (g_hDbHandle != INVALID_HANDLE && g_bAllLoaded)
+	if (g_hDbHandle != null && g_bAllLoaded)
 	{
-		decl String:query[1024];
+		char query[1024];
 		
-		decl String:sHostName[(sizeof(g_sServerName) + 1) * 2];
+		char sHostName[(sizeof(g_sServerName) + 1) * 2];
 		SQL_EscapeString(g_hDbHandle, g_sServerName, sHostName, sizeof(sHostName));
 		
 		// Update the servername
@@ -272,7 +272,7 @@ UpdateServerData()
 
 
 
-public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue[])
+public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newValue)
 {
 	if (cvar == g_hEntryPruning)
 	{
@@ -297,27 +297,27 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 
 
 
-public CallAdmin_OnReportPost(client, target, const String:reason[])
+public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 {
 	// We need all loaded
-	if (!g_bAllLoaded || g_hDbHandle == INVALID_HANDLE)
+	if (!g_bAllLoaded || g_hDbHandle == null)
 	{
 		return;
 	}
 
 
-	new String:clientNameBuf[MAX_NAME_LENGTH];
-	new String:clientName[(MAX_NAME_LENGTH + 1) * 2];
-	new String:clientAuth[21];
+	char clientNameBuf[MAX_NAME_LENGTH];
+	char clientName[(MAX_NAME_LENGTH + 1) * 2];
+	char clientAuth[21];
 	
-	new String:targetNameBuf[MAX_NAME_LENGTH];
-	new String:targetName[(MAX_NAME_LENGTH + 1) * 2];
-	new String:targetAuth[21];
+	char targetNameBuf[MAX_NAME_LENGTH];
+	char targetName[(MAX_NAME_LENGTH + 1) * 2];
+	char targetAuth[21];
 
-	new String:sKey[(32 + 1) * 2];
+	char sKey[(32 + 1) * 2];
 	SQL_EscapeString(g_hDbHandle, g_sServerKey, sKey, sizeof(sKey));
 
-	new String:sReason[(REASON_MAX_LENGTH + 1) * 2];
+	char sReason[(REASON_MAX_LENGTH + 1) * 2];
 	SQL_EscapeString(g_hDbHandle, reason, sReason, sizeof(sReason));
 	
 	
@@ -339,10 +339,10 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	SQL_EscapeString(g_hDbHandle, targetNameBuf, targetName, sizeof(targetName));
 	GetClientAuthString(target, targetAuth, sizeof(targetAuth));
 	
-	new String:serverName[(sizeof(g_sServerName) + 1) * 2];
+	char serverName[(sizeof(g_sServerName) + 1) * 2];
 	SQL_EscapeString(g_hDbHandle, g_sServerName, serverName, sizeof(serverName));
 	
-	new String:query[1024];
+	char query[1024];
 	Format(query, sizeof(query), "INSERT INTO `%s`\
 												(serverIP, serverPort, serverName, serverKey, targetName, targetID, targetReason, clientName, clientID, callHandled, reportedAt)\
 											VALUES\
@@ -354,9 +354,9 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 
 
 
-public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
+public void SQLT_ConnectCallback(Handle owner, Handle hndl, const char[] error, any data)
 {
-	if (hndl == INVALID_HANDLE)
+	if (hndl == null)
 	{
 		CallAdmin_LogMessage("ConErr: %s", error);
 		SetFailState("ConErr: %s", error);
@@ -369,7 +369,7 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 		SQL_TQuery(g_hDbHandle, SQLT_ErrorCheckCallback, "SET NAMES 'utf8'");
 		
 		// Create main Table
-		new String:query[1024];
+		char query[1024];
 		Format(query, sizeof(query), "CREATE TABLE IF NOT EXISTS `%s` (\
 															`callID` INT UNSIGNED NOT NULL AUTO_INCREMENT,\
 															`serverIP` VARCHAR(15) NOT NULL,\
@@ -432,9 +432,9 @@ public SQLT_ConnectCallback(Handle:owner, Handle:hndl, const String:error[], any
 
 
 
-public SQLT_ErrorCheckCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
+public void SQLT_ErrorCheckCallback(Handle owner, Handle hndl, const char[] error, any data)
 {
-	if (hndl == INVALID_HANDLE)
+	if (hndl == null)
 	{
 		CallAdmin_LogMessage("QueryErr: %s", error);
 		SetFailState("QueryErr: %s", error);
@@ -444,12 +444,12 @@ public SQLT_ErrorCheckCallback(Handle:owner, Handle:hndl, const String:error[], 
 
 
 
-public SQLT_CurrentVersion(Handle:owner, Handle:hndl, const String:error[], any:data)
+public void SQLT_CurrentVersion(Handle owner, Handle hndl, const char[] error, any data)
 {
-	decl String:version[12];
-	decl String:query[512];
+	char version[12];
+	char query[512];
 
-	if (hndl != INVALID_HANDLE)
+	if (hndl != null)
 	{
 		if (SQL_FetchRow(hndl))
 		{
@@ -494,9 +494,9 @@ public SQLT_CurrentVersion(Handle:owner, Handle:hndl, const String:error[], any:
 
 
 
-public SQLT_GetRealVersion(Handle:owner, Handle:hndl, const String:error[], any:data)
+public void SQLT_GetRealVersion(Handle owner, Handle hndl, const char[] error, any data)
 {
-	if (hndl == INVALID_HANDLE)
+	if (hndl == null)
 	{
 		// We have the old 0.1.2A
 		ChangeDB("0.1.2A");
@@ -511,9 +511,9 @@ public SQLT_GetRealVersion(Handle:owner, Handle:hndl, const String:error[], any:
 
 
 
-ChangeDB(String:version[])
+void ChangeDB(const char[] version)
 {
-	decl String:query[512];
+	char query[512];
 
 	// Check version < 0.1.3
 	if (!IsVersionNewerOrEqual(version, "0.1.3"))
@@ -535,7 +535,7 @@ ChangeDB(String:version[])
 
 
 
-bool:IsVersionNewerOrEqual(const String:currentVersion[], const String:versionCompare[])
+bool IsVersionNewerOrEqual(const char[] currentVersion, const char[] versionCompare)
 {
 	// Check if currentVersion >= versionCompare
 	return (strcmp(versionCompare, currentVersion, false) <= 0);
@@ -544,7 +544,7 @@ bool:IsVersionNewerOrEqual(const String:currentVersion[], const String:versionCo
 
 
 
-public Action:Timer_UpdateTrackersCount(Handle:timer)
+public Action Timer_UpdateTrackersCount(Handle timer)
 {
 	// Get current trackers
 	GetCurrentTrackers();
@@ -555,14 +555,14 @@ public Action:Timer_UpdateTrackersCount(Handle:timer)
 
 
 
-GetCurrentTrackers()
+int GetCurrentTrackers()
 {
 	// We need all loaded
-	if (g_hDbHandle != INVALID_HANDLE && g_bAllLoaded)
+	if (g_hDbHandle != null && g_bAllLoaded)
 	{
-		decl String:query[1024];
+		char query[1024];
 
-		new String:sKey[(32 + 1) * 2];
+		char sKey[(32 + 1) * 2];
 		SQL_EscapeString(g_hDbHandle, g_sServerKey, sKey, sizeof(sKey));
 		
 		// Get current trackers (last 2 minutes)
@@ -585,9 +585,9 @@ GetCurrentTrackers()
 
 
 
-public SQLT_CurrentTrackersCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
+public void SQLT_CurrentTrackersCallback(Handle owner, Handle hndl, const char[] error, any data)
 {
-	if (hndl == INVALID_HANDLE)
+	if (hndl == null)
 	{
 		CallAdmin_LogMessage("CurrentTrackersErr: %s", error);
 		SetFailState("CurrentTrackersErr: %s", error);
@@ -604,7 +604,7 @@ public SQLT_CurrentTrackersCallback(Handle:owner, Handle:hndl, const String:erro
 
 
 
-OnAllLoaded()
+void OnAllLoaded()
 {
 	g_bAllLoaded = true;
 
