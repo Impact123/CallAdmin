@@ -207,7 +207,7 @@ public void CallAdmin_OnRequestTrackersCountRefresh(int &trackers)
 
 
 
-public void CallAdmin_OnServerDataChanged(Handle convar, ServerData type, const char[] oldVal, const char[] newVal)
+public void CallAdmin_OnServerDataChanged(ConVar convar, ServerData type, const char[] oldVal, const char[] newVal)
 {
 	if (type == ServerData_HostIP)
 	{

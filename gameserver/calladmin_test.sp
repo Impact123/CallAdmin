@@ -146,7 +146,7 @@ public void CallAdmin_OnLogMessage(Handle plugin, const char[] message)
 
 
 
-public void CallAdmin_OnServerDataChanged(Handle convar, ServerData type, const char[] oldVal, const char[] newVal)
+public void CallAdmin_OnServerDataChanged(ConVar convar, ServerData type, const char[] oldVal, const char[] newVal)
 {
 	PrintToServer("Convar: %x (type: %d) was changed from '%s' to '%s'", convar, type, oldVal, newVal);
 }
