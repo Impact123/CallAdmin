@@ -26,10 +26,11 @@
 #include <sourcemod>
 #include "calladmin"
 #pragma semicolon 1
+#pragma newdecls required
 
 
 
-public Plugin:myinfo = 
+public Plugin myinfo = 
 {
 	name = "CallAdmin: Test",
 	author = "Impact, Popoklopsi",
@@ -41,7 +42,7 @@ public Plugin:myinfo =
 
 
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	RegConsoleCmd("calladmin_test", Command_Test);
 }
@@ -49,7 +50,7 @@ public OnPluginStart()
 
 
 
-public Action:Command_Test(client, args)
+public Action Command_Test(int client, int args)
 {
 	PrintToServer("Current trackercount: %d", CallAdmin_GetTrackersCount());
 	CallAdmin_LogMessage("Loggingtest");
@@ -59,7 +60,7 @@ public Action:Command_Test(client, args)
 
 
 
-public Action:CallAdmin_OnDrawMenu(client)
+public Action CallAdmin_OnDrawMenu(int client)
 {
 	PrintToServer("The main CallAdmin client selection menu is drawn to: %N", client);
 	
@@ -68,7 +69,7 @@ public Action:CallAdmin_OnDrawMenu(client)
 
 
 
-public Action:CallAdmin_OnDrawOwnReason(client)
+public Action CallAdmin_OnDrawOwnReason(int client)
 {
 	PrintToServer("An own reason menu is drawn to: %N", client);
 	
@@ -77,7 +78,7 @@ public Action:CallAdmin_OnDrawOwnReason(client)
 
 
 
-public Action:CallAdmin_OnDrawTarget(client, target)
+public Action CallAdmin_OnDrawTarget(int client, int target)
 {
 	PrintToServer("Client %N is drawn to %N", target, client);
 	
@@ -86,14 +87,14 @@ public Action:CallAdmin_OnDrawTarget(client, target)
 
 
 
-public CallAdmin_OnTrackerCountChanged(oldVal, newVal)
+public void CallAdmin_OnTrackerCountChanged(int oldVal, int newVal)
 {
 	PrintToServer("Trackercount has changed from %d to %d", oldVal, newVal);
 }
 
 
 
-public Action:CallAdmin_OnAddToAdminCount(client)
+public Action CallAdmin_OnAddToAdminCount(int client)
 {
 	PrintToServer("Client %N is being added to admin count", client);
 	
@@ -102,7 +103,7 @@ public Action:CallAdmin_OnAddToAdminCount(client)
 
 
 
-public Action:CallAdmin_OnReportPre(client, target, const String:reason[])
+public Action CallAdmin_OnReportPre(int client, int target, const char[] reason)
 {
 	PrintToServer("%N is about to be reported by %N for %s", target, client, reason);
 	
@@ -111,9 +112,9 @@ public Action:CallAdmin_OnReportPre(client, target, const String:reason[])
 
 
 
-public CallAdmin_OnReportPost(client, target, const String:reason[])
+public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 {
-	new id = CallAdmin_GetReportID();
+	int  id = CallAdmin_GetReportID();
 	
 	// Reporter wasn't a real client (initiated by a module)
 	if (client == REPORTER_CONSOLE)
@@ -128,16 +129,16 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 
 
 
-public CallAdmin_OnRequestTrackersCountRefresh(&trackers)
+public void CallAdmin_OnRequestTrackersCountRefresh(int &trackers)
 {
 	PrintToServer("Base plugin requested a tracker count from us");
 }
 
 
 
-public CallAdmin_OnLogMessage(Handle:plugin, const String:message[])
+public void CallAdmin_OnLogMessage(Handle plugin, const char[] message)
 {
-	new String:sPluginName[64];
+	char sPluginName[64];
 	GetPluginInfo(plugin, PlInfo_Name, sPluginName, sizeof(sPluginName));
 	
 	PrintToServer("Plugin: %s (handle: %x) logged a message: %s", sPluginName, plugin, message);
@@ -145,14 +146,14 @@ public CallAdmin_OnLogMessage(Handle:plugin, const String:message[])
 
 
 
-public CallAdmin_OnServerDataChanged(Handle:convar, ServerData:type, const String:oldVal[], const String:newVal[])
+public void CallAdmin_OnServerDataChanged(Handle convar, ServerData type, const char[] oldVal, const char[] newVal)
 {
 	PrintToServer("Convar: %x (type: %d) was changed from '%s' to '%s'", convar, type, oldVal, newVal);
 }
 
 
 
-public CallAdmin_OnReportHandled(client, id)
+public void CallAdmin_OnReportHandled(int client, int id)
 {
 	PrintToServer("ReportID: %d was handled by: %N", id, client);
 }
