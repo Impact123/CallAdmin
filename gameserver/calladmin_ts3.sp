@@ -366,7 +366,7 @@ public int OnSocketConnect(Handle socket, any pack)
 
 public int OnSocketReceive(Handle socket, char[] data, const int size, any pack) 
 {
-	if (socket != INVALID_HANDLE)
+	if (socket != null)
 	{
 		// Check the response here and do something
 		
@@ -374,6 +374,7 @@ public int OnSocketReceive(Handle socket, char[] data, const int size, any pack)
 		// Close the socket
 		if (SocketIsConnected(socket))
 		{
+			SocketDisconnect(socket);
 			SocketDisconnect(socket);
 		}
 	}
@@ -383,7 +384,7 @@ public int OnSocketReceive(Handle socket, char[] data, const int size, any pack)
 
 public int OnSocketDisconnect(Handle socket, any pack)
 {
-	if (socket != INVALID_HANDLE)
+	if (socket != null)
 	{
 		CloseHandle(socket);
 	}
@@ -395,7 +396,7 @@ public int OnSocketError(Handle socket, const int errorType, const int errorNum,
 {
 	CallAdmin_LogMessage("Socket Error: %d, %d", errorType, errorNum);
 	
-	if (socket != INVALID_HANDLE)
+	if (socket != null)
 	{
 		CloseHandle(socket);
 	}
@@ -434,7 +435,7 @@ public int OnSocketConnectCount(Handle socket, any pack)
 // Onlinecount callback
 public int OnSocketReceiveCount(Handle socket, char[] data, const int size, any pack) 
 {
-	if (socket != INVALID_HANDLE)
+	if (socket != null)
 	{
 		// This fixes an bug on windowsservers
 		// The receivefunction for socket is getting called twice on these systems, once for the headers, and a second time for the body
