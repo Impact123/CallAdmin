@@ -33,6 +33,7 @@
 #undef REQUIRE_PLUGIN
 #include <updater>
 #pragma semicolon 1
+#pragma newdecls required
 
 
 // This should be 128 KB which is more than enough
@@ -51,28 +52,28 @@
 
 
 // Global stuff
-new Handle:g_hVersion;
+Handle g_hVersion;
 
-new Handle:g_hSteamMethod;
-new bool:g_bSteamMethod;
-
-
-new Handle:g_hSteamUsername;
-new String:g_sSteamUsername[128];
-
-new Handle:g_hSteamPassword;
-new String:g_sSteamPassword[128];
-
-new Handle:g_hSteamIDRegex;
-new Handle:g_hSteamIDRegex2;
-new Handle:g_hCommunityIDRegex;
+Handle g_hSteamMethod;
+bool g_bSteamMethod;
 
 
-new String:g_sSteamIDConfigFile[PLATFORM_MAX_PATH];
-new String:g_sGroupIDConfigFile[PLATFORM_MAX_PATH];
+Handle g_hSteamUsername;
+char g_sSteamUsername[128];
+
+Handle g_hSteamPassword;
+char g_sSteamPassword[128];
+
+Handle g_hSteamIDRegex;
+Handle g_hSteamIDRegex2;
+Handle g_hCommunityIDRegex;
 
 
-new g_iLastReportID;
+char g_sSteamIDConfigFile[PLATFORM_MAX_PATH];
+char g_sGroupIDConfigFile[PLATFORM_MAX_PATH];
+
+
+int g_iLastReportID;
 
 
 enum AuthStringType
@@ -89,7 +90,7 @@ enum AuthStringType
 #define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_steam.txt"
 
 
-public Plugin:myinfo = 
+public Plugin myinfo = 
 {
 	name = "CallAdmin: Steam module",
 	author = "Impact, Popoklopsi",
@@ -102,7 +103,7 @@ public Plugin:myinfo =
 
 
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	// Path to the SteamID list
 	BuildPath(Path_SM, g_sSteamIDConfigFile, sizeof(g_sSteamIDConfigFile), "configs/calladmin_steam_steamidlist.cfg");
@@ -181,15 +182,15 @@ public OnPluginStart()
 
 
 
-public OnMessageResultReceived(MessageBotResult:result, MessageBotError:error)
+public void OnMessageResultReceived(MessageBotResult result, MessageBotError error)
 {
-	static String:resultString[][] = {"No error", "Error while trying to login", "Operation timed out",
+	static char resultString[][] = {"No error", "Error while trying to login", "Operation timed out",
 	                                  "No recipients were setup prior to sending a message", "Couldn't send to any recipient"};
 
 
 	if (result != RESULT_NO_ERROR)
 	{
-		decl String:sSteamMethod[24];
+		char sSteamMethod[24];
 		Format(sSteamMethod, sizeof(sSteamMethod), "%s", g_bSteamMethod ? "Steamworks" : "Web API");
 		CallAdmin_LogMessage("Failed to send steam message via %s: (result: %d [%s] | error: %d)", sSteamMethod, result, resultString[result], error);
 	}
@@ -198,9 +199,9 @@ public OnMessageResultReceived(MessageBotResult:result, MessageBotError:error)
 
 
 
-CreateSteamIDList()
+void CreateSteamIDList()
 {
-	new Handle:hFile;
+	Handle hFile;
 	hFile = OpenFile(g_sSteamIDConfigFile, "w");
 	
 	// Failed to open
@@ -218,9 +219,9 @@ CreateSteamIDList()
 
 
 
-ParseSteamIDList()
+void ParseSteamIDList()
 {
-	new Handle:hFile;
+	Handle hFile;
 	
 	hFile = OpenFile(g_sSteamIDConfigFile, "r");
 	
@@ -234,10 +235,10 @@ ParseSteamIDList()
 	
 	
 	// Buffer must be a little bit bigger to have enough room for possible comments
-	decl String:sReadBuffer[128];
+	char sReadBuffer[128];
 
 	
-	new len;
+	int len;
 	while (!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
 	{
 		if (sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
@@ -254,7 +255,7 @@ ParseSteamIDList()
 		
 		// Support for comments on end of line
 		len = strlen(sReadBuffer);
-		for (new i; i < len; i++)
+		for (int i; i < len; i++)
 		{
 			if (sReadBuffer[i] == ' ' || sReadBuffer[i] == '/')
 			{
@@ -265,7 +266,7 @@ ParseSteamIDList()
 		}
 		
 		
-		new AuthStringType:type = GetAuthIDType(sReadBuffer);
+		AuthStringType type = GetAuthIDType(sReadBuffer);
 		
 		// Is a steamid
 		if (type == AuthString_SteamID)
@@ -302,9 +303,9 @@ ParseSteamIDList()
 
 
 
-CreateGroupIDList()
+void CreateGroupIDList()
 {
-	new Handle:hFile;
+	Handle hFile;
 	hFile = OpenFile(g_sGroupIDConfigFile, "w");
 	
 	// Failed to open
@@ -322,9 +323,9 @@ CreateGroupIDList()
 
 
 
-ParseGroupIDList()
+void ParseGroupIDList()
 {
-	new Handle:hFile;
+	Handle hFile;
 	
 	hFile = OpenFile(g_sGroupIDConfigFile, "r");
 	
@@ -338,10 +339,10 @@ ParseGroupIDList()
 	
 	
 	// Buffer must be a little bit bigger to have enough room for possible comments
-	decl String:sReadBuffer[128];
+	char sReadBuffer[128];
 
 	
-	new len;
+	int len;
 	while (!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
 	{
 		if (sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
@@ -358,7 +359,7 @@ ParseGroupIDList()
 		
 		// Support for comments on end of line
 		len = strlen(sReadBuffer);
-		for (new i; i < len; i++)
+		for (int i; i < len; i++)
 		{
 			if (sReadBuffer[i] == ' ' || sReadBuffer[i] == '/')
 			{
@@ -389,7 +390,7 @@ ParseGroupIDList()
 
 
 
-public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue[])
+public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newValue)
 {
 	if (cvar == g_hVersion)
 	{
@@ -424,7 +425,7 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 
 
 
-public OnAllPluginsLoaded()
+public void OnAllPluginsLoaded()
 {
 	if (!LibraryExists("calladmin"))
 	{
@@ -440,7 +441,7 @@ public OnAllPluginsLoaded()
 
 
 
-public OnLibraryAdded(const String:name[])
+public void OnLibraryAdded(const char[] name)
 {
 	if (StrEqual(name, "updater"))
 	{
@@ -451,19 +452,19 @@ public OnLibraryAdded(const String:name[])
 
 
 
-public CallAdmin_OnReportPost(client, target, const String:reason[])
+public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 {
 	MessageBot_SetLoginData(g_sSteamUsername, g_sSteamPassword);
 	
-	decl String:sClientName[MAX_NAME_LENGTH];
-	decl String:sClientID[21];
+	char sClientName[MAX_NAME_LENGTH];
+	char sClientID[21];
 	
-	decl String:sTargetName[MAX_NAME_LENGTH];
-	decl String:sTargetID[21];
+	char sTargetName[MAX_NAME_LENGTH];
+	char sTargetID[21];
 	
-	decl String:sServerIP[16];
-	new serverPort;
-	decl String:sServerName[128];
+	char sServerIP[16];
+	int serverPort;
+	char sServerName[128];
 	
 	CallAdmin_GetHostIP(sServerIP, sizeof(sServerIP));
 	serverPort = CallAdmin_GetHostPort();
@@ -486,7 +487,7 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	
 	g_iLastReportID = CallAdmin_GetReportID();
 	
-	decl String:sMessage[4096];
+	char sMessage[4096];
 	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReportID: %d\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s\nJoin server: steam://connect/%s:%d\nWhen in game, type !calladmin_handle <id> or /calladmin_handle <id> in chat to handle this report", sServerName, sServerIP, serverPort, g_iLastReportID, sClientName, sClientID, sTargetName, sTargetID, reason, sServerIP, serverPort);
 							 
 	MessageBot_SendMessage(OnMessageResultReceived, sMessage);
@@ -494,14 +495,14 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 
 
 
-public CallAdmin_OnReportHandled(client, id)
+public void CallAdmin_OnReportHandled(int client, int id)
 {
 	if (id != g_iLastReportID)
 	{
 		return;
 	}
 	
-	decl String:sMessage[1024];
+	char sMessage[1024];
 	Format(sMessage, sizeof(sMessage), "\nLast report (%d) was handled by: %N", g_iLastReportID, client);
 	
 	MessageBot_SendMessage(OnMessageResultReceived, sMessage);
@@ -509,10 +510,10 @@ public CallAdmin_OnReportHandled(client, id)
 
 
 
-FetchGroupMembers(String:groupID[])
+void FetchGroupMembers(const char[] groupID)
 {
 	// Create a new socket
-	new Handle:Socket = SocketCreate(SOCKET_TCP, OnSocketError);
+	Handle Socket = SocketCreate(SOCKET_TCP, OnSocketError);
 	
 	
 	// Optional tweaking stuff
@@ -523,11 +524,11 @@ FetchGroupMembers(String:groupID[])
 	
 
 	// Create a datapack
-	new Handle:pack = CreateDataPack();
+	Handle pack = CreateDataPack();
 	
 	
 	// Buffers
-	decl String:sGroupID[64];
+	char sGroupID[64];
 	strcopy(sGroupID, sizeof(sGroupID), groupID);
 	
 	
@@ -546,15 +547,15 @@ FetchGroupMembers(String:groupID[])
 
 
 
-public OnSocketConnect(Handle:socket, any pack)
+public int OnSocketConnect(Handle socket, any pack)
 {
 	// If socket is connected, should be since this is the callback that is called if it is connected
 	if (SocketIsConnected(socket))
 	{
 		// Buffers
-		decl String:sRequestString[1024];
-		decl String:sRequestPath[512];
-		decl String:sGroupID[64 * 4];
+		char sRequestString[1024];
+		char sRequestPath[512];
+		char sGroupID[64 * 4];
 		
 		
 		// Reset the pack
@@ -587,7 +588,7 @@ public OnSocketConnect(Handle:socket, any pack)
 
 
 
-public OnSocketReceive(Handle:socket, String:data[], const size, any pack) 
+public int OnSocketReceive(Handle socket, char[] data, const int size, any pack) 
 {
 	if (socket != INVALID_HANDLE)
 	{
@@ -603,18 +604,18 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any pack)
 		
 		// 150 ids should be enough for now
 		// We shoudln't need it, but we use a little bit of a buffer to filter out garbage
-		new String:Split[150 + 50][64];
-		new String:sTempID[21];
+		char Split[150 + 50][64];
+		char sTempID[21];
 		
 		
 		// We only have an limited amount of lines we can split, we shouldn't waste this ;)
-		new startindex  = 0;
+		int startindex  = 0;
 		if ( (startindex = StrContains(data, "<members>", true)) == -1)
 		{
 			startindex = 0;
 		}
 		
-		new endindex  = strlen(data);
+		int endindex  = strlen(data);
 		if ( (endindex = StrContains(data, "</members>", true)) != -1)
 		{
 			data[endindex] = '\0';
@@ -625,9 +626,9 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any pack)
 				
 		
 		// Run though Communityids
-		new splitsize = sizeof(Split);
-		new index;
-		for (new i; i < splitsize; i++)
+		int splitsize = sizeof(Split);
+		int index;
+		for (int i; i < splitsize; i++)
 		{
 			if (strlen(Split[i]) > 0)
 			{
@@ -663,7 +664,7 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any pack)
 
 
 
-public OnSocketDisconnect(Handle:socket, any pack)
+public int OnSocketDisconnect(Handle socket, any pack)
 {
 	if (socket != INVALID_HANDLE)
 	{
@@ -674,7 +675,7 @@ public OnSocketDisconnect(Handle:socket, any pack)
 
 
 
-public OnSocketError(Handle:socket, const errorType, const errorNum, any pack)
+public int OnSocketError(Handle socket, const int errorType, const int errorNum, any pack)
 {
 	CallAdmin_LogMessage("Socket Error: %d, %d", errorType, errorNum);
 	
@@ -687,7 +688,7 @@ public OnSocketError(Handle:socket, const errorType, const errorNum, any pack)
 
 
 
-stock AuthStringType:GetAuthIDType(String:auth[])
+stock AuthStringType GetAuthIDType(const char[] auth)
 {
 	if (MatchRegex(g_hSteamIDRegex, auth) == 1)
 	{
@@ -707,14 +708,14 @@ stock AuthStringType:GetAuthIDType(String:auth[])
 
 
 
-stock SteamID2ToSteamId(const String:steamID2[], String:dest[], max_len)
+stock void SteamID2ToSteamId(const char[] steamID2, char[] dest, int max_len)
 {
-	decl String:sTemp[21];
+	char sTemp[21];
 	strcopy(sTemp, sizeof(sTemp), steamID2);
 	
 	sTemp[strlen(sTemp)] = '\0';
 	
-	new temp = StringToInt(sTemp[5]);
+	int temp = StringToInt(sTemp[5]);
 	
 	Format(dest, max_len, "STEAM_0:%d:%d", temp & 1, temp >> 1);
 }
@@ -723,7 +724,7 @@ stock SteamID2ToSteamId(const String:steamID2[], String:dest[], max_len)
 
 
 // Written by Peace-Maker (i guess), formatted for better readability
-stock URLEncode(String:sString[], maxlen, String:safe[] = "/", bool bFormat = false)
+stock void URLEncode(char[] sString, int maxlen, char safe[] = "/", bool bFormat = false)
 {
 	char sAlwaysSafe[256];
 	Format(sAlwaysSafe, sizeof(sAlwaysSafe), "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-%s", safe);
@@ -743,7 +744,7 @@ stock URLEncode(String:sString[], maxlen, String:safe[] = "/", bool bFormat = fa
 	char sChar[8];
 	char sReplaceChar[8];
 	
-	for (new i = 1; i < 256; i++)
+	for (int i = 1; i < 256; i++)
 	{
 		// Skip the '%' double replace ftw..
 		if (i==37)
