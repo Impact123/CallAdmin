@@ -2,10 +2,11 @@ language: c
 
 before_script:
     - sudo apt-get update -qq
-    - sudo apt-get install unzip libc6-i386 lib32stdc++6 -y
-    - wget http://www.sourcemod.net/smdrop/1.8/sourcemod-1.8.0-git5346-linux.tar.gz
+    - sudo apt-get install unzip libc6-i386 lib32stdc++6 lynx -y
+    - SMPACKAGE="$(lynx -dump "http://www.sourcemod.net/smdrop/1.8/" | grep -Eo "http:.*sourcemod-.*-linux\.tar.gz" | tail -n 1)"
+    - wget $SMPACKAGE
     - mkdir sm18 sharedinclude
-    - tar xfz sourcemod-1.8.0-git5346-linux.tar.gz -C sm18
+    - tar xfz $(basename $SMPACKAGE) -C sm18
     - export sm18=$(pwd)/sm18/addons/sourcemod/scripting
     - wget https://raw.githubusercontent.com/Impact123/AutoExecConfig/master/autoexecconfig.inc -P sharedinclude
     - wget https://raw.githubusercontent.com/popoklopsi/MessageBot/master/messagebot.inc -P sharedinclude
