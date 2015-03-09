@@ -499,7 +499,7 @@ void ParseReasonList()
 		// Add the reason to the list only if it doesn't already exist
 		if (g_hReasonAdt.FindString(sReadBuffer) == -1)
 		{
-			PushArrayString(g_hReasonAdt, sReadBuffer);
+			g_hReasonAdt.PushString(sReadBuffer);
 		}
 	}
 	
