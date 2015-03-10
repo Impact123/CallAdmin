@@ -75,8 +75,8 @@ public void OnPluginStart()
 	AutoExecConfig_SetFile("plugin.calladmin_ts3");
 	
 	g_hVersion = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_ts3_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hUrl     = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_ts3_url", "http://calladmin.yourclan.eu/subfolder", "Url to the ts3script path", FCVAR_PLUGIN);
-	g_hKey     = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_ts3_key", "SomeSecureKeyNobodyKnows", "Key of your ts3script", FCVAR_PLUGIN);
+	g_hUrl     = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_ts3_url", "http://calladmin.yourclan.eu/subfolder", "Url to the ts3script path", FCVAR_PLUGIN|FCVAR_PROTECTED);
+	g_hKey     = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_ts3_key", "SomeSecureKeyNobodyKnows", "Key of your ts3script", FCVAR_PLUGIN|FCVAR_PROTECTED);
 	
 	
 	AutoExecConfig(true, "plugin.calladmin_ts3");
