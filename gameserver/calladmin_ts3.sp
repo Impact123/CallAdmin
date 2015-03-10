@@ -37,16 +37,16 @@
 
 
 // Global stuff
-Handle g_hVersion;
+ConVar g_hVersion;
 
 
-Handle g_hUrl;
+ConVar g_hUrl;
 char g_sUrl[PLATFORM_MAX_PATH];
 char g_sRealUrl[PLATFORM_MAX_PATH];
 char g_sRealPath[PLATFORM_MAX_PATH];
 
 
-Handle g_hKey;
+ConVar g_hKey;
 char g_sKey[PLATFORM_MAX_PATH];
 
 int g_iCurrentTrackers;
@@ -74,23 +74,23 @@ public void OnPluginStart()
 {
 	AutoExecConfig_SetFile("plugin.calladmin_ts3");
 	
-	g_hVersion = AutoExecConfig_CreateConVar("sm_calladmin_ts3_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hUrl     = AutoExecConfig_CreateConVar("sm_calladmin_ts3_url", "http://calladmin.yourclan.eu/subfolder", "Url to the ts3script path", FCVAR_PLUGIN);
-	g_hKey     = AutoExecConfig_CreateConVar("sm_calladmin_ts3_key", "SomeSecureKeyNobodyKnows", "Key of your ts3script", FCVAR_PLUGIN);
+	g_hVersion = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_ts3_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hUrl     = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_ts3_url", "http://calladmin.yourclan.eu/subfolder", "Url to the ts3script path", FCVAR_PLUGIN);
+	g_hKey     = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_ts3_key", "SomeSecureKeyNobodyKnows", "Key of your ts3script", FCVAR_PLUGIN);
 	
 	
 	AutoExecConfig(true, "plugin.calladmin_ts3");
 	AutoExecConfig_CleanFile();
 	
 	
-	SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
+	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
 	
-	GetConVarString(g_hUrl, g_sUrl, sizeof(g_sUrl));
+	g_hUrl.GetString(g_sUrl, sizeof(g_sUrl));
 	PreFormatUrl();
 	HookConVarChange(g_hUrl, OnCvarChanged);
 	
-	GetConVarString(g_hKey, g_sKey, sizeof(g_sKey));
+	g_hKey.GetString(g_sKey, sizeof(g_sKey));
 	HookConVarChange(g_hKey, OnCvarChanged);
 	
 	CreateTimer(20.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
@@ -178,16 +178,16 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 {
 	if (cvar == g_hVersion)
 	{
-		SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
+		g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	}
 	else if (cvar == g_hUrl)
 	{
-		GetConVarString(g_hUrl, g_sUrl, sizeof(g_sUrl));
+		g_hUrl.GetString(g_sUrl, sizeof(g_sUrl));
 		PreFormatUrl();
 	}
 	else if (cvar == g_hKey)
 	{
-		GetConVarString(g_hKey, g_sKey, sizeof(g_sKey));
+		g_hKey.GetString(g_sKey, sizeof(g_sKey));
 	}
 }
 
