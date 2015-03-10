@@ -52,16 +52,16 @@
 
 
 // Global stuff
-Handle g_hVersion;
+ConVar g_hVersion;
 
-Handle g_hSteamMethod;
+ConVar g_hSteamMethod;
 bool g_bSteamMethod;
 
 
-Handle g_hSteamUsername;
+ConVar g_hSteamUsername;
 char g_sSteamUsername[128];
 
-Handle g_hSteamPassword;
+ConVar g_hSteamPassword;
 char g_sSteamPassword[128];
 
 Handle g_hSteamIDRegex;
@@ -144,26 +144,26 @@ public void OnPluginStart()
 	
 	AutoExecConfig_SetFile("plugin.calladmin_steam");
 	
-	g_hVersion       = AutoExecConfig_CreateConVar("sm_calladmin_steam_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hSteamMethod   = AutoExecConfig_CreateConVar("sm_calladmin_steam_method", "0", "1 = Use Opensteamworks to send message, 0 = Use Steam Web API to send message", FCVAR_PLUGIN);
-	g_hSteamUsername = AutoExecConfig_CreateConVar("sm_calladmin_steam_username", "", "Your steam username", FCVAR_PLUGIN|FCVAR_PROTECTED);
-	g_hSteamPassword = AutoExecConfig_CreateConVar("sm_calladmin_steam_password", "", "Your steam password", FCVAR_PLUGIN|FCVAR_PROTECTED);
+	g_hVersion       = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_steam_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hSteamMethod   = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_steam_method", "0", "1 = Use Opensteamworks to send message, 0 = Use Steam Web API to send message", FCVAR_PLUGIN);
+	g_hSteamUsername = view_as<ConVar> view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_steam_username", "", "Your steam username", FCVAR_PLUGIN|FCVAR_PROTECTED);
+	g_hSteamPassword = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_steam_password", "", "Your steam password", FCVAR_PLUGIN|FCVAR_PROTECTED);
 	
 	
 	AutoExecConfig(true, "plugin.calladmin_steam");
 	AutoExecConfig_CleanFile();
 	
 	
-	SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
+	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
 	
-	GetConVarString(g_hSteamUsername, g_sSteamUsername, sizeof(g_sSteamUsername));
+	g_hSteamUsername.GetString(g_sSteamUsername, sizeof(g_sSteamUsername));
 	HookConVarChange(g_hSteamUsername, OnCvarChanged);
 	
-	GetConVarString(g_hSteamPassword, g_sSteamPassword, sizeof(g_sSteamPassword));
+	g_hSteamPassword.GetString(g_sSteamPassword, sizeof(g_sSteamPassword));
 	HookConVarChange(g_hSteamPassword, OnCvarChanged);
 	
-	g_bSteamMethod = GetConVarBool(g_hSteamMethod);
+	g_bSteamMethod = g_hSteamMethod.BoolValue;
 	HookConVarChange(g_hSteamMethod, OnCvarChanged);
 
 
@@ -221,7 +221,7 @@ void CreateSteamIDList()
 
 void ParseSteamIDList()
 {
-	Handle hFile;
+	File hFile;
 	
 	hFile = OpenFile(g_sSteamIDConfigFile, "r");
 	
@@ -239,7 +239,7 @@ void ParseSteamIDList()
 
 	
 	int len;
-	while (!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
+	while (!IsEndOfFile(hFile) && hFile.ReadLine(sReadBuffer, sizeof(sReadBuffer)))
 	{
 		if (sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
 		{
@@ -297,7 +297,7 @@ void ParseSteamIDList()
 		MessageBot_AddRecipient(sReadBuffer);
 	}
 	
-	CloseHandle(hFile);
+	hFile.Close();
 }
 
 
@@ -305,7 +305,7 @@ void ParseSteamIDList()
 
 void CreateGroupIDList()
 {
-	Handle hFile;
+	File hFile;
 	hFile = OpenFile(g_sGroupIDConfigFile, "w");
 	
 	// Failed to open
@@ -315,9 +315,9 @@ void CreateGroupIDList()
 		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for writing");
 	}
 	
-	WriteFileLine(hFile, "// List of group names (custom group url), seperated by a new line");
+	hFile.WriteLine("// List of group names (custom group url), seperated by a new line");
 	
-	CloseHandle(hFile);
+	hFile.Close();
 }
 
 
@@ -325,7 +325,7 @@ void CreateGroupIDList()
 
 void ParseGroupIDList()
 {
-	Handle hFile;
+	File hFile;
 	
 	hFile = OpenFile(g_sGroupIDConfigFile, "r");
 	
@@ -343,7 +343,7 @@ void ParseGroupIDList()
 
 	
 	int len;
-	while (!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
+	while (! hFile.EndOfFile() &&  hFile.ReadLine(sReadBuffer, sizeof(sReadBuffer)))
 	{
 		if (sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
 		{
@@ -384,7 +384,7 @@ void ParseGroupIDList()
 		FetchGroupMembers(sReadBuffer);
 	}
 	
-	CloseHandle(hFile);
+	hFile.Close();
 }
 
 
@@ -394,19 +394,19 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 {
 	if (cvar == g_hVersion)
 	{
-		SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
+		g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	}
 	else if (cvar == g_hSteamUsername)
 	{
-		GetConVarString(g_hSteamUsername, g_sSteamUsername, sizeof(g_sSteamUsername));
+		g_hSteamUsername.GetString(g_sSteamUsername, sizeof(g_sSteamUsername));
 	}
 	else if (cvar == g_hSteamPassword)
 	{
-		GetConVarString(g_hSteamPassword, g_sSteamPassword, sizeof(g_sSteamPassword));
+		g_hSteamPassword.GetString(g_sSteamPassword, sizeof(g_sSteamPassword));
 	}
 	else if (cvar == g_hSteamMethod)
 	{
-		g_bSteamMethod = GetConVarBool(g_hSteamMethod);
+		g_bSteamMethod = g_hSteamMethod.BoolValue;
 
 		if (CALLADMIN_STEAM_METHOD_AVAILABLE())
 		{
