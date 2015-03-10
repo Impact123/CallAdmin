@@ -1,13 +1,13 @@
 /**
  * -----------------------------------------------------
  * File        calladmin_usermanager.sp
- * Authors     David <popoklopsi> Ordnung, Impact
+ * Authors     Popoklopsi, Impact
  * License     GPLv3
  * Web         http://popoklopsi.de, http://gugyclan.eu
  * -----------------------------------------------------
  * 
  * CallAdmin
- * Copyright (C) 2013 David <popoklopsi> Ordnung, Impact
+ * Copyright (C) 2013 Popoklopsi, Impact
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

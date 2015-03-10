@@ -2,13 +2,13 @@
 /**
  * -----------------------------------------------------
  * File        autoload.php
- * Authors     Impact, David <popoklopsi> Ordnung
+ * Authors     Impact, Popoklopsi
  * License     GPLv3
  * Web         http://gugyclan.eu, http://popoklopsi.de
  * -----------------------------------------------------
  * 
  * CallAdmin
- * Copyright (C) 2013 Impact, David <popoklopsi> Ordnung
+ * Copyright (C) 2013 Impact, Popoklopsi
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
