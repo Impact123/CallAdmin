@@ -168,6 +168,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("CallAdmin_GetTrackersCount", Native_GetCurrentTrackers);
 	CreateNative("CallAdmin_RequestTrackersCountRefresh", Native_RequestTrackersCountRefresh);
 	CreateNative("CallAdmin_GetHostName", Native_GetHostName);
+	CreateNative("CallAdmin_GetHostIP", Native_GetHostIP);
 	CreateNative("CallAdmin_GetHostPort", Native_GetHostPort);
 	CreateNative("CallAdmin_ReportClient", Native_ReportClient);
 	CreateNative("CallAdmin_LogMessage", Native_LogMessage);
