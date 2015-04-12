@@ -319,7 +319,7 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_call_handle", Command_HandleCall);
 	RegConsoleCmd("sm_calladmin_handle", Command_HandleCall);
 	
-	RegConsoleCmd("sm_calladmin_reload_reasons", Command_ReloadReasons);
+	RegConsoleCmd("sm_calladmin_reload", Command_ReloadReasons);
 	
 	
 	AutoExecConfig_SetFile("plugin.calladmin");
