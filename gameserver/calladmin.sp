@@ -319,7 +319,7 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_call_handle", Command_HandleCall);
 	RegConsoleCmd("sm_calladmin_handle", Command_HandleCall);
 	
-	RegConsoleCmd("sm_calladmin_reload", Command_ReloadReasons);
+	RegConsoleCmd("sm_calladmin_reload", Command_Reload);
 	
 	
 	AutoExecConfig_SetFile("plugin.calladmin");
@@ -917,16 +917,8 @@ public Action Command_HandleCall(int client, int args)
 
 
 
-public Action Command_ReloadReasons(int client, int args)
+public Action Command_Reload(int client, int args)
 {
-	if (client == 0)
-	{
-		PrintToServer("This command can't be used from console");
-		
-		return Plugin_Handled;
-	}
-	
-	
 	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
 	{
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
