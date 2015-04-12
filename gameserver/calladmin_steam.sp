@@ -140,6 +140,7 @@ public void OnPluginStart()
 	ParseGroupIDList();
 	
 
+	RegConsoleCmd("sm_calladmin_steam_reload", Command_Reload);
 	
 	
 	AutoExecConfig_SetFile("plugin.calladmin_steam");
@@ -420,6 +421,39 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 			}
 		}
 	}
+}
+
+
+
+
+public Action Command_Reload(int client, int args)
+{
+	if (client == 0)
+	{
+		PrintToServer("This command can't be used from console");
+		
+		return Plugin_Handled;
+	}
+	
+	
+	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
+	{
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
+		
+		return Plugin_Handled;
+	}
+	
+	
+	// Clear the recipients
+	MessageBot_ClearRecipients();
+	
+	// Read in all those steamids
+	ParseSteamIDList();
+	
+	// Read in all those groupids
+	ParseGroupIDList();
+
+	return Plugin_Handled;
 }
 
 
