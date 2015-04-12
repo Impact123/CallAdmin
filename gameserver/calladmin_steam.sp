@@ -428,14 +428,6 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 
 public Action Command_Reload(int client, int args)
 {
-	if (client == 0)
-	{
-		PrintToServer("This command can't be used from console");
-		
-		return Plugin_Handled;
-	}
-	
-	
 	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
 	{
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
