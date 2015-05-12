@@ -901,7 +901,8 @@ public Action Command_HandleCall(int client, int args)
 	
 	
 	// Report was already handled
-	if (!g_hActiveReports.FindValue(reportID))
+	int reportIndex = g_hActiveReports.FindValue(reportID);
+	if (reportIndex == -1)
 	{
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_ReportAlreadyHandled");
 		
@@ -909,7 +910,7 @@ public Action Command_HandleCall(int client, int args)
 	}
 	
 	
-	g_hActiveReports.Erase(reportID);
+	g_hActiveReports.Erase(reportIndex);
 	Forward_OnReportHandled(client, reportID);
 
 	return Plugin_Handled;
