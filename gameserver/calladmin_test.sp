@@ -105,7 +105,15 @@ public Action CallAdmin_OnAddToAdminCount(int client)
 
 public Action CallAdmin_OnReportPre(int client, int target, const char[] reason)
 {
-	PrintToServer("%N is about to be reported by %N for %s", target, client, reason);
+	// Reporter wasn't a real client (initiated by a module)
+	if (client == REPORTER_CONSOLE)
+	{
+		PrintToServer("%N is about to be reported by Server for %s", target, reason);
+	}
+	else
+	{
+		PrintToServer("%N is about to be reported by %N for %s", target, client, reason);
+	}
 	
 	return Plugin_Continue;
 }
