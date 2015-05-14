@@ -52,6 +52,13 @@ public void OnPluginStart()
 
 public Action Command_Test(int client, int args)
 {
+	static char sReasons[][] = {"I was harassed", "I had an urge and felt like it needed to happen", "I don't like his face"};
+	
+	if (client)
+	{
+		CallAdmin_ReportClient(REPORTER_CONSOLE, client, sReasons[GetRandomInt(0, sizeof(sReasons) -1)]);
+	}
+	
 	PrintToServer("Current trackercount: %d", CallAdmin_GetTrackersCount());
 	CallAdmin_LogMessage("Loggingtest");
 	
