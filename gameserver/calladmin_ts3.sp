@@ -375,7 +375,6 @@ public int OnSocketReceive(Handle socket, char[] data, const int size, any pack)
 		if (SocketIsConnected(socket))
 		{
 			SocketDisconnect(socket);
-			SocketDisconnect(socket);
 		}
 	}
 }
