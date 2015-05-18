@@ -618,16 +618,6 @@ public int OnSocketReceive(Handle socket, char[] data, const int size, any pack)
 {
 	if (socket != null)
 	{
-		// This fixes an bug on windowsservers
-		// The receivefunction for socket is getting called twice on these systems, once for the headers, and a second time for the body
-		// Because we know that our response should begin with <?xml and contains a steamid we can quit here and don't waste resources on the first response
-		// Other than that if the api is down, the request was malformed etcetera we don't waste resources for working with useless data
-		if (StrContains(data, "<?xml", false) == -1)
-		{
-			return;
-		}
-		
-		
 		// 150 ids should be enough for now
 		// We shoudln't need it, but we use a little bit of a buffer to filter out garbage
 		char Split[150 + 50][64];
