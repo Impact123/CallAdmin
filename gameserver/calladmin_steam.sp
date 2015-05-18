@@ -46,8 +46,8 @@
 
 
 
-// Each array can have 150 items, this is hardcoded, bad things happen if you change this
-#define MAX_ITEMS 150
+// Each array can have 300 items, this is hardcoded, bad things happen if you change this
+#define MAX_ITEMS 300
 
 
 
@@ -618,9 +618,9 @@ public int OnSocketReceive(Handle socket, char[] data, const int size, any pack)
 {
 	if (socket != null)
 	{
-		// 150 ids should be enough for now
+		// 300 ids should be enough for now
 		// We shoudln't need it, but we use a little bit of a buffer to filter out garbage
-		char Split[150 + 50][64];
+		char Split[MAX_ITEMS + 50][64];
 		char sTempID[21];
 		
 		
