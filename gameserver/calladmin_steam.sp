@@ -599,7 +599,7 @@ public int OnSocketConnect(Handle socket, any pack)
 		
 		
 		// Params
-		Format(sRequestPath, sizeof(sRequestPath), "groups/%s/memberslistxml", sGroupID);
+		Format(sRequestPath, sizeof(sRequestPath), "groups/%s/memberslistxml?xml=1", sGroupID);
 
 		
 		// Request String
