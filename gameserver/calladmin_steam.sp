@@ -46,8 +46,8 @@
 
 
 
-// Each array can have 300 items, this is hardcoded, bad things happen if you change this
-#define MAX_ITEMS 300
+// Each array can have 150 items, this is hardcoded, bad things happen if you change this
+#define MAX_ITEMS 150
 
 
 
@@ -74,6 +74,8 @@ char g_sGroupIDConfigFile[PLATFORM_MAX_PATH];
 
 
 int g_iLastReportID;
+int g_iRecipientCount;
+bool g_bRecipientCountLimitReached;
 
 
 enum AuthStringType
@@ -294,8 +296,17 @@ void ParseSteamIDList()
 		}
 		
 		
-		// Add as recipient
-		MessageBot_AddRecipient(sReadBuffer);
+		if(g_iRecipientCount >= MAX_ITEMS && !g_bRecipientCountLimitReached)
+		{
+			g_bRecipientCountLimitReached = true;
+			CallAdmin_LogMessage("Maximum amount of %d recipients reached", MAX_ITEMS);
+		}
+		else
+		{
+			// Add as recipient
+			MessageBot_AddRecipient(sReadBuffer);
+			g_iRecipientCount++;
+		}
 	}
 	
 	hFile.Close();
@@ -438,6 +449,8 @@ public Action Command_Reload(int client, int args)
 	
 	// Clear the recipients
 	MessageBot_ClearRecipients();
+	g_iRecipientCount = 0;
+	g_bRecipientCountLimitReached = false;
 	
 	// Read in all those steamids
 	ParseSteamIDList();
@@ -618,9 +631,12 @@ public int OnSocketReceive(Handle socket, char[] data, const int size, any pack)
 {
 	if (socket != null)
 	{
-		// 300 ids should be enough for now
+		static int SPLITSIZE1 = (MAX_ITEMS / 2) + 50;
+		static int SPLITSIZE2 = 64;
+		
+		// 150 ids should be enough for now
 		// We shoudln't need it, but we use a little bit of a buffer to filter out garbage
-		char Split[MAX_ITEMS + 50][64];
+		char[][] Split = new char[SPLITSIZE1][SPLITSIZE2];
 		char sTempID[21];
 		
 		
@@ -638,11 +654,11 @@ public int OnSocketReceive(Handle socket, char[] data, const int size, any pack)
 		}
 		
 		
-		ExplodeString(data[startindex], "<steamID64>", Split, sizeof(Split), sizeof(Split[]));
+		ExplodeString(data[startindex], "<steamID64>", Split, SPLITSIZE1, SPLITSIZE2);
 				
 		
 		// Run though Communityids
-		int splitsize = sizeof(Split);
+		int splitsize = SPLITSIZE1;
 		int index;
 		for (int i; i < splitsize; i++)
 		{
@@ -663,8 +679,17 @@ public int OnSocketReceive(Handle socket, char[] data, const int size, any pack)
 				// We might have a use for this later
 				strcopy(sTempID, sizeof(sTempID), Split[i]);
 				
-				// Add as recipient
-				MessageBot_AddRecipient(sTempID);
+				if (g_iRecipientCount >= MAX_ITEMS && !g_bRecipientCountLimitReached)
+				{
+					g_bRecipientCountLimitReached = true;
+					CallAdmin_LogMessage("Maximum amount of %d recipients reached", MAX_ITEMS);
+				}
+				else
+				{
+					// Add as recipient
+					MessageBot_AddRecipient(sTempID);
+					g_iRecipientCount++;
+				}
 			}
 		}
 		
