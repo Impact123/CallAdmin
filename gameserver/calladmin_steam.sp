@@ -214,7 +214,9 @@ void CreateSteamIDList()
 		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for writing");
 	}
 	
-	WriteFileLine(hFile, "// List of steamID's or communityid's, seperated by a new line");
+	WriteFileLine(hFile, "// List of steamids or communityids, seperated by a new line");
+	WriteFileLine(hFile, "// STEAM_0:0:1");
+	WriteFileLine(hFile, "// 76561197960265730");
 	
 	CloseHandle(hFile);
 }
@@ -328,6 +330,8 @@ void CreateGroupIDList()
 	}
 	
 	hFile.WriteLine("// List of group names (custom group url), seperated by a new line");
+	hFile.WriteLine("// Valve");
+	hFile.WriteLine("// Steam");
 	
 	hFile.Close();
 }
