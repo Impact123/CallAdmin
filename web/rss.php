@@ -33,6 +33,7 @@ header("Content-type: text/xml; charset=utf-8");
 require_once('include/app.config.php');
 require_once('include/FeedWriter/Feed.php');
 require_once('include/FeedWriter/RSS2.php');
+require_once('include/FeedWriter/Item.php');
 require_once('autoload.php');
 
 
