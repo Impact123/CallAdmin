@@ -100,7 +100,7 @@ class CallAdmin_Helpers
 	 */
 	function SteamIDToComm($steamId)
 	{
-		if (GetAuthIDType($steamId) == AuthIDType::AuthString_SteamID2)
+		if (self::GetAuthIDType($steamId) == AuthIDType::AuthString_SteamID2)
 		{
 			$steamId = SteamID2ToSteamId($steamId);
 		}
