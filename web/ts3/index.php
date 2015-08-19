@@ -90,6 +90,7 @@ $connect = "[url=steam://connect/" . $serverIP . "]connect now[/url]";
 require_once("include/TeamSpeak3/TeamSpeak3.php");
 $ts3 = new TeamSpeak3();
 $alreadyAdded = Array();
+$inMutedChannel = Array();
 
 try
 {
@@ -97,6 +98,30 @@ try
 	
 	$uid  = "";
 	//$name = "";
+	
+	if (isset($muted_channels) && is_array($muted_channels))
+	{
+		foreach ($ts3_VirtualServer->channelList() as $ts3_Channel)
+		{
+			$channelName = $ts3_Channel->__toString();
+			
+			if (!in_array($channelName, $muted_channels))
+			{
+				continue;
+			}
+			
+			foreach ($ts3_Channel->clientList() as $client)
+			{
+				$clientUid = (string)$client['client_unique_identifier'];
+				
+				if (!in_array($clientUid, $inMutedChannel))
+				{
+					array_push($inMutedChannel, $clientUid);
+				}
+			}
+		}
+	}
+	
 	foreach ($ts3_VirtualServer->clientList() as $ts3_Client)
 	{
 		$uid = (string)$ts3_Client['client_unique_identifier'];
@@ -109,6 +134,11 @@ try
 			continue;
 		}
 		
+		// If in muted channel, skip this uid
+		if (in_array($uid, $inMutedChannel))
+		{
+			continue;
+		}
 		
 		// Is listed as admin, go send him a message
 		if (in_array($uid, $access_keys[$_GET['key']]))
