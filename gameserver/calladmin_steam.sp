@@ -147,10 +147,10 @@ public void OnPluginStart()
 	
 	AutoExecConfig_SetFile("plugin.calladmin_steam");
 	
-	g_hVersion       = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_steam_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hSteamMethod   = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_steam_method", "0", "1 = Use Opensteamworks to send message, 0 = Use Steam Web API to send message", FCVAR_NONE);
-	g_hSteamUsername = view_as<ConVar> view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_steam_username", "", "Your steam username", FCVAR_PROTECTED);
-	g_hSteamPassword = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_steam_password", "", "Your steam password", FCVAR_PROTECTED);
+	g_hVersion       = AutoExecConfig_CreateConVar("sm_calladmin_steam_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hSteamMethod   = AutoExecConfig_CreateConVar("sm_calladmin_steam_method", "0", "1 = Use Opensteamworks to send message, 0 = Use Steam Web API to send message", FCVAR_NONE);
+	g_hSteamUsername = AutoExecConfig_CreateConVar("sm_calladmin_steam_username", "", "Your steam username", FCVAR_PROTECTED);
+	g_hSteamPassword = AutoExecConfig_CreateConVar("sm_calladmin_steam_password", "", "Your steam password", FCVAR_PROTECTED);
 	
 	
 	AutoExecConfig(true, "plugin.calladmin_steam");

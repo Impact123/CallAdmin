@@ -324,14 +324,14 @@ public void OnPluginStart()
 	
 	AutoExecConfig_SetFile("plugin.calladmin");
 	
-	g_hVersion                = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hAdvertInterval         = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_advert_interval", "60.0",  "Interval to advert the use of calladmin, 0.0 deactivates the feature", FCVAR_NONE, true, 0.0, true, 1800.0);
-	g_hPublicMessage          = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_public_message", "1",  "Whether or not a report should be notified to all players or only the reporter.", FCVAR_NONE, true, 0.0, true, 1.0);
-	g_hOwnReason              = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_own_reason", "1",  "Whether or not a client can submit their own reason.", FCVAR_NONE, true, 0.0, true, 1.0);
-	g_hConfirmCall            = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_confirm_call", "1",  "Whether or not a call must be confirmed by the client", FCVAR_NONE, true, 0.0, true, 1.0);
-	g_hSpamTime               = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_spamtime", "25", "An user must wait this many seconds after a report before he can issue a new one", FCVAR_NONE, true, 0.0);
-	g_hReportTime             = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_reporttime", "300", "An user cannot be reported again for this many seconds", FCVAR_NONE, true, 0.0);
-	g_hAdminAction            = view_as<ConVar> AutoExecConfig_CreateConVar("sm_calladmin_admin_action", "0", "What happens when admins are in-game on report: 0 - Do nothing, let the report pass, 1 - Block the report and notify the caller and admins in-game about it", FCVAR_NONE, true, 0.0, true, 1.0);
+	g_hVersion                = AutoExecConfig_CreateConVar("sm_calladmin_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hAdvertInterval         = AutoExecConfig_CreateConVar("sm_calladmin_advert_interval", "60.0",  "Interval to advert the use of calladmin, 0.0 deactivates the feature", FCVAR_NONE, true, 0.0, true, 1800.0);
+	g_hPublicMessage          = AutoExecConfig_CreateConVar("sm_calladmin_public_message", "1",  "Whether or not a report should be notified to all players or only the reporter.", FCVAR_NONE, true, 0.0, true, 1.0);
+	g_hOwnReason              = AutoExecConfig_CreateConVar("sm_calladmin_own_reason", "1",  "Whether or not a client can submit their own reason.", FCVAR_NONE, true, 0.0, true, 1.0);
+	g_hConfirmCall            = AutoExecConfig_CreateConVar("sm_calladmin_confirm_call", "1",  "Whether or not a call must be confirmed by the client", FCVAR_NONE, true, 0.0, true, 1.0);
+	g_hSpamTime               = AutoExecConfig_CreateConVar("sm_calladmin_spamtime", "25", "An user must wait this many seconds after a report before he can issue a new one", FCVAR_NONE, true, 0.0);
+	g_hReportTime             = AutoExecConfig_CreateConVar("sm_calladmin_reporttime", "300", "An user cannot be reported again for this many seconds", FCVAR_NONE, true, 0.0);
+	g_hAdminAction            = AutoExecConfig_CreateConVar("sm_calladmin_admin_action", "0", "What happens when admins are in-game on report: 0 - Do nothing, let the report pass, 1 - Block the report and notify the caller and admins in-game about it", FCVAR_NONE, true, 0.0, true, 1.0);
 
 	
 	
