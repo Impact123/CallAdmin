@@ -522,11 +522,11 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	else
 	{
 		GetClientName(client, sClientName, sizeof(sClientName));
-		GetClientAuthString(client, sClientID, sizeof(sClientID));
+		GetClientAuthId(client, AuthId_Steam2, sClientID, sizeof(sClientID));
 	}
 	
 	GetClientName(target, sTargetName, sizeof(sTargetName));
-	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
+	GetClientAuthId(client, AuthId_Steam2, sTargetID, sizeof(sTargetID));
 	
 	g_iLastReportID = CallAdmin_GetReportID();
 	

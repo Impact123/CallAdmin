@@ -331,13 +331,13 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	{
 		GetClientName(client, clientNameBuf, sizeof(clientNameBuf));
 		g_hDbHandle.Escape(clientNameBuf, clientName, sizeof(clientName));
-		GetClientAuthString(client, clientAuth, sizeof(clientAuth));
+		GetClientAuthId(client, AuthId_Steam2, clientAuth, sizeof(clientAuth));
 	}
 	
 	
 	GetClientName(target, targetNameBuf, sizeof(targetNameBuf));
 	g_hDbHandle.Escape(targetNameBuf, targetName, sizeof(targetName));
-	GetClientAuthString(target, targetAuth, sizeof(targetAuth));
+	GetClientAuthId(client, AuthId_Steam2, clientAuth, sizeof(clientAuth));
 	
 	char serverName[(sizeof(g_sServerName) + 1) * 2];
 	g_hDbHandle.Escape(g_sServerName, serverName, sizeof(serverName));
