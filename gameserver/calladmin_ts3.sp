@@ -264,7 +264,7 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 
 	
 	GetClientName(target, sTargetName, sizeof(sTargetName));
-	GetClientAuthId(client, AuthId_Steam2, sTargetID, sizeof(sTargetID));
+	GetClientAuthId(target, AuthId_Steam2, sTargetID, sizeof(sTargetID));
 	
 	
 	// Write the data to the pack
