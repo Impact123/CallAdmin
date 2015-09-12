@@ -1,8 +1,14 @@
 language: c
 
+sudo: false
+addons:
+    apt:
+        packages:
+            - lib32stdc++6
+            - unzip
+
+
 before_script:
-    - sudo apt-get update -qq
-    - sudo apt-get install unzip lib32stdc++6 -y
     - SMPACKAGE="http://www.sourcemod.net$(wget -qO- "http://www.sourcemod.net/downloads-new.php?branch=dev" | grep linux | cut -d "'" -f 2 | head -n 1)"
     - wget $SMPACKAGE
     - mkdir sm18 sharedinclude
