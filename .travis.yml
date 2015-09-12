@@ -9,7 +9,7 @@ addons:
 
 
 before_script:
-    - SMPACKAGE="http://www.sourcemod.net$(wget -qO- "http://www.sourcemod.net/downloads-new.php?branch=dev" | grep linux | cut -d "'" -f 2 | head -n 1)"
+    - SMPACKAGE="$(wget -qO- "http://www.sourcemod.net/downloads-new.php?branch=dev" | grep linux | cut -d "'" -f 2 | sed -n 2p)"
     - wget $SMPACKAGE
     - mkdir sm18 sharedinclude
     - tar xfz $(basename $SMPACKAGE) -C sm18
