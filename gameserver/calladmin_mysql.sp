@@ -337,7 +337,7 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	
 	GetClientName(target, targetNameBuf, sizeof(targetNameBuf));
 	g_hDbHandle.Escape(targetNameBuf, targetName, sizeof(targetName));
-	GetClientAuthId(client, AuthId_Steam2, clientAuth, sizeof(clientAuth));
+	GetClientAuthId(target, AuthId_Steam2, targetAuth, sizeof(clientAuth));
 	
 	char serverName[(sizeof(g_sServerName) + 1) * 2];
 	g_hDbHandle.Escape(g_sServerName, serverName, sizeof(serverName));
