@@ -8,12 +8,17 @@ addons:
             - unzip
 
 
+env:
+    - SMBRANCH=dev
+    - SMBRANCH=stable
+
+
 before_script:
-    - SMPACKAGE="$(wget -qO- "http://www.sourcemod.net/downloads-new.php?branch=dev" | grep linux | cut -d "'" -f 2 | sed -n 2p)"
+    - SMPACKAGE="$(wget -qO- "http://www.sourcemod.net/downloads-new.php?branch=$SMBRANCH" | grep linux | cut -d "'" -f 2 | sed -n 2p)"
     - wget $SMPACKAGE
-    - mkdir sm18 sharedinclude
-    - tar xfz $(basename $SMPACKAGE) -C sm18
-    - export sm18=$(pwd)/sm18/addons/sourcemod/scripting
+    - mkdir $SMBRANCH sharedinclude
+    - tar xfz $(basename $SMPACKAGE) -C $SMBRANCH
+    - export $SMBRANCH=$(pwd)/$SMBRANCH/addons/sourcemod/scripting
     - wget https://raw.githubusercontent.com/Impact123/AutoExecConfig/master/autoexecconfig.inc -P sharedinclude
     - wget https://raw.githubusercontent.com/popoklopsi/MessageBot/master/messagebot.inc -P sharedinclude
     - wget https://bitbucket.org/GoD_Tony/updater/raw/default/include/updater.inc -P sharedinclude
@@ -22,9 +27,9 @@ before_script:
 
 
 script:
-    - $sm18/spcomp -isharedinclude gameserver/calladmin.sp
-    - $sm18/spcomp -isharedinclude gameserver/calladmin_steam.sp
-    - $sm18/spcomp -isharedinclude gameserver/calladmin_mysql.sp
-    - $sm18/spcomp -isharedinclude gameserver/calladmin_ts3.sp
-    - $sm18/spcomp -isharedinclude gameserver/calladmin_test.sp
-    - $sm18/spcomp -isharedinclude gameserver/calladmin_usermanager.sp
+    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin.sp
+    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_steam.sp
+    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_mysql.sp
+    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_ts3.sp
+    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_test.sp
+    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_usermanager.sp
