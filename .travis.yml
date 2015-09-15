@@ -18,7 +18,7 @@ before_script:
     - wget $SMPACKAGE
     - mkdir $SMBRANCH sharedinclude
     - tar xfz $(basename $SMPACKAGE) -C $SMBRANCH
-    - export $SMBRANCH=$(pwd)/$SMBRANCH/addons/sourcemod/scripting
+    - export SMBRANCH=$(pwd)/$SMBRANCH/addons/sourcemod/scripting
     - wget https://raw.githubusercontent.com/Impact123/AutoExecConfig/master/autoexecconfig.inc -P sharedinclude
     - wget https://raw.githubusercontent.com/popoklopsi/MessageBot/master/messagebot.inc -P sharedinclude
     - wget https://bitbucket.org/GoD_Tony/updater/raw/default/include/updater.inc -P sharedinclude
