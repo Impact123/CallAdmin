@@ -14,7 +14,7 @@ env:
 
 
 before_script:
-    - SMPACKAGE="$(wget -qO- "http://www.sourcemod.net/downloads-new.php?branch=$SMBRANCH" | grep linux | cut -d "'" -f 2 | sed -n 2p)"
+    - SMPACKAGE="$(wget -qO- "http://www.sourcemod.net/downloads.php?branch=$SMBRANCH" | grep linux | cut -d "'" -f 2 | sed -n 2p)"
     - wget $SMPACKAGE
     - mkdir $SMBRANCH sharedinclude
     - tar xfz $(basename $SMPACKAGE) -C $SMBRANCH
