@@ -419,7 +419,7 @@ public void OnPluginStart()
 	g_hActiveReports = new ArrayList();
 	
 	// Reason handling
-	g_hReasonAdt = CreateArray(REASON_MAX_LENGTH);
+	g_hReasonAdt = new ArrayList(ByteCountToCells(REASON_MAX_LENGTH));
 	
 	BuildPath(Path_SM, g_sReasonConfigFile, sizeof(g_sReasonConfigFile), "configs/calladmin_reasons.cfg");
 	
