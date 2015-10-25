@@ -9,12 +9,12 @@ addons:
 
 
 env:
-    - SMBRANCH=dev
-    - SMBRANCH=stable
+    - SMBRANCH=1.7
+    - SMBRANCH=1.8
 
 
 before_script:
-    - SMPACKAGE="$(wget -qO- "http://www.sourcemod.net/downloads.php?branch=$SMBRANCH" | grep linux | cut -d "'" -f 2 | sed -n 2p)"
+    - SMPACKAGE="http://www.sourcemod.net/smdrop/${SMBRANCH}/$(wget -qO- "http://www.sourcemod.net/smdrop/${SMBRANCH}/" | grep linux | cut -d "\"" -f 2 | tail -n 1)"
     - wget $SMPACKAGE
     - mkdir $SMBRANCH sharedinclude
     - tar xfz $(basename $SMPACKAGE) -C $SMBRANCH
