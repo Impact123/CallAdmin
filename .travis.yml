@@ -14,7 +14,7 @@ env:
 
 
 before_script:
-    - SMPACKAGE="http://www.sourcemod.net/smdrop/${SMBRANCH}/$(wget -qO- "http://www.sourcemod.net/smdrop/${SMBRANCH}/" | grep linux*tar.gz | cut -d "\"" -f 2 | tail -n 1)"
+    - SMPACKAGE="http://www.sourcemod.net/smdrop/${SMBRANCH}/$(wget -qO- "http://www.sourcemod.net/smdrop/${SMBRANCH}/" | grep linux*.tar.gz | cut -d "\"" -f 2 | tail -n 1)"
     - wget $SMPACKAGE
     - mkdir $SMBRANCH sharedinclude
     - tar xfz $(basename $SMPACKAGE) -C $SMBRANCH
