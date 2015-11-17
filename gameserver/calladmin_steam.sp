@@ -329,7 +329,7 @@ void CreateGroupIDList()
 		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for writing");
 	}
 	
-	hFile.WriteLine("// List of group names (custom group url), seperated by a new line");
+	hFile.WriteLine("// List of group names (custom group name), separated by a new line");
 	hFile.WriteLine("// Valve");
 	hFile.WriteLine("// Steam");
 	
