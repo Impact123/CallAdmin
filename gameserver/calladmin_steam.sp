@@ -330,8 +330,8 @@ void CreateGroupIDList()
 	}
 	
 	hFile.WriteLine("// List of group names (custom group name), separated by a new line");
-	hFile.WriteLine("// Valve");
-	hFile.WriteLine("// Steam");
+	hFile.WriteLine("// So for example if your community link is: http://steamcommunity.com/groups/Valve then write in a new line: Valve");
+	hFile.WriteLine("// YourGroupName");
 	
 	hFile.Close();
 }
