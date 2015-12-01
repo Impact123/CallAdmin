@@ -54,10 +54,6 @@
 // Global stuff
 ConVar g_hVersion;
 
-ConVar g_hSteamMethod;
-bool g_bSteamMethod;
-
-
 ConVar g_hSteamUsername;
 char g_sSteamUsername[128];
 
@@ -74,8 +70,6 @@ char g_sGroupIDConfigFile[PLATFORM_MAX_PATH];
 
 
 int g_iLastReportID;
-int g_iRecipientCount;
-bool g_bRecipientCountLimitReached;
 
 
 enum AuthStringType
@@ -148,7 +142,6 @@ public void OnPluginStart()
 	AutoExecConfig_SetFile("plugin.calladmin_steam");
 	
 	g_hVersion       = AutoExecConfig_CreateConVar("sm_calladmin_steam_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hSteamMethod   = AutoExecConfig_CreateConVar("sm_calladmin_steam_method", "0", "1 = Use Opensteamworks to send message, 0 = Use Steam Web API to send message", FCVAR_NONE);
 	g_hSteamUsername = AutoExecConfig_CreateConVar("sm_calladmin_steam_username", "", "Your steam username", FCVAR_PROTECTED);
 	g_hSteamPassword = AutoExecConfig_CreateConVar("sm_calladmin_steam_password", "", "Your steam password", FCVAR_PROTECTED);
 	
@@ -165,22 +158,6 @@ public void OnPluginStart()
 	
 	g_hSteamPassword.GetString(g_sSteamPassword, sizeof(g_sSteamPassword));
 	HookConVarChange(g_hSteamPassword, OnCvarChanged);
-	
-	g_bSteamMethod = g_hSteamMethod.BoolValue;
-	HookConVarChange(g_hSteamMethod, OnCvarChanged);
-
-
-	if (CALLADMIN_STEAM_METHOD_AVAILABLE())
-	{
-		if (g_bSteamMethod)
-		{
-			MessageBot_SetSendMethod(SEND_METHOD_STEAMWORKS);
-		}
-		else
-		{
-			MessageBot_SetSendMethod(SEND_METHOD_ONLINEAPI);
-		}
-	}
 }
 
 
@@ -193,9 +170,7 @@ public void OnMessageResultReceived(MessageBotResult result, MessageBotError err
 
 	if (result != RESULT_NO_ERROR)
 	{
-		char sSteamMethod[24];
-		Format(sSteamMethod, sizeof(sSteamMethod), "%s", g_bSteamMethod ? "Steamworks" : "Web API");
-		CallAdmin_LogMessage("Failed to send steam message via %s: (result: %d [%s] | error: %d)", sSteamMethod, result, resultString[result], error);
+		CallAdmin_LogMessage("Failed to send steam message: (result: %d [%s] | error: %d)", result, resultString[result], error);
 	}
 }
 
@@ -297,18 +272,8 @@ void ParseSteamIDList()
 			continue;
 		}
 		
-		
-		if(g_iRecipientCount >= MAX_ITEMS && !g_bRecipientCountLimitReached)
-		{
-			g_bRecipientCountLimitReached = true;
-			CallAdmin_LogMessage("Maximum amount of %d recipients reached", MAX_ITEMS);
-		}
-		else
-		{
-			// Add as recipient
-			MessageBot_AddRecipient(sReadBuffer);
-			g_iRecipientCount++;
-		}
+		// Add as recipient
+		MessageBot_AddRecipient(sReadBuffer);
 	}
 	
 	hFile.Close();
@@ -420,22 +385,6 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 	{
 		g_hSteamPassword.GetString(g_sSteamPassword, sizeof(g_sSteamPassword));
 	}
-	else if (cvar == g_hSteamMethod)
-	{
-		g_bSteamMethod = g_hSteamMethod.BoolValue;
-
-		if (CALLADMIN_STEAM_METHOD_AVAILABLE())
-		{
-			if (g_bSteamMethod)
-			{
-				MessageBot_SetSendMethod(SEND_METHOD_STEAMWORKS);
-			}
-			else
-			{
-				MessageBot_SetSendMethod(SEND_METHOD_ONLINEAPI);
-			}
-		}
-	}
 }
 
 
@@ -453,8 +402,6 @@ public Action Command_Reload(int client, int args)
 	
 	// Clear the recipients
 	MessageBot_ClearRecipients();
-	g_iRecipientCount = 0;
-	g_bRecipientCountLimitReached = false;
 	
 	// Read in all those steamids
 	ParseSteamIDList();
@@ -683,17 +630,8 @@ public int OnSocketReceive(Handle socket, char[] data, const int size, any pack)
 				// We might have a use for this later
 				strcopy(sTempID, sizeof(sTempID), Split[i]);
 				
-				if (g_iRecipientCount >= MAX_ITEMS && !g_bRecipientCountLimitReached)
-				{
-					g_bRecipientCountLimitReached = true;
-					CallAdmin_LogMessage("Maximum amount of %d recipients reached", MAX_ITEMS);
-				}
-				else
-				{
-					// Add as recipient
-					MessageBot_AddRecipient(sTempID);
-					g_iRecipientCount++;
-				}
+				// Add as recipient
+				MessageBot_AddRecipient(sTempID);
 			}
 		}
 		
