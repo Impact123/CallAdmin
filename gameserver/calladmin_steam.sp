@@ -582,11 +582,10 @@ public int OnSocketReceive(Handle socket, char[] data, const int size, any pack)
 {
 	if (socket != null)
 	{
-		static int SPLITSIZE1 = (MAX_ITEMS / 2) + 50;
+		// We shoudln't need it, but we use a little bit of a buffer to filter out garbage
+		static int SPLITSIZE1 = MAX_ITEMS + 50;
 		static int SPLITSIZE2 = 64;
 		
-		// 150 ids should be enough for now
-		// We shoudln't need it, but we use a little bit of a buffer to filter out garbage
 		char[][] Split = new char[SPLITSIZE1][SPLITSIZE2];
 		char sTempID[21];
 		
