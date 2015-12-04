@@ -1,5 +1,4 @@
 <?php
-
 /**
  * -----------------------------------------------------
  * File        notice.php
@@ -9,7 +8,7 @@
  * -----------------------------------------------------
  * 
  * CallAdmin
- * Copyright (C) 2013 Impact,Popoklopsi
+ * Copyright (C) 2013 Impact, Popoklopsi
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,9 +38,9 @@ $helpers = new CallAdmin_Helpers();
 
 
 // Key set and no key given or key is wrong
-if(!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
+if (!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
-	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Notice");
+	$helpers->printXmlError2("APP_AUTH_FAILURE", "Given access key does not exist", "CallAdmin_Notice");
 }
 
 
@@ -50,9 +49,10 @@ $dbi = new mysqli($host, $username, $password, $database, $dbport);
 
 
 // Oh noes, we couldn't connect
-if($dbi->connect_errno != 0)
+if ($dbi->connect_errno != 0)
 {
-	$helpers->printXmlError("DB_CONNECT_FAILURE", "CallAdmin_Notice");
+	$detailError = sprintf("Errorcode '%d': %s", $dbi->connect_errno, $dbi->connect_error);
+	$helpers->printXmlError2("DB_CONNECT_FAILURE", $detailError, "CallAdmin_Notice");
 }
 
 
@@ -62,11 +62,11 @@ $dbi->set_charset("utf8");
 
 
 // Escape server keys
-foreach($access_keys as $key => $value)
+foreach ($access_keys as $key => $value)
 {
-	if(is_array($value))
+	if (is_array($value))
 	{
-		foreach($value as $serverKey)
+		foreach ($value as $serverKey)
 		{
 			$access_keys[$key][$serverKey] = $dbi->escape_string($serverKey);
 		}
@@ -78,21 +78,23 @@ foreach($access_keys as $key => $value)
 // Updated serverKey Access list
 $uniqueArray = $helpers->keysToArray($access_keys);
 
-if($uniqueArray)
+if ($uniqueArray)
 {
 	$deleteresult = $dbi->query("TRUNCATE `" .$table. "_Access`");
 
 	// delete failed
-	if($deleteresult === FALSE)
+	if ($deleteresult === FALSE)
 	{
+		$detailError = sprintf("Errorcode '%d': %s", $dbi->errno, $dbi->error);
+		
 		$dbi->close();
-		$helpers->printXmlError("DB_DELETE_FAILURE", "CallAdmin_Notice");
+		$helpers->printXmlError2("DB_DELETE_FAILURE", $detailError, "CallAdmin_Notice");
 	}
 	
 	// Start with zero
 	$current = 0; 
 	
-	foreach($uniqueArray as $serverKey)
+	foreach ($uniqueArray as $serverKey)
 	{
 		$bit = (1 << $current);
 		
@@ -102,13 +104,15 @@ if($uniqueArray)
 							('$serverKey', $bit)");
 
 		// Insert failed
-		if($insertresult === FALSE)
+		if ($insertresult === FALSE)
 		{
+			$detailError = sprintf("Errorcode '%d': %s", $dbi->errno, $dbi->error);
+		
 			$dbi->close();
-			$helpers->printXmlError("DB_UPDATE_FAILURE", "CallAdmin_Notice");
+			$helpers->printXmlError2("DB_UPDATE_FAILURE", $detailError, "CallAdmin_Notice");
 		}
 		
-		if($current + 1 >= 64)
+		if ($current + 1 >= 64)
 		{
 			$dbi->close();
 			$helpers->printXmlError("DB_MAX_ACCESS_REACHED", "CallAdmin_Notice");
@@ -123,7 +127,7 @@ if($uniqueArray)
 // Safety
 $from = $data_from;
 $from_query = "reportedAt > $from";
-if(isset($_GET['from']) && preg_match("/^[0-9]{1,11}+$/", $_GET['from']))
+if (isset($_GET['from']) && preg_match("/^[0-9]{1,11}+$/", $_GET['from']))
 {
 	$from = $dbi->escape_string($_GET['from']);
 	
@@ -133,13 +137,13 @@ if(isset($_GET['from']) && preg_match("/^[0-9]{1,11}+$/", $_GET['from']))
 	
 	// We use the global mysqltime in all tables and columns, the client however can have an different time
 	// Thus most times it's better to range the last results in seconds (max 120 seconds ago, etc) thus this option is introduced
-	if(isset($_GET['from_type']) && preg_match("/^[a-zA-Z]{8}+$/", $_GET['from_type']))
+	if (isset($_GET['from_type']) && preg_match("/^[a-zA-Z]{8}+$/", $_GET['from_type']))
 	{
-		if(strcasecmp($_GET['from_type'], "unixtime") === 0)
+		if (strcasecmp($_GET['from_type'], "unixtime") === 0)
 		{
 			$from_query = "reportedAt > $from";
 		}
-		else if(strcasecmp($_GET['from_type'], "interval") === 0)
+		else if (strcasecmp($_GET['from_type'], "interval") === 0)
 		{
 			$from_query = "TIMESTAMPDIFF(SECOND, FROM_UNIXTIME(reportedAt), NOW()) <= $from";
 		}
@@ -151,7 +155,7 @@ if(isset($_GET['from']) && preg_match("/^[0-9]{1,11}+$/", $_GET['from']))
 
 
 // Safety
-if(isset($_GET['handled']) && preg_match("/^[0-9]{1,11}+$/", $_GET['handled']))
+if (isset($_GET['handled']) && preg_match("/^[0-9]{1,11}+$/", $_GET['handled']))
 {
 	$from = $dbi->escape_string($_GET['handled']);
 
@@ -162,9 +166,9 @@ if(isset($_GET['handled']) && preg_match("/^[0-9]{1,11}+$/", $_GET['handled']))
 
 // Safety
 $limit = $data_limit;
-if(isset($_GET['limit']) && preg_match("/^[0-9]{1,2}+$/", $_GET['limit']))
+if (isset($_GET['limit']) && preg_match("/^[0-9]{1,2}+$/", $_GET['limit']))
 {
-	if($_GET['limit'] > 0 && $_GET['limit'] <= $data_limit)
+	if ($_GET['limit'] > 0 && $_GET['limit'] <= $data_limit)
 	{
 		$limit = $dbi->escape_string($_GET['limit']);
 	}
@@ -173,9 +177,9 @@ if(isset($_GET['limit']) && preg_match("/^[0-9]{1,2}+$/", $_GET['limit']))
 
 // Safety
 $sort = strtoupper("desc");
-if(isset($_GET['sort']) && preg_match("/^[a-zA-Z]{3,4}+$/", $_GET['sort']))
+if (isset($_GET['sort']) && preg_match("/^[a-zA-Z]{3,4}+$/", $_GET['sort']))
 {
-	if(strcasecmp($_GET['sort'], "desc") === 0 || strcasecmp($_GET['sort'], "asc") === 0)
+	if (strcasecmp($_GET['sort'], "desc") === 0 || strcasecmp($_GET['sort'], "asc") === 0)
 	{
 		$sort = strtoupper($dbi->escape_string($_GET['sort']));
 	}
@@ -198,23 +202,31 @@ $fetchresult = $dbi->query("SELECT
 
 
 // Retrieval failed
-if($fetchresult === FALSE)
+if ($fetchresult === FALSE)
 {
+	$detailError = sprintf("Errorcode '%d': %s", $dbi->errno, $dbi->error);
+	
 	$dbi->close();
-	$helpers->printXmlError("DB_RETRIEVE_FAILURE", "CallAdmin_Notice");
+	$helpers->printXmlError2("DB_RETRIEVE_FAILURE", $detailError, "CallAdmin_Notice");
 }
 
 
 // Save this tracker if key is set, key was given, we have an valid remote address and the client sends an store (save him as available)
-if(isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
+if (isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
 {
 	$trackerIP = $dbi->escape_string($helpers->AnonymizeIP($_SERVER['REMOTE_ADDR']));
 	$trackerID = "";
 
 
 	// Steamid was submitted, this must have come from the client
-	if(isset($_GET['steamid']) && $helpers->IsValidSteamID($_GET['steamid']))
+	if (isset($_GET['steamid']) && $helpers->IsValidSteamID($_GET['steamid']))
 	{
+		if ($helpers->GetAuthIDType($_GET['steamid']) == AuthIDType::AuthString_SteamID2)
+		{
+			// This is bad, fix it
+			$_GET['steamid'] = $helpers->SteamID2ToSteamId($_GET['steamid']);
+		}
+		
 		$trackerID = $dbi->escape_string($_GET['steamid']);
 	}
 	
@@ -231,10 +243,12 @@ if(isset($_SERVER['REMOTE_ADDR']) && isset($_GET['store']))
 						UPDATE lastView = UNIX_TIMESTAMP(), trackerID = '$trackerID', accessID = $access_query");
 
 	// Insert failed
-	if($insertresult === FALSE)
+	if ($insertresult === FALSE)
 	{
+		$detailError = sprintf("Errorcode '%d': %s", $dbi->errno, $dbi->error);
+		
 		$dbi->close();
-		$helpers->printXmlError("DB_UPDATE_FAILURE", "CallAdmin_Notice");
+		$helpers->printXmlError2("DB_UPDATE_FAILURE", $detailError, "CallAdmin_Notice");
 	}
 }
 
@@ -245,18 +259,18 @@ $dbi->close();
 $xml = new SimpleXMLElement("<CallAdmin/>");
 
 $counter = 0;
-while(($row = $fetchresult->fetch_assoc()))
+while (($row = $fetchresult->fetch_assoc()))
 {
 	$child = $xml->addChild("singleReport");
 
-	foreach($row as $key => $value)
+	foreach ($row as $key => $value)
 	{
 		$key   = $helpers->_xmlentities($key);
 		$value = $helpers->_xmlentities($value);
 
 
 		// This shouldn't happen, but is used for the client
-		if(strlen($value) < 1)
+		if (strlen($value) < 1)
 		{
 			$value = "NULL";
 		}

@@ -40,13 +40,13 @@ $helpers = new CallAdmin_Helpers();
 
 
 // Key set and no key given or key is wrong
-if(!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
+if (!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
-	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Ts3");
+	$helpers->printXmlError2("APP_AUTH_FAILURE", "Given access key doesn't exist", "CallAdmin_Ts3");
 }
 
 
-if(!isset($_GET['targetid']) 
+if (!isset($_GET['targetid']) 
 		|| !isset($_GET['targetname'])
 		|| !isset($_GET['targetreason'])
 		|| !isset($_GET['clientid'])
@@ -54,7 +54,7 @@ if(!isset($_GET['targetid'])
 		|| !isset($_GET['servername'])
 		|| !isset($_GET['serverip']))
 {
-	$helpers->printXmlError("APP_INPUT_FAILURE", "CallAdmin_Ts3");
+	$helpers->printXmlError2("APP_INPUT_FAILURE", "Required meta data was missing or given in invalid format", "CallAdmin_Ts3");
 }
 
 
@@ -69,7 +69,7 @@ $serverIP     = $_GET['serverip'];
 
 
 $targetCommBB = "Invalid";
-if($helpers->IsValidSteamID($targetID))
+if ($helpers->IsValidSteamID($targetID))
 {
 	$targetCommID = $helpers->SteamIDToComm($targetID);
 	$targetCommBB = "[url=http://steamcommunity.com/profiles/" . $targetCommID . "]$targetID" . "[/url]";
@@ -77,7 +77,7 @@ if($helpers->IsValidSteamID($targetID))
 
 
 $clientCommBB = "Invalid";
-if($helpers->IsValidSteamID($clientID))
+if ($helpers->IsValidSteamID($clientID))
 {
 	$clientCommID = $helpers->SteamIDToComm($clientID);
 	$clientCommBB = "[url=http://steamcommunity.com/profiles/" . $clientCommID . "]$clientID" . "[/url]";
@@ -89,6 +89,8 @@ $connect = "[url=steam://connect/" . $serverIP . "]connect now[/url]";
 
 require_once("include/TeamSpeak3/TeamSpeak3.php");
 $ts3 = new TeamSpeak3();
+$alreadyAdded = Array();
+$inMutedChannel = Array();
 
 try
 {
@@ -96,15 +98,54 @@ try
 	
 	$uid  = "";
 	//$name = "";
-	foreach($ts3_VirtualServer->clientList() as $ts3_Client)
+	
+	if (isset($muted_channels) && is_array($muted_channels))
+	{
+		foreach ($ts3_VirtualServer->channelList() as $ts3_Channel)
+		{
+			$channelName = $ts3_Channel->__toString();
+			
+			if (!in_array($channelName, $muted_channels))
+			{
+				continue;
+			}
+			
+			foreach ($ts3_Channel->clientList() as $client)
+			{
+				$clientUid = (string)$client['client_unique_identifier'];
+				
+				if (!in_array($clientUid, $inMutedChannel))
+				{
+					array_push($inMutedChannel, $clientUid);
+				}
+			}
+		}
+	}
+	
+	foreach ($ts3_VirtualServer->clientList() as $ts3_Client)
 	{
 		$uid = (string)$ts3_Client['client_unique_identifier'];
 		//$name = (string)$ts3_Client['client_nickname'];
 		
 		
-		// Is listed as admin, go send him a message
-		if(in_array($uid, $access_keys[$_GET['key']]))
+		// If already added, skip this uid
+		if (in_array($uid, $alreadyAdded))
 		{
+			continue;
+		}
+		
+		// If in muted channel, skip this uid
+		if (in_array($uid, $inMutedChannel))
+		{
+			continue;
+		}
+		
+		// Is listed as admin, go send him a message
+		if (in_array($uid, $access_keys[$_GET['key']]))
+		{
+			// Add to already added list 
+			array_push($alreadyAdded, $uid);
+			
 			$ts3_Client->message("----------------------------------------------------");
 			$ts3_Client->message("[CallAdmin] New report on:   $serverName ($serverIP) $connect");
 			$ts3_Client->message("[CallAdmin] Reporter:        $clientName ($clientCommBB)");

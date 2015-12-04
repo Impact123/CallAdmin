@@ -33,6 +33,7 @@
 #undef REQUIRE_PLUGIN
 #include <updater>
 #pragma semicolon 1
+#pragma newdecls required
 
 
 // This should be 128 KB which is more than enough
@@ -51,30 +52,30 @@
 
 
 // Global stuff
-new Handle:g_hVersion;
+ConVar g_hVersion;
 
-new Handle:g_hSteamMethod;
-new bool:g_bSteamMethod;
+ConVar g_hSteamUsername;
+char g_sSteamUsername[128];
 
+ConVar g_hSteamPassword;
+char g_sSteamPassword[128];
 
-new Handle:g_hSteamUsername;
-new String:g_sSteamUsername[128];
-
-new Handle:g_hSteamPassword;
-new String:g_sSteamPassword[128];
-
-new Handle:g_hSteamIDRegex;
-new Handle:g_hCommunityIDRegex;
+Handle g_hSteamIDRegex;
+Handle g_hSteamIDRegex2;
+Handle g_hCommunityIDRegex;
 
 
-new String:g_sSteamIDConfigFile[PLATFORM_MAX_PATH];
-new String:g_sGroupIDConfigFile[PLATFORM_MAX_PATH];
+char g_sSteamIDConfigFile[PLATFORM_MAX_PATH];
+char g_sGroupIDConfigFile[PLATFORM_MAX_PATH];
 
+
+int g_iLastReportID;
 
 
 enum AuthStringType
 {
 	AuthString_SteamID,
+	AuthString_SteamID2,
 	AuthString_CommunityID,
 	AuthString_Unknown
 }
@@ -85,7 +86,7 @@ enum AuthStringType
 #define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_steam.txt"
 
 
-public Plugin:myinfo = 
+public Plugin myinfo = 
 {
 	name = "CallAdmin: Steam module",
 	author = "Impact, Popoklopsi",
@@ -98,12 +99,12 @@ public Plugin:myinfo =
 
 
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	// Path to the SteamID list
 	BuildPath(Path_SM, g_sSteamIDConfigFile, sizeof(g_sSteamIDConfigFile), "configs/calladmin_steam_steamidlist.cfg");
 	
-	if(!FileExists(g_sSteamIDConfigFile))
+	if (!FileExists(g_sSteamIDConfigFile))
 	{
 		CreateSteamIDList();
 	}
@@ -112,7 +113,7 @@ public OnPluginStart()
 	// Path to the GroupID list
 	BuildPath(Path_SM, g_sGroupIDConfigFile, sizeof(g_sGroupIDConfigFile), "configs/calladmin_steam_groupidlist.cfg");
 	
-	if(!FileExists(g_sGroupIDConfigFile))
+	if (!FileExists(g_sGroupIDConfigFile))
 	{
 		CreateGroupIDList();
 	}
@@ -120,6 +121,7 @@ public OnPluginStart()
 	
 	// Just for simple validation usage
 	g_hSteamIDRegex     = CompileRegex("^STEAM_[0-1]{1}:[0-1]{1}:[0-9]+$");
+	g_hSteamIDRegex2    = CompileRegex("^\\[U:1:[0-9]{3,11}+\\]$");
 	g_hCommunityIDRegex = CompileRegex("^[0-9]{4,17}+$");
 	
 	
@@ -134,72 +136,62 @@ public OnPluginStart()
 	ParseGroupIDList();
 	
 
+	RegConsoleCmd("sm_calladmin_steam_reload", Command_Reload);
 	
 	
 	AutoExecConfig_SetFile("plugin.calladmin_steam");
 	
-	g_hVersion       = AutoExecConfig_CreateConVar("sm_calladmin_steam_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hSteamMethod   = AutoExecConfig_CreateConVar("sm_calladmin_steam_method", "1", "1 = Use Opensteamworks to send message, 0 = Use Steam Web API to send message", FCVAR_PLUGIN);
-	g_hSteamUsername = AutoExecConfig_CreateConVar("sm_calladmin_steam_username", "", "Your steam username", FCVAR_PLUGIN|FCVAR_PROTECTED);
-	g_hSteamPassword = AutoExecConfig_CreateConVar("sm_calladmin_steam_password", "", "Your steam password", FCVAR_PLUGIN|FCVAR_PROTECTED);
+	g_hVersion       = AutoExecConfig_CreateConVar("sm_calladmin_steam_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hSteamUsername = AutoExecConfig_CreateConVar("sm_calladmin_steam_username", "", "Your steam username", FCVAR_PROTECTED);
+	g_hSteamPassword = AutoExecConfig_CreateConVar("sm_calladmin_steam_password", "", "Your steam password", FCVAR_PROTECTED);
 	
 	
 	AutoExecConfig(true, "plugin.calladmin_steam");
 	AutoExecConfig_CleanFile();
 	
 	
-	SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
+	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
 	
-	GetConVarString(g_hSteamUsername, g_sSteamUsername, sizeof(g_sSteamUsername));
+	g_hSteamUsername.GetString(g_sSteamUsername, sizeof(g_sSteamUsername));
 	HookConVarChange(g_hSteamUsername, OnCvarChanged);
 	
-	GetConVarString(g_hSteamPassword, g_sSteamPassword, sizeof(g_sSteamPassword));
+	g_hSteamPassword.GetString(g_sSteamPassword, sizeof(g_sSteamPassword));
 	HookConVarChange(g_hSteamPassword, OnCvarChanged);
-	
-	g_bSteamMethod = GetConVarBool(g_hSteamMethod);
-	HookConVarChange(g_hSteamMethod, OnCvarChanged);
-
-
-	if(CALLADMIN_STEAM_METHOD_AVAILABLE())
-	{
-		if(g_bSteamMethod)
-		{
-			MessageBot_SetSendMethod(SEND_METHOD_STEAMWORKS);
-		}
-		else
-		{
-			MessageBot_SetSendMethod(SEND_METHOD_ONLINEAPI);
-		}
-	}
 }
 
 
 
-public OnMessageResultReceived(MessageBotResult:result, error)
+public void OnMessageResultReceived(MessageBotResult result, MessageBotError error)
 {
-	if(result != RESULT_NO_ERROR)
+	static char resultString[][] = {"No error", "Error while trying to login", "Operation timed out",
+	                                  "No recipients were setup prior to sending a message", "Couldn't send to any recipient"};
+
+
+	if (result != RESULT_NO_ERROR)
 	{
-		CallAdmin_LogMessage("Failed to send message, result was: (%d, %d)", result, error);
+		CallAdmin_LogMessage("Failed to send steam message: (result: %d [%s] | error: %d)", result, resultString[result], error);
 	}
 }
 
 
 
 
-CreateSteamIDList()
+void CreateSteamIDList()
 {
-	new Handle:hFile;
+	Handle hFile;
 	hFile = OpenFile(g_sSteamIDConfigFile, "w");
 	
 	// Failed to open
-	if(hFile == INVALID_HANDLE)
+	if (hFile == null)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for writing");
 		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for writing");
 	}
 	
-	WriteFileLine(hFile, "// List of steamID's or communityid's, seperated by a new line");
+	WriteFileLine(hFile, "// List of steamids or communityids, seperated by a new line");
+	WriteFileLine(hFile, "// STEAM_0:0:1");
+	WriteFileLine(hFile, "// 76561197960265730");
 	
 	CloseHandle(hFile);
 }
@@ -207,15 +199,15 @@ CreateSteamIDList()
 
 
 
-ParseSteamIDList()
+void ParseSteamIDList()
 {
-	new Handle:hFile;
+	File hFile;
 	
 	hFile = OpenFile(g_sSteamIDConfigFile, "r");
 	
 	
 	// Failed to open
-	if(hFile == INVALID_HANDLE)
+	if (hFile == null)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for reading");
 		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for reading");
@@ -223,13 +215,13 @@ ParseSteamIDList()
 	
 	
 	// Buffer must be a little bit bigger to have enough room for possible comments
-	decl String:sReadBuffer[128];
+	char sReadBuffer[128];
 
 	
-	new len;
-	while(!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
+	int len;
+	while (!IsEndOfFile(hFile) && hFile.ReadLine(sReadBuffer, sizeof(sReadBuffer)))
 	{
-		if(sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
+		if (sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
 		{
 			continue;
 		}
@@ -243,9 +235,9 @@ ParseSteamIDList()
 		
 		// Support for comments on end of line
 		len = strlen(sReadBuffer);
-		for(new i; i < len; i++)
+		for (int i; i < len; i++)
 		{
-			if(sReadBuffer[i] == ' ' || sReadBuffer[i] == '/')
+			if (sReadBuffer[i] == ' ' || sReadBuffer[i] == '/')
 			{
 				sReadBuffer[i] = '\0';
 				
@@ -254,15 +246,23 @@ ParseSteamIDList()
 		}
 		
 		
-		new AuthStringType:type = GetAuthIDType(sReadBuffer);
+		AuthStringType type = GetAuthIDType(sReadBuffer);
 		
 		// Is a steamid
-		if(type == AuthString_SteamID)
+		if (type == AuthString_SteamID)
 		{
 			GetRegexSubString(g_hSteamIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
 		}
+		// Is a steamid2
+		else if (type == AuthString_SteamID2)
+		{
+			GetRegexSubString(g_hSteamIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
+			
+			// Convert it to an steamid
+			SteamID2ToSteamId(sReadBuffer, sReadBuffer, sizeof(sReadBuffer));
+		}
 		// Is a communityid
-		else if(type == AuthString_CommunityID)
+		else if (type == AuthString_CommunityID)
 		{
 			GetRegexSubString(g_hCommunityIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
 		}
@@ -272,46 +272,47 @@ ParseSteamIDList()
 			continue;
 		}
 		
-		
 		// Add as recipient
 		MessageBot_AddRecipient(sReadBuffer);
 	}
 	
-	CloseHandle(hFile);
+	hFile.Close();
 }
 
 
 
 
-CreateGroupIDList()
+void CreateGroupIDList()
 {
-	new Handle:hFile;
+	File hFile;
 	hFile = OpenFile(g_sGroupIDConfigFile, "w");
 	
 	// Failed to open
-	if(hFile == INVALID_HANDLE)
+	if (hFile == null)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for writing");
 		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for writing");
 	}
 	
-	WriteFileLine(hFile, "// List of group names (custom group url), seperated by a new line");
+	hFile.WriteLine("// List of group names (custom group name), separated by a new line");
+	hFile.WriteLine("// So for example if your community link is: http://steamcommunity.com/groups/Valve then write in a new line: Valve");
+	hFile.WriteLine("// YourGroupName");
 	
-	CloseHandle(hFile);
+	hFile.Close();
 }
 
 
 
 
-ParseGroupIDList()
+void ParseGroupIDList()
 {
-	new Handle:hFile;
+	File hFile;
 	
 	hFile = OpenFile(g_sGroupIDConfigFile, "r");
 	
 	
 	// Failed to open
-	if(hFile == INVALID_HANDLE)
+	if (hFile == null)
 	{
 		CallAdmin_LogMessage("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for reading");
 		SetFailState("Failed to open configfile 'calladmin_steam_groupidlist.cfg' for reading");
@@ -319,13 +320,13 @@ ParseGroupIDList()
 	
 	
 	// Buffer must be a little bit bigger to have enough room for possible comments
-	decl String:sReadBuffer[128];
+	char sReadBuffer[128];
 
 	
-	new len;
-	while(!IsEndOfFile(hFile) && ReadFileLine(hFile, sReadBuffer, sizeof(sReadBuffer)))
+	int len;
+	while (! hFile.EndOfFile() &&  hFile.ReadLine(sReadBuffer, sizeof(sReadBuffer)))
 	{
-		if(sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
+		if (sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
 		{
 			continue;
 		}
@@ -339,9 +340,9 @@ ParseGroupIDList()
 		
 		// Support for comments on end of line
 		len = strlen(sReadBuffer);
-		for(new i; i < len; i++)
+		for (int i; i < len; i++)
 		{
-			if(sReadBuffer[i] == ' ' || sReadBuffer[i] == '/')
+			if (sReadBuffer[i] == ' ' || sReadBuffer[i] == '/')
 			{
 				sReadBuffer[i] = '\0';
 				
@@ -354,7 +355,7 @@ ParseGroupIDList()
 		}
 		
 		
-		if(len < 3 || len > 64)
+		if (len < 3 || len > 64)
 		{
 			continue;
 		}
@@ -364,55 +365,64 @@ ParseGroupIDList()
 		FetchGroupMembers(sReadBuffer);
 	}
 	
-	CloseHandle(hFile);
+	hFile.Close();
 }
 
 
 
 
-public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue[])
+public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newValue)
 {
-	if(cvar == g_hVersion)
+	if (cvar == g_hVersion)
 	{
-		SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
+		g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	}
-	else if(cvar == g_hSteamUsername)
+	else if (cvar == g_hSteamUsername)
 	{
-		GetConVarString(g_hSteamUsername, g_sSteamUsername, sizeof(g_sSteamUsername));
+		g_hSteamUsername.GetString(g_sSteamUsername, sizeof(g_sSteamUsername));
 	}
-	else if(cvar == g_hSteamPassword)
+	else if (cvar == g_hSteamPassword)
 	{
-		GetConVarString(g_hSteamPassword, g_sSteamPassword, sizeof(g_sSteamPassword));
-	}
-	else if(cvar == g_hSteamMethod)
-	{
-		g_bSteamMethod = GetConVarBool(g_hSteamMethod);
-
-		if(CALLADMIN_STEAM_METHOD_AVAILABLE())
-		{
-			if(g_bSteamMethod)
-			{
-				MessageBot_SetSendMethod(SEND_METHOD_STEAMWORKS);
-			}
-			else
-			{
-				MessageBot_SetSendMethod(SEND_METHOD_ONLINEAPI);
-			}
-		}
+		g_hSteamPassword.GetString(g_sSteamPassword, sizeof(g_sSteamPassword));
 	}
 }
 
 
 
 
-public OnAllPluginsLoaded()
+public Action Command_Reload(int client, int args)
 {
-	if(!LibraryExists("calladmin"))
+	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
+	{
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
+		
+		return Plugin_Handled;
+	}
+	
+	
+	// Clear the recipients
+	MessageBot_ClearRecipients();
+	
+	// Read in all those steamids
+	ParseSteamIDList();
+	
+	// Read in all those groupids
+	ParseGroupIDList();
+
+	return Plugin_Handled;
+}
+
+
+
+
+public void OnAllPluginsLoaded()
+{
+	if (!LibraryExists("calladmin"))
 	{
 		SetFailState("CallAdmin not found");
 	}
 	
-	if(LibraryExists("updater"))
+	if (LibraryExists("updater"))
 	{
 		Updater_AddPlugin(UPDATER_URL);
 	}
@@ -421,9 +431,9 @@ public OnAllPluginsLoaded()
 
 
 
-public OnLibraryAdded(const String:name[])
+public void OnLibraryAdded(const char[] name)
 {
-	if(StrEqual(name, "updater"))
+	if (StrEqual(name, "updater"))
 	{
 		Updater_AddPlugin(UPDATER_URL);
 	}
@@ -432,26 +442,26 @@ public OnLibraryAdded(const String:name[])
 
 
 
-public CallAdmin_OnReportPost(client, target, const String:reason[])
+public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 {
 	MessageBot_SetLoginData(g_sSteamUsername, g_sSteamPassword);
 	
-	decl String:sClientName[MAX_NAME_LENGTH];
-	decl String:sClientID[21];
+	char sClientName[MAX_NAME_LENGTH];
+	char sClientID[21];
 	
-	decl String:sTargetName[MAX_NAME_LENGTH];
-	decl String:sTargetID[21];
+	char sTargetName[MAX_NAME_LENGTH];
+	char sTargetID[21];
 	
-	decl String:sServerIP[16];
-	new serverPort;
-	decl String:sServerName[128];
+	char sServerIP[16];
+	int serverPort;
+	char sServerName[128];
 	
 	CallAdmin_GetHostIP(sServerIP, sizeof(sServerIP));
 	serverPort = CallAdmin_GetHostPort();
 	CallAdmin_GetHostName(sServerName, sizeof(sServerName));
 	
 	// Reporter wasn't a real client (initiated by a module)
-	if(client == REPORTER_CONSOLE)
+	if (client == REPORTER_CONSOLE)
 	{
 		strcopy(sClientName, sizeof(sClientName), "Server/Console");
 		strcopy(sClientID, sizeof(sClientID), "Server/Console");
@@ -459,25 +469,41 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	else
 	{
 		GetClientName(client, sClientName, sizeof(sClientName));
-		GetClientAuthString(client, sClientID, sizeof(sClientID));
+		GetClientAuthId(client, AuthId_Steam2, sClientID, sizeof(sClientID));
 	}
 	
 	GetClientName(target, sTargetName, sizeof(sTargetName));
-	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
+	GetClientAuthId(target, AuthId_Steam2, sTargetID, sizeof(sTargetID));
 	
-	decl String:sMessage[4096];
-	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s\nJoin server: steam://connect/%s:%d", sServerName, sServerIP, serverPort, sClientName, sClientID, sTargetName, sTargetID, reason, sServerIP, serverPort);
+	g_iLastReportID = CallAdmin_GetReportID();
+	
+	char sMessage[4096];
+	Format(sMessage, sizeof(sMessage), "\nNew report on server: %s (%s:%d)\nReportID: %d\nReporter: %s (%s)\nTarget: %s (%s)\nReason: %s\nJoin server: steam://connect/%s:%d\nWhen in game, type !calladmin_handle %d or /calladmin_handle %d in chat to handle this report", sServerName, sServerIP, serverPort, g_iLastReportID, sClientName, sClientID, sTargetName, sTargetID, reason, sServerIP, serverPort, g_iLastReportID, g_iLastReportID);
 							 
 	MessageBot_SendMessage(OnMessageResultReceived, sMessage);
 }
 
 
 
+public void CallAdmin_OnReportHandled(int client, int id)
+{
+	if (id != g_iLastReportID)
+	{
+		return;
+	}
+	
+	char sMessage[1024];
+	Format(sMessage, sizeof(sMessage), "\nLast report (%d) was handled by: %N", g_iLastReportID, client);
+	
+	MessageBot_SendMessage(OnMessageResultReceived, sMessage);
+}
 
-FetchGroupMembers(String:groupID[])
+
+
+void FetchGroupMembers(const char[] groupID)
 {
 	// Create a new socket
-	new Handle:Socket = SocketCreate(SOCKET_TCP, OnSocketError);
+	Handle Socket = SocketCreate(SOCKET_TCP, OnSocketError);
 	
 	
 	// Optional tweaking stuff
@@ -488,11 +514,11 @@ FetchGroupMembers(String:groupID[])
 	
 
 	// Create a datapack
-	new Handle:pack = CreateDataPack();
+	Handle pack = CreateDataPack();
 	
 	
 	// Buffers
-	decl String:sGroupID[64];
+	char sGroupID[64];
 	strcopy(sGroupID, sizeof(sGroupID), groupID);
 	
 	
@@ -511,15 +537,15 @@ FetchGroupMembers(String:groupID[])
 
 
 
-public OnSocketConnect(Handle:socket, any:pack)
+public int OnSocketConnect(Handle socket, any pack)
 {
 	// If socket is connected, should be since this is the callback that is called if it is connected
-	if(SocketIsConnected(socket))
+	if (SocketIsConnected(socket))
 	{
 		// Buffers
-		decl String:sRequestString[1024];
-		decl String:sRequestPath[512];
-		decl String:sGroupID[64 * 4];
+		char sRequestString[1024];
+		char sRequestPath[512];
+		char sGroupID[64 * 4];
 		
 		
 		// Reset the pack
@@ -537,7 +563,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 		
 		
 		// Params
-		Format(sRequestPath, sizeof(sRequestPath), "groups/%s/memberslistxml", sGroupID);
+		Format(sRequestPath, sizeof(sRequestPath), "groups/%s/memberslistxml?xml=1", sGroupID);
 
 		
 		// Request String
@@ -552,58 +578,51 @@ public OnSocketConnect(Handle:socket, any:pack)
 
 
 
-public OnSocketReceive(Handle:socket, String:data[], const size, any:pack) 
+public int OnSocketReceive(Handle socket, char[] data, const int size, any pack) 
 {
-	if(socket != INVALID_HANDLE)
+	if (socket != null)
 	{
-		// This fixes an bug on windowsservers
-		// The receivefunction for socket is getting called twice on these systems, once for the headers, and a second time for the body
-		// Because we know that our response should begin with <?xml and contains a steamid we can quit here and don't waste resources on the first response
-		// Other than that if the api is down, the request was malformed etcetera we don't waste resources for working with useless data
-		if(StrContains(data, "<?xml", false) == -1)
-		{
-			return;
-		}
-		
+		static int SPLITSIZE1 = (MAX_ITEMS / 2) + 50;
+		static int SPLITSIZE2 = 64;
 		
 		// 150 ids should be enough for now
 		// We shoudln't need it, but we use a little bit of a buffer to filter out garbage
-		new String:Split[150 + 50][64];
-		new String:sTempID[21];
+		char[][] Split = new char[SPLITSIZE1][SPLITSIZE2];
+		char sTempID[21];
 		
 		
 		// We only have an limited amount of lines we can split, we shouldn't waste this ;)
-		new startindex  = 0;
-		if( (startindex = StrContains(data, "<members>", true)) == -1)
+		int startindex  = 0;
+		if ( (startindex = StrContains(data, "<members>", true)) == -1)
 		{
 			startindex = 0;
 		}
 		
-		new endindex  = strlen(data);
-		if( (endindex = StrContains(data, "</members>", true)) != -1)
+		int endindex  = strlen(data);
+		if ( (endindex = StrContains(data, "</members>", true)) != -1)
 		{
 			data[endindex] = '\0';
 		}
 		
 		
-		ExplodeString(data[startindex], "<steamID64>", Split, sizeof(Split), sizeof(Split[]));
+		ExplodeString(data[startindex], "<steamID64>", Split, SPLITSIZE1, SPLITSIZE2);
 				
 		
 		// Run though Communityids
-		new splitsize = sizeof(Split);
-		new index;
-		for(new i; i < splitsize; i++)
+		int splitsize = SPLITSIZE1;
+		int index;
+		for (int i; i < splitsize; i++)
 		{
-			if(strlen(Split[i]) > 0)
+			if (strlen(Split[i]) > 0)
 			{
 				// If we find something we split off at the searchresult, we then then only have the steamid
-				if( (index = StrContains(Split[i], "</steamID64>", true)) != -1)
+				if ( (index = StrContains(Split[i], "</steamID64>", true)) != -1)
 				{
 					Split[i][index] = '\0';
 				}
 				
 				// No match :(
-				if(MatchRegex(g_hCommunityIDRegex, Split[i]) != 1)
+				if (GetAuthIDType(Split[i]) != AuthString_CommunityID)
 				{
 					continue;
 				}
@@ -618,7 +637,7 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any:pack)
 		
 		
 		// Close the socket
-		if(SocketIsConnected(socket))
+		if (SocketIsConnected(socket))
 		{
 			SocketDisconnect(socket);
 		}
@@ -628,9 +647,9 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any:pack)
 
 
 
-public OnSocketDisconnect(Handle:socket, any:pack)
+public int OnSocketDisconnect(Handle socket, any pack)
 {
-	if(socket != INVALID_HANDLE)
+	if (socket != null)
 	{
 		CloseHandle(socket);
 	}
@@ -639,11 +658,11 @@ public OnSocketDisconnect(Handle:socket, any:pack)
 
 
 
-public OnSocketError(Handle:socket, const errorType, const errorNum, any:pack)
+public int OnSocketError(Handle socket, const int errorType, const int errorNum, any pack)
 {
 	CallAdmin_LogMessage("Socket Error: %d, %d", errorType, errorNum);
 	
-	if(socket != INVALID_HANDLE)
+	if (socket != null)
 	{
 		CloseHandle(socket);
 	}
@@ -652,13 +671,17 @@ public OnSocketError(Handle:socket, const errorType, const errorNum, any:pack)
 
 
 
-stock AuthStringType:GetAuthIDType(String:auth[])
+stock AuthStringType GetAuthIDType(const char[] auth)
 {
-	if(MatchRegex(g_hSteamIDRegex, auth) == 1)
+	if (MatchRegex(g_hSteamIDRegex, auth) == 1)
 	{
 		return AuthString_SteamID;
 	}
-	else if(MatchRegex(g_hCommunityIDRegex, auth) == 1)
+	else if (MatchRegex(g_hSteamIDRegex2, auth) == 1)
+	{
+		return AuthString_SteamID2;
+	}
+	else if (MatchRegex(g_hCommunityIDRegex, auth) == 1)
 	{
 		return AuthString_CommunityID;
 	}
@@ -668,16 +691,30 @@ stock AuthStringType:GetAuthIDType(String:auth[])
 
 
 
+stock void SteamID2ToSteamId(const char[] steamID2, char[] dest, int max_len)
+{
+	char sTemp[21];
+	strcopy(sTemp, sizeof(sTemp), steamID2);
+	
+	sTemp[strlen(sTemp)] = '\0';
+	
+	int temp = StringToInt(sTemp[5]);
+	
+	Format(dest, max_len, "STEAM_0:%d:%d", temp & 1, temp >> 1);
+}
+
+
+
 
 // Written by Peace-Maker (i guess), formatted for better readability
-stock URLEncode(String:sString[], maxlen, String:safe[] = "/", bool:bFormat = false)
+stock void URLEncode(char[] sString, int maxlen, char safe[] = "/", bool bFormat = false)
 {
-	decl String:sAlwaysSafe[256];
+	char sAlwaysSafe[256];
 	Format(sAlwaysSafe, sizeof(sAlwaysSafe), "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-%s", safe);
 	
 	// Need 2 '%' since sp's Format parses one as a parameter to replace
 	// http://wiki.alliedmods.net/Format_Class_Functions_%28SourceMod_Scripting%29
-	if(bFormat)
+	if (bFormat)
 	{
 		ReplaceString(sString, maxlen, "%", "%%25");
 	}
@@ -687,22 +724,22 @@ stock URLEncode(String:sString[], maxlen, String:safe[] = "/", bool:bFormat = fa
 	}
 	
 	
-	new String:sChar[8];
-	new String:sReplaceChar[8];
+	char sChar[8];
+	char sReplaceChar[8];
 	
-	for(new i = 1; i < 256; i++)
+	for (int i = 1; i < 256; i++)
 	{
 		// Skip the '%' double replace ftw..
-		if(i==37)
+		if (i==37)
 		{
 			continue;
 		}
 		
 		
 		Format(sChar, sizeof(sChar), "%c", i);
-		if(StrContains(sAlwaysSafe, sChar) == -1 && StrContains(sString, sChar) != -1)
+		if (StrContains(sAlwaysSafe, sChar) == -1 && StrContains(sString, sChar) != -1)
 		{
-			if(bFormat)
+			if (bFormat)
 			{
 				Format(sReplaceChar, sizeof(sReplaceChar), "%%%%%02X", i);
 			}

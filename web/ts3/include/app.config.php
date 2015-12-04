@@ -41,6 +41,25 @@ $access_keys = array
 
 
 /*
+Admins inside these channels will not receive messages
+	
+$muted_channels = array
+(
+	'channelname 1',
+	'channelname 2',
+	'channelname 3',
+);
+*/
+
+$muted_channels = array
+(
+	'',
+);
+
+
+
+
+/*
  *---------------------------------------------------------------
  * CONNECTION SETTINGS
  *---------------------------------------------------------------

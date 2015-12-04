@@ -37,12 +37,13 @@ require_once("include/TeamSpeak3/TeamSpeak3.php");
 
 
 $helpers = new CallAdmin_Helpers();
+$alreadyAdded = Array();
 
 
 // Key set and no key given or key is wrong
-if(!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
+if (!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
-	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Ts3");
+	$helpers->printXmlError2("APP_AUTH_FAILURE", "Given access key doesn't exist", "CallAdmin_Ts3");
 }
 
 
@@ -58,12 +59,18 @@ try
 	$count = 0;
 	$uid  = "";
 	$name = "";
-	foreach($ts3_VirtualServer->clientList() as $ts3_Client)
+	foreach ($ts3_VirtualServer->clientList() as $ts3_Client)
 	{
 		$uid  = $helpers->_xmlentities((string)$ts3_Client['client_unique_identifier']);
 		$name = $helpers->_xmlentities((string)$ts3_Client['client_nickname']);
 		
-		if($uid == "ServerQuery")
+		if ($uid == "ServerQuery")
+		{
+			continue;
+		}
+		
+		// If already added, skip this uid
+		if (in_array($uid, $alreadyAdded))
 		{
 			continue;
 		}
@@ -72,6 +79,9 @@ try
 
 		$child->addChild("name", $name);
 		$child->addChild("uid", $uid);
+		
+		// Add to already added list 
+		array_push($alreadyAdded, $uid);
 	}
 }
 catch(TeamSpeak3_Adapter_ServerQuery_Exception $e)

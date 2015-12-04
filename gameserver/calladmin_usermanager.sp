@@ -27,35 +27,36 @@
 #include <sourcemod>
 #include <autoexecconfig>
 #include "calladmin"
+#include "calladmin_stocks"
 
 #undef REQUIRE_PLUGIN
 #include <updater>
 #include <basecomm>
 
 #pragma semicolon 1
-
+#pragma newdecls required
 
 
 // Version cvar
-new Handle:g_hVersion;
+Handle g_hVersion;
 
 // Cvar to blacklist muted players
-new Handle:g_hBlacklistMuted;
-new bool:g_bBlacklistMuted;
+Handle g_hBlacklistMuted;
+bool g_bBlacklistMuted;
 
 // Cvar to blacklist gagged players
-new Handle:g_hBlacklistGagged;
-new bool:g_bBlacklistGagged;
+Handle g_hBlacklistGagged;
+bool g_bBlacklistGagged;
 
 // Cvar to show information
-new Handle:g_hShowInformation;
-new bool:g_bShowInformation;
+Handle g_hShowInformation;
+bool g_bShowInformation;
 
 
 
 // Is immune or on blacklist?
-new bool:g_bClientOnBlacklist[MAXPLAYERS + 1];
-new bool:g_bClientImmune[MAXPLAYERS + 1];
+bool g_bClientOnBlacklist[MAXPLAYERS + 1];
+bool g_bClientImmune[MAXPLAYERS + 1];
 
 
 
@@ -64,7 +65,7 @@ new bool:g_bClientImmune[MAXPLAYERS + 1];
 
 
 
-public Plugin:myinfo = 
+public Plugin myinfo = 
 {
 	name = "CallAdmin UserManager",
 	author = "Popoklopsi, Impact",
@@ -86,7 +87,7 @@ Sourcemod
 
 
 // Register the library
-public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	RegPluginLibrary("calladmin_usermanager");
 	
@@ -103,16 +104,16 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 
 
 // Plugin Started
-public OnPluginStart()
+public void OnPluginStart()
 {
 	// Create config and load it
 	AutoExecConfig_SetFile("plugin.calladmin_usermanager");
 
 
-	g_hVersion = AutoExecConfig_CreateConVar("sm_calladmin_usermanager_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hBlacklistMuted = AutoExecConfig_CreateConVar("sm_calladmin_blacklist_muted", "1",  "Disallow muted players to report a player", FCVAR_PLUGIN);
-	g_hBlacklistGagged = AutoExecConfig_CreateConVar("sm_calladmin_blacklist_gagged", "1",  "Disallow gagged players to report a player", FCVAR_PLUGIN);
-	g_hShowInformation = AutoExecConfig_CreateConVar("sm_calladmin_show_information", "1",  "Show status to player on mute/gag", FCVAR_PLUGIN);
+	g_hVersion = AutoExecConfig_CreateConVar("sm_calladmin_usermanager_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hBlacklistMuted = AutoExecConfig_CreateConVar("sm_calladmin_blacklist_muted", "1",  "Disallow muted players to report a player", FCVAR_NONE);
+	g_hBlacklistGagged = AutoExecConfig_CreateConVar("sm_calladmin_blacklist_gagged", "1",  "Disallow gagged players to report a player", FCVAR_NONE);
+	g_hShowInformation = AutoExecConfig_CreateConVar("sm_calladmin_show_information", "1",  "Show status to player on mute/gag", FCVAR_NONE);
 
 
 	AutoExecConfig(true, "plugin.calladmin_usermanager");
@@ -141,7 +142,7 @@ public OnPluginStart()
 
 
 // Convar Changed
-public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue[])
+public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newValue)
 {
 	if (cvar == g_hBlacklistMuted)
 	{
@@ -178,9 +179,9 @@ public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue
 
 
 // Updater
-public OnAllPluginsLoaded()
+public void OnAllPluginsLoaded()
 {
-	if(!LibraryExists("calladmin"))
+	if (!LibraryExists("calladmin"))
 	{
 		SetFailState("CallAdmin not found");
 	}
@@ -198,7 +199,7 @@ public OnAllPluginsLoaded()
 
 
 // Updater
-public OnLibraryAdded(const String:name[])
+public void OnLibraryAdded(const char[] name)
 {
 	if (StrEqual(name, "updater"))
 	{
@@ -219,9 +220,9 @@ NATIVES
 
 
 // Set client on blacklist
-public Native_SetClientOnBlacklist(Handle:plugin, numParams)
+public int Native_SetClientOnBlacklist(Handle plugin, int numParams)
 {
-	new client = GetNativeCell(1);
+	int client = GetNativeCell(1);
 	
 	if (IsClientValid(client))
 	{
@@ -231,9 +232,9 @@ public Native_SetClientOnBlacklist(Handle:plugin, numParams)
 
 
 // Set Client immune
-public Native_SetClientImmune(Handle:plugin, numParams)
+public int Native_SetClientImmune(Handle plugin, int numParams)
 {
-	new client = GetNativeCell(1);
+	int client = GetNativeCell(1);
 	
 	if (IsClientValid(client))
 	{
@@ -243,9 +244,9 @@ public Native_SetClientImmune(Handle:plugin, numParams)
 
 
 // Checks if the client is on the blacklist
-public Native_IsClientOnBlacklist(Handle:plugin, numParams)
+public int Native_IsClientOnBlacklist(Handle plugin, int numParams)
 {
-	new client = GetNativeCell(1);
+	int client = GetNativeCell(1);
 	
 	if (IsClientValid(client))
 	{
@@ -257,9 +258,9 @@ public Native_IsClientOnBlacklist(Handle:plugin, numParams)
 
 
 // Checks if the client is immune
-public Native_IsClientImmune(Handle:plugin, numParams)
+public int Native_IsClientImmune(Handle plugin, int numParams)
 {
-	new client = GetNativeCell(1);
+	int client = GetNativeCell(1);
 	
 	if (IsClientValid(client))
 	{
@@ -280,7 +281,7 @@ CallAdmin
 */
 
 // Client open the menu
-public Action:CallAdmin_OnDrawMenu(client)
+public Action CallAdmin_OnDrawMenu(int client)
 {
 	// Client is on blacklist, so don't open menu
 	if (g_bClientOnBlacklist[client])
@@ -296,7 +297,7 @@ public Action:CallAdmin_OnDrawMenu(client)
 
 
 // Client will drawn to menu
-public Action:CallAdmin_OnDrawTarget(client, target)
+public Action CallAdmin_OnDrawTarget(int client, int target)
 {
 	// Target is immune, so don't draw it
 	if (g_bClientImmune[target])
@@ -309,7 +310,7 @@ public Action:CallAdmin_OnDrawTarget(client, target)
 
 
 // Client will report
-public Action:CallAdmin_OnReportPre(client, target, const String:reason[])
+public Action CallAdmin_OnReportPre(int client, int target, const char[] reason)
 {
 	// Target is immune, so don't report
 	if (g_bClientImmune[target])
@@ -347,7 +348,7 @@ Basecomm
 
 
 // Client get muted
-public BaseComm_OnClientMute(client, bool:muteState)
+public void BaseComm_OnClientMute(int client, bool muteState)
 {
 	if (g_bBlacklistMuted && IsClientValid(client))
 	{
@@ -371,7 +372,7 @@ public BaseComm_OnClientMute(client, bool:muteState)
 
 
 // Client get gagged
-public BaseComm_OnClientGag(client, bool:gagState)
+public void BaseComm_OnClientGag(int client, bool gagState)
 {
 	if (g_bBlacklistGagged && IsClientValid(client))
 	{
@@ -394,22 +395,8 @@ public BaseComm_OnClientGag(client, bool:gagState)
 }
 
 
-
-
-/*
-
-STOCKS
-
-*/
-
-
-// Is Client valid
-stock bool:IsClientValid(client)
+public void OnClientDisconnect_Post(int client)
 {
-	if (client > 0 && client <= MaxClients && IsClientInGame(client))
-	{
-		return true;
-	}
-	
-	return false;
+	g_bClientOnBlacklist[client] = false;
+	g_bClientImmune[client] = false;
 }

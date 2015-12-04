@@ -32,23 +32,24 @@
 #undef REQUIRE_PLUGIN
 #include <updater>
 #pragma semicolon 1
+#pragma newdecls required
 
 
 
 // Global stuff
-new Handle:g_hVersion;
+ConVar g_hVersion;
 
 
-new Handle:g_hUrl;
-new String:g_sUrl[PLATFORM_MAX_PATH];
-new String:g_sRealUrl[PLATFORM_MAX_PATH];
-new String:g_sRealPath[PLATFORM_MAX_PATH];
+ConVar g_hUrl;
+char g_sUrl[PLATFORM_MAX_PATH];
+char g_sRealUrl[PLATFORM_MAX_PATH];
+char g_sRealPath[PLATFORM_MAX_PATH];
 
 
-new Handle:g_hKey;
-new String:g_sKey[PLATFORM_MAX_PATH];
+ConVar g_hKey;
+char g_sKey[PLATFORM_MAX_PATH];
 
-new g_iCurrentTrackers;
+int g_iCurrentTrackers;
 
 
 
@@ -56,7 +57,7 @@ new g_iCurrentTrackers;
 #define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_ts3.txt"
 
 
-public Plugin:myinfo = 
+public Plugin myinfo = 
 {
 	name = "CallAdmin: Ts3 module",
 	author = "Impact, Popoklopsi",
@@ -69,27 +70,27 @@ public Plugin:myinfo =
 
 
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	AutoExecConfig_SetFile("plugin.calladmin_ts3");
 	
-	g_hVersion = AutoExecConfig_CreateConVar("sm_calladmin_ts3_version", CALLADMIN_VERSION, "Plugin version", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hUrl     = AutoExecConfig_CreateConVar("sm_calladmin_ts3_url", "http://calladmin.yourclan.eu/subfolder", "Url to the ts3script path", FCVAR_PLUGIN);
-	g_hKey     = AutoExecConfig_CreateConVar("sm_calladmin_ts3_key", "SomeSecureKeyNobodyKnows", "Key of your ts3script", FCVAR_PLUGIN);
+	g_hVersion = AutoExecConfig_CreateConVar("sm_calladmin_ts3_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hUrl     = AutoExecConfig_CreateConVar("sm_calladmin_ts3_url", "http://calladmin.yourclan.eu/ts3", "Url to the ts3 folder of the webscripts", FCVAR_PROTECTED);
+	g_hKey     = AutoExecConfig_CreateConVar("sm_calladmin_ts3_key", "SomeSecureKeyNobodyKnows", "Key of your ts3script", FCVAR_PROTECTED);
 	
 	
 	AutoExecConfig(true, "plugin.calladmin_ts3");
 	AutoExecConfig_CleanFile();
 	
 	
-	SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
+	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	HookConVarChange(g_hVersion, OnCvarChanged);
 	
-	GetConVarString(g_hUrl, g_sUrl, sizeof(g_sUrl));
+	g_hUrl.GetString(g_sUrl, sizeof(g_sUrl));
 	PreFormatUrl();
 	HookConVarChange(g_hUrl, OnCvarChanged);
 	
-	GetConVarString(g_hKey, g_sKey, sizeof(g_sKey));
+	g_hKey.GetString(g_sKey, sizeof(g_sKey));
 	HookConVarChange(g_hKey, OnCvarChanged);
 	
 	CreateTimer(20.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
@@ -98,7 +99,7 @@ public OnPluginStart()
 
 
 
-public Action:Timer_UpdateTrackersCount(Handle:timer)
+public Action Timer_UpdateTrackersCount(Handle timer)
 {
 	// Get current trackers
 	GetCurrentTrackers();
@@ -108,10 +109,10 @@ public Action:Timer_UpdateTrackersCount(Handle:timer)
 
 
 
-GetCurrentTrackers()
+int GetCurrentTrackers()
 {
-	// Create a new socket
-	new Handle:Socket = SocketCreate(SOCKET_TCP, OnSocketError);
+	// Create a socket
+	Handle Socket = SocketCreate(SOCKET_TCP, OnSocketError);
 	
 	
 	// Optional tweaking stuff
@@ -126,41 +127,41 @@ GetCurrentTrackers()
 
 
 
-PreFormatUrl()
+void PreFormatUrl()
 {
 	// We work on a copy
 	strcopy(g_sRealUrl, sizeof(g_sRealUrl), g_sUrl);
 	
 	
 	// Strip http and such stuff here
-	if(StrContains(g_sRealUrl, "http://") == 0)
+	if (StrContains(g_sRealUrl, "http://") == 0)
 	{
 		ReplaceString(g_sRealUrl, sizeof(g_sRealUrl), "http://", "");
 	}
 
-	if(StrContains(g_sRealUrl, "https://") == 0)
+	if (StrContains(g_sRealUrl, "https://") == 0)
 	{
 		ReplaceString(g_sRealUrl, sizeof(g_sRealUrl), "https://", "");
 	}
 	
-	if(StrContains(g_sRealUrl, "www.") == 0)
+	if (StrContains(g_sRealUrl, "www.") == 0)
 	{
 		ReplaceString(g_sRealUrl, sizeof(g_sRealUrl), "www.", "");
 	}
 	
 	
-	new index;
+	int index;
 	
 	// We strip from / of the url to get the path
-	if( (index = StrContains(g_sRealUrl, "/")) != -1 )
+	if ( (index = StrContains(g_sRealUrl, "/")) != -1 )
 	{
 		// Copy from there
 		strcopy(g_sRealPath, sizeof(g_sRealPath), g_sRealUrl[index]);
 		
 		
 		// Strip the slash of the path if there is one
-		new len = strlen(g_sRealPath);
-		if(len > 0 && g_sRealPath[len - 1] == '/')
+		int len = strlen(g_sRealPath);
+		if (len > 0 && g_sRealPath[len - 1] == '/')
 		{
 			g_sRealPath[len -1] = '\0';
 		}
@@ -173,33 +174,33 @@ PreFormatUrl()
 
 
 
-public OnCvarChanged(Handle:cvar, const String:oldValue[], const String:newValue[])
+public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newValue)
 {
-	if(cvar == g_hVersion)
+	if (cvar == g_hVersion)
 	{
-		SetConVarString(g_hVersion, CALLADMIN_VERSION, false, false);
+		g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	}
-	else if(cvar == g_hUrl)
+	else if (cvar == g_hUrl)
 	{
-		GetConVarString(g_hUrl, g_sUrl, sizeof(g_sUrl));
+		g_hUrl.GetString(g_sUrl, sizeof(g_sUrl));
 		PreFormatUrl();
 	}
-	else if(cvar == g_hKey)
+	else if (cvar == g_hKey)
 	{
-		GetConVarString(g_hKey, g_sKey, sizeof(g_sKey));
+		g_hKey.GetString(g_sKey, sizeof(g_sKey));
 	}
 }
 
 
 
-public OnAllPluginsLoaded()
+public void OnAllPluginsLoaded()
 {
-	if(!LibraryExists("calladmin"))
+	if (!LibraryExists("calladmin"))
 	{
 		SetFailState("CallAdmin not found");
 	}
 	
-	if(LibraryExists("updater"))
+	if (LibraryExists("updater"))
 	{
 		Updater_AddPlugin(UPDATER_URL);
 	}
@@ -207,9 +208,9 @@ public OnAllPluginsLoaded()
 
 
 
-public OnLibraryAdded(const String:name[])
+public void OnLibraryAdded(const char[] name)
 {
-    if(StrEqual(name, "updater"))
+    if (StrEqual(name, "updater"))
     {
         Updater_AddPlugin(UPDATER_URL);
     }
@@ -218,17 +219,17 @@ public OnLibraryAdded(const String:name[])
 
 
 // Pseudo forward
-public CallAdmin_OnRequestTrackersCountRefresh(&trackers)
+public void CallAdmin_OnRequestTrackersCountRefresh(int &trackers)
 {
 	trackers = g_iCurrentTrackers;
 }
 
 
 
-public CallAdmin_OnReportPost(client, target, const String:reason[])
+public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 {
-	// Create a new socket
-	new Handle:Socket = SocketCreate(SOCKET_TCP, OnSocketError);
+	// Create a socket
+	Handle Socket = SocketCreate(SOCKET_TCP, OnSocketError);
 	
 	
 	// Optional tweaking stuff
@@ -238,19 +239,19 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	
 	
 	// Create a datapack
-	new Handle:pack = CreateDataPack();
+	Handle pack = CreateDataPack();
 	
 	
 	// Buffers
-	decl String:sClientID[21];
-	decl String:sClientName[MAX_NAME_LENGTH];
+	char sClientID[21];
+	char sClientName[MAX_NAME_LENGTH];
 	
-	decl String:sTargetID[21];
-	decl String:sTargetName[MAX_NAME_LENGTH];
+	char sTargetID[21];
+	char sTargetName[MAX_NAME_LENGTH];
 	
 	
 	// Reporter wasn't a real client (initiated by a module)
-	if(client == REPORTER_CONSOLE)
+	if (client == REPORTER_CONSOLE)
 	{
 		strcopy(sClientName, sizeof(sClientName), "Server/Console");
 		strcopy(sClientID, sizeof(sClientID), "Server/Console");
@@ -258,12 +259,12 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 	else
 	{
 		GetClientName(client, sClientName, sizeof(sClientName));
-		GetClientAuthString(client, sClientID, sizeof(sClientID));
+		GetClientAuthId(client, AuthId_Steam2, sClientID, sizeof(sClientID));
 	}
 
 	
 	GetClientName(target, sTargetName, sizeof(sTargetName));
-	GetClientAuthString(target, sTargetID, sizeof(sTargetID));
+	GetClientAuthId(target, AuthId_Steam2, sTargetID, sizeof(sTargetID));
 	
 	
 	// Write the data to the pack
@@ -287,24 +288,24 @@ public CallAdmin_OnReportPost(client, target, const String:reason[])
 
 
 
-public OnSocketConnect(Handle:socket, any:pack)
+public int OnSocketConnect(Handle socket, any pack)
 {
 	// If socket is connected, should be since this is the callback that is called if it is connected
-	if(SocketIsConnected(socket))
+	if (SocketIsConnected(socket))
 	{
 		// Buffers
-		decl String:sRequestString[2048];
-		decl String:sRequestParams[2048];
+		char sRequestString[2048];
+		char sRequestParams[2048];
 		
 		// Params
-		decl String:sClientID[21];
-		decl String:sClientName[MAX_NAME_LENGTH * 4];
+		char sClientID[21];
+		char sClientName[MAX_NAME_LENGTH * 4];
 		
-		decl String:sTargetID[21];
-		decl String:sTargetName[MAX_NAME_LENGTH * 4];
+		char sTargetID[21];
+		char sTargetName[MAX_NAME_LENGTH * 4];
 		
-		decl String:sServerName[64 * 4];
-		decl String:sServerIP[16 + 5];
+		char sServerName[64 * 4];
+		char sServerIP[16 + 5];
 		
 		
 		// Fetch serverdata here...
@@ -314,7 +315,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 		
 		
 		// Currently maximum 48 in length
-		decl String:sReason[REASON_MAX_LENGTH * 4];
+		char sReason[REASON_MAX_LENGTH * 4];
 		
 		
 		// Reset the pack
@@ -341,7 +342,7 @@ public OnSocketConnect(Handle:socket, any:pack)
 		
 		
 		// Temp, for bots
-		if(strlen(sTargetID) < 1)
+		if (strlen(sTargetID) < 1)
 		{
 			Format(sTargetID, sizeof(sTargetID), "INVALID");
 		}
@@ -363,15 +364,15 @@ public OnSocketConnect(Handle:socket, any:pack)
 
 
 
-public OnSocketReceive(Handle:socket, String:data[], const size, any:pack) 
+public int OnSocketReceive(Handle socket, char[] data, const int size, any pack) 
 {
-	if(socket != INVALID_HANDLE)
+	if (socket != null)
 	{
 		// Check the response here and do something
 		
 		
 		// Close the socket
-		if(SocketIsConnected(socket))
+		if (SocketIsConnected(socket))
 		{
 			SocketDisconnect(socket);
 		}
@@ -380,9 +381,9 @@ public OnSocketReceive(Handle:socket, String:data[], const size, any:pack)
 
 
 
-public OnSocketDisconnect(Handle:socket, any:pack)
+public int OnSocketDisconnect(Handle socket, any pack)
 {
-	if(socket != INVALID_HANDLE)
+	if (socket != null)
 	{
 		CloseHandle(socket);
 	}
@@ -390,11 +391,11 @@ public OnSocketDisconnect(Handle:socket, any:pack)
 
 
 
-public OnSocketError(Handle:socket, const errorType, const errorNum, any:pack)
+public int OnSocketError(Handle socket, const int errorType, const int errorNum, any pack)
 {
 	CallAdmin_LogMessage("Socket Error: %d, %d", errorType, errorNum);
 	
-	if(socket != INVALID_HANDLE)
+	if (socket != null)
 	{
 		CloseHandle(socket);
 	}
@@ -404,14 +405,14 @@ public OnSocketError(Handle:socket, const errorType, const errorNum, any:pack)
 
 
 // Onlinecount callback
-public OnSocketConnectCount(Handle:socket, any:pack)
+public int OnSocketConnectCount(Handle socket, any pack)
 {
 	// If socket is connected, should be since this is the callback that is called if it is connected
-	if(SocketIsConnected(socket))
+	if (SocketIsConnected(socket))
 	{
 		// Buffers
-		decl String:sRequestString[2048];
-		decl String:sRequestParams[2048];
+		char sRequestString[2048];
+		char sRequestParams[2048];
 
 		
 		// Params
@@ -431,34 +432,34 @@ public OnSocketConnectCount(Handle:socket, any:pack)
 
 
 // Onlinecount callback
-public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack) 
+public int OnSocketReceiveCount(Handle socket, char[] data, const int size, any pack) 
 {
-	if(socket != INVALID_HANDLE)
+	if (socket != null)
 	{
 		// This fixes an bug on windowsservers
 		// The receivefunction for socket is getting called twice on these systems, once for the headers, and a second time for the body
 		// Because we know that our response should begin with <?xml and contains a steamid we can quit here and don't waste resources on the first response
 		// Other than that if the api is down, the request was malformed etcetera we don't waste resources for working with useless data
-		if(StrContains(data, "<?xml", false) == -1)
+		if (StrContains(data, "<?xml", false) == -1)
 		{
 			return;
 		}
 		
 		
-		new String:Split[2][48];
+		char Split[2][48];
 		
 		ExplodeString(data, "<onlineCount>", Split, sizeof(Split), sizeof(Split[]));
 		
 		
 		// Run though count
-		new splitsize = sizeof(Split);
-		new index;
-		for(new i; i < splitsize; i++)
+		int splitsize = sizeof(Split);
+		int index;
+		for (int i; i < splitsize; i++)
 		{
-			if(strlen(Split[i]) > 0)
+			if (strlen(Split[i]) > 0)
 			{
 				// If we find something we split off at the searchresult, we then then only have the steamid
-				if( (index = StrContains(Split[i], "</onlineCount>", true)) != -1)
+				if ( (index = StrContains(Split[i], "</onlineCount>", true)) != -1)
 				{
 					Split[i][index] = '\0';
 				}
@@ -467,13 +468,13 @@ public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack)
 		
 		
 		// Add the count to the total trackers
-		if(strlen(Split[1]) > 0)
+		if (strlen(Split[1]) > 0)
 		{
-			if(SimpleRegexMatch(Split[1], "^[0-9]+$"))
+			if (SimpleRegexMatch(Split[1], "^[0-9]+$"))
 			{
-				new temp = StringToInt(Split[1]);
+				int temp = StringToInt(Split[1]);
 				
-				if(temp > 0)
+				if (temp > 0)
 				{
 					g_iCurrentTrackers = temp;
 				}
@@ -482,7 +483,7 @@ public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack)
 
 		
 		// Close the socket
-		if(SocketIsConnected(socket))
+		if (SocketIsConnected(socket))
 		{
 			SocketDisconnect(socket);
 		}
@@ -493,14 +494,14 @@ public OnSocketReceiveCount(Handle:socket, String:data[], const size, any:pack)
 
 
 // Written by Peace-Maker (i guess), formatted for better readability
-stock URLEncode(String:sString[], maxlen, String:safe[] = "/", bool:bFormat = false)
+stock void URLEncode(char[] sString, int maxlen, char safe[] = "/", bool bFormat = false)
 {
-	decl String:sAlwaysSafe[256];
+	char sAlwaysSafe[256];
 	Format(sAlwaysSafe, sizeof(sAlwaysSafe), "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-%s", safe);
 	
 	// Need 2 '%' since sp's Format parses one as a parameter to replace
 	// http://wiki.alliedmods.net/Format_Class_Functions_%28SourceMod_Scripting%29
-	if(bFormat)
+	if (bFormat)
 	{
 		ReplaceString(sString, maxlen, "%", "%%25");
 	}
@@ -510,22 +511,22 @@ stock URLEncode(String:sString[], maxlen, String:safe[] = "/", bool:bFormat = fa
 	}
 	
 	
-	new String:sChar[8];
-	new String:sReplaceChar[8];
+	char sChar[8];
+	char sReplaceChar[8];
 	
-	for(new i = 1; i < 256; i++)
+	for (int i = 1; i < 256; i++)
 	{
 		// Skip the '%' double replace ftw..
-		if(i==37)
+		if (i==37)
 		{
 			continue;
 		}
 		
 		
 		Format(sChar, sizeof(sChar), "%c", i);
-		if(StrContains(sAlwaysSafe, sChar) == -1 && StrContains(sString, sChar) != -1)
+		if (StrContains(sAlwaysSafe, sChar) == -1 && StrContains(sString, sChar) != -1)
 		{
-			if(bFormat)
+			if (bFormat)
 			{
 				Format(sReplaceChar, sizeof(sReplaceChar), "%%%%%02X", i);
 			}

@@ -23,7 +23,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  */
- 
+class AuthIDType
+{
+	const AuthString_SteamID     = 0;
+	const AuthString_SteamID2    = 1;
+	const AuthString_CommunityID = 2;
+	const AuthString_Unknown     = 3;
+}
+
 class CallAdmin_Helpers
 {
 	/**
@@ -37,6 +44,24 @@ class CallAdmin_Helpers
 		return str_replace(array("&", "<", ">", "\"", "'"), array("&amp;", "&lt;", "&gt;", "&quot;", "&apos;"), $input);
 	}
 
+	
+	public function GetAuthIDType($steamID)
+	{
+		if (preg_match("/^STEAM_[0-1]:[0-1]:[0-9]{3,11}+$/", $steamID))
+		{
+			return AuthIDType::AuthString_SteamID;
+		}
+		else if (preg_match("/^\[U:1:[0-9]{3,11}+\]$/", $steamID))
+		{
+			return AuthIDType::AuthString_SteamID2;
+		}
+		else if (preg_match("/^[0-9]{4,17}+$/", $steamID))
+		{
+			return AuthIDType::AuthString_CommunityID;
+		}
+
+		return AuthIDType::AuthString_Unknown;
+	}
 
 	
 	/**
@@ -47,10 +72,24 @@ class CallAdmin_Helpers
 	 */
 	public function IsValidSteamID($steamID)
 	{
-		return preg_match("/^STEAM_[0-1]:[0-1]:[0-9]{3,11}+$/", $steamID);
+		return self::GetAuthIDType($steamID) != AuthIDType::AuthString_Unknown;
 	}
 	
 	
+	
+	/**
+	 * Converts an steamid2 to an steamid
+	 * 
+	 * @var       string
+	 * @return    string
+	 */
+	public function SteamID2ToSteamId($steamId)
+	{
+		$temp = substr($steamId, 5, strlen($steamId) - 6);
+		$temp = intval($temp);
+		
+		return ("STEAM_0:" . ($temp & 1) . ":" . ($temp >> 1));
+	}
 	
 	
 	/**
@@ -61,6 +100,11 @@ class CallAdmin_Helpers
 	 */
 	function SteamIDToComm($steamId)
 	{
+		if (self::GetAuthIDType($steamId) == AuthIDType::AuthString_SteamID2)
+		{
+			$steamId = SteamID2ToSteamId($steamId);
+		}
+		
 		//Example SteamID: "STEAM_X:Y:ZZZZZZZZ"
 		$gameType   = 0; //This is X.  It's either 0 or 1 depending on which game you are playing (CSS, L4D, TF2, etc)
 		$authServer = 0; //This is Y.  Some people have a 0, some people have a 1
@@ -81,7 +125,6 @@ class CallAdmin_Helpers
 	}
 	
 	
-
 	
 	/**
 	 * Converts the last token pair of an ip to 0
@@ -105,7 +148,7 @@ class CallAdmin_Helpers
 	 */
 	public function printXmlError($error, $tag)
 	{
-		if(!headers_sent())
+		if (!headers_sent())
 		{
 			header("Content-type: text/xml; charset=utf-8"); 
 		}
@@ -113,6 +156,31 @@ class CallAdmin_Helpers
 		$xml = new SimpleXMLElement("<$tag/>");
 
 		$xml->addChild("error", $error);
+		echo $xml->asXML();
+		exit;
+	}
+	
+	
+	
+	/**
+	 * Prints an detailed xmlerror and dies
+	 * 
+	 * @var    string
+	 * @var    string
+	 * @var    string
+	 * @noreturn
+	 */
+	public function printXmlError2($error, $detailMsg, $tag)
+	{
+		if (!headers_sent())
+		{
+			header("Content-type: text/xml; charset=utf-8"); 
+		}
+
+		$xml = new SimpleXMLElement("<$tag/>");
+
+		$xml->addChild("error", $error);
+		$xml->addChild("detailError", $detailMsg);
 		echo $xml->asXML();
 		exit;
 	}
@@ -132,17 +200,17 @@ class CallAdmin_Helpers
 		$result = '';
 		
 		// Key is in array and a server key is set for it
-		if(!is_array($serverKeys) || !array_key_exists($access_key, $serverKeys) || !isset($serverKeys[$access_key]) || count($serverKeys[$access_key]) < 1)
+		if (!is_array($serverKeys) || !array_key_exists($access_key, $serverKeys) || !isset($serverKeys[$access_key]) || count($serverKeys[$access_key]) < 1)
 		{
 			return false;
 		}
 		
 		// Loop through server keys
-		foreach($serverKeys[$access_key] as $serverKey)
+		foreach ($serverKeys[$access_key] as $serverKey)
 		{
-			if(strlen($serverKey) > 0)
+			if (strlen($serverKey) > 0)
 			{
-				if(strlen($result) < 1)
+				if (strlen($result) < 1)
 				{
 					$result = '\''.$serverKey.'\'';
 				}
@@ -154,7 +222,7 @@ class CallAdmin_Helpers
 		}
 
 		// Valid result?
-		if(strlen($result) < 1)
+		if (strlen($result) < 1)
 		{
 			return false;
 		}
@@ -177,20 +245,20 @@ class CallAdmin_Helpers
 		$result = array();
 		
 		// serverKeys is array
-		if(!is_array($serverKeys))
+		if (!is_array($serverKeys))
 		{
 			return false;
 		}
 		
 		
 		// Loop through server keys
-		foreach($serverKeys as $key => $value)
+		foreach ($serverKeys as $key => $value)
 		{
-			if(is_array($value))
+			if (is_array($value))
 			{
-				foreach($value as $serverKey)
+				foreach ($value as $serverKey)
 				{
-					if($serverKey != '' && !in_array($serverKey, $result))
+					if ($serverKey != '' && !in_array($serverKey, $result))
 					{
 						$result[] = $serverKey;
 					}
@@ -199,7 +267,7 @@ class CallAdmin_Helpers
 		}
 
 		// Valid result?
-		if(empty($result))
+		if (empty($result))
 		{
 			return false;
 		}

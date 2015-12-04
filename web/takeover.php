@@ -39,9 +39,9 @@ $helpers = new CallAdmin_Helpers();
 
 
 // Key set and no key given or key is wrong
-if(!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
+if (!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
 {
-	$helpers->printXmlError("APP_AUTH_FAILURE", "CallAdmin_Takeover");
+	$helpers->printXmlError2("APP_AUTH_FAILURE", "Given access key doesn't exist", "CallAdmin_Takeover");
 }
 
 
@@ -50,9 +50,10 @@ $dbi = new mysqli($host, $username, $password, $database, $dbport);
 
 
 // Oh noes, we couldn't connect
-if($dbi->connect_errno != 0)
+if ($dbi->connect_errno != 0)
 {
-	$helpers->printXmlError("DB_CONNECT_FAILURE", "CallAdmin_Takeover");
+	$detailError = sprintf("Errorcode '%d': %s", $dbi->connect_errno, $dbi->connect_error);
+	$helpers->printXmlError2("DB_CONNECT_FAILURE", $detailError, "CallAdmin_Takeover");
 }
 
 
@@ -62,11 +63,11 @@ $dbi->set_charset("utf8");
 
 
 // Escape server keys
-foreach($access_keys as $key => $value)
+foreach ($access_keys as $key => $value)
 {
-	if(is_array($value))
+	if (is_array($value))
 	{
-		foreach($value as $serverKey)
+		foreach ($value as $serverKey)
 		{
 			$access_keys[$key][$serverKey] = $dbi->escape_string($serverKey);
 		}
@@ -80,7 +81,7 @@ $server_key_clause = 'serverKey IN (' .$helpers->keyToServerKeys($access_keys, $
 
 
 // Safety
-if(isset($_GET['callid']) && preg_match("/^[0-9]{1,11}+$/", $_GET['callid']))
+if (isset($_GET['callid']) && preg_match("/^[0-9]{1,11}+$/", $_GET['callid']))
 {
 	$callID = $dbi->escape_string($_GET['callid']);
 	
@@ -91,15 +92,17 @@ if(isset($_GET['callid']) && preg_match("/^[0-9]{1,11}+$/", $_GET['callid']))
 								callID = $callID AND $server_key_clause");
 
 	// Insert failed, we should check if the update was successfull somehow (affected_rows ist reliable here)
-	if($insertresult === FALSE)
+	if ($insertresult === FALSE)
 	{
+		$detailError = sprintf("Errorcode '%d': %s", $dbi->errno, $dbi->error);
+		
 		$dbi->close();
-		$helpers->printXmlError("DB_UPDATE_FAILURE", "CallAdmin_Takeover");
+		$helpers->printXmlError2("DB_UPDATE_FAILURE", $detailError, "CallAdmin_Takeover");
 	}
 }
 else
 {
-	$helpers->printXmlError("APP_INPUT_FAILURE", "CallAdmin_Takeover");
+	$helpers->printXmlError2("APP_INPUT_FAILURE", "Required meta data was missing or given in invalid format", "CallAdmin_Takeover");
 }
 
 $dbi->close();

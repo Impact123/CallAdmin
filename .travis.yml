@@ -1,0 +1,35 @@
+language: c
+
+sudo: false
+addons:
+    apt:
+        packages:
+            - lib32stdc++6
+            - unzip
+
+
+env:
+    - SMBRANCH=1.7
+    - SMBRANCH=1.8
+
+
+before_script:
+    - SMPACKAGE="http://www.sourcemod.net/smdrop/${SMBRANCH}/$(wget -qO- "http://www.sourcemod.net/smdrop/${SMBRANCH}/" | grep linux*.tar.gz | cut -d "\"" -f 2 | tail -n 1)"
+    - wget $SMPACKAGE
+    - mkdir $SMBRANCH sharedinclude
+    - tar xfz $(basename $SMPACKAGE) -C $SMBRANCH
+    - export SMBRANCH=$(pwd)/$SMBRANCH/addons/sourcemod/scripting
+    - wget https://raw.githubusercontent.com/Impact123/AutoExecConfig/master/autoexecconfig.inc -P sharedinclude
+    - wget https://raw.githubusercontent.com/popoklopsi/MessageBot/master/messagebot.inc -P sharedinclude
+    - wget https://bitbucket.org/GoD_Tony/updater/raw/default/include/updater.inc -P sharedinclude
+    - wget -O socket.zip "https://forums.alliedmods.net/attachment.php?attachmentid=83286"
+    - unzip -p socket.zip addons/sourcemod/scripting/include/socket.inc > sharedinclude/socket.inc
+
+
+script:
+    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin.sp
+    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_steam.sp
+    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_mysql.sp
+    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_ts3.sp
+    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_test.sp
+    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_usermanager.sp
