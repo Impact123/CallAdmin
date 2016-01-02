@@ -130,7 +130,7 @@ public void OnPluginStart()
 	g_iOhphanedEntryPruning = g_hOhphanedEntryPruning.IntValue;
 	HookConVarChange(g_hOhphanedEntryPruning, OnCvarChanged);
 
-	CreateTimer(600.0, Timer_PruneEntries, _, TIMER_REPEAT);
+	CreateTimer(60.0, Timer_PruneEntries, _, TIMER_REPEAT);
 	CreateTimer(20.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
 }
 
