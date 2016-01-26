@@ -24,11 +24,11 @@
  */
  
 #include <sourcemod>
-#include <autoexecconfig>
-#include "calladmin"
+#include "include/autoexecconfig"
+#include "include/calladmin"
 
 #undef REQUIRE_PLUGIN
-#include <updater>
+#include "include/updater"
 #pragma semicolon 1
 #pragma newdecls required
 

@@ -24,7 +24,7 @@
  */
  
 #include <sourcemod>
-#include "calladmin"
+#include "include/calladmin"
 #pragma semicolon 1
 #pragma newdecls required
 

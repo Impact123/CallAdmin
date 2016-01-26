@@ -25,12 +25,12 @@
  
 
 #include <sourcemod>
-#include <autoexecconfig>
-#include "calladmin"
-#include "calladmin_stocks"
+#include "include/autoexecconfig"
+#include "include/calladmin"
+#include "include/calladmin_stocks"
 
 #undef REQUIRE_PLUGIN
-#include <updater>
+#include "include/updater"
 #include <basecomm>
 
 #pragma semicolon 1

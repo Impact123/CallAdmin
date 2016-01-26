@@ -24,14 +24,14 @@
  */
  
 #include <sourcemod>
-#include <autoexecconfig>
-#include <messagebot>
-#include "calladmin"
-#include <socket>
+#include "include/autoexecconfig"
+#include "include/messagebot"
+#include "include/calladmin"
+#include "include/socket"
 #include <regex>
 
 #undef REQUIRE_PLUGIN
-#include <updater>
+#include "include/updater"
 #pragma semicolon 1
 #pragma newdecls required
 
