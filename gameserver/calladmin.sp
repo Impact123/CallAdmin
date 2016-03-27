@@ -54,7 +54,6 @@ ConVar g_hHostPort;
 int g_iHostPort;
 
 ConVar g_hHostIP;
-int g_iHostIP;
 char g_sHostIP[16];
 
 Handle g_hAdvertTimer;
@@ -351,8 +350,7 @@ public void OnPluginStart()
 	g_iHostPort = g_hHostPort.IntValue;
 	HookConVarChange(g_hHostPort, OnCvarChanged);
 	
-	g_iHostIP = g_hHostIP.IntValue;
-	LongToIp(g_iHostIP, g_sHostIP, sizeof(g_sHostIP));
+	UpdateHostIp();
 	HookConVarChange(g_hHostIP, OnCvarChanged);
 	
 	g_fAdvertInterval = g_hAdvertInterval.FloatValue;
@@ -763,9 +761,7 @@ public void OnCvarChanged(ConVar cvar, const char[] oldValue, const char[] newVa
 	}
 	else if (cvar == g_hHostIP)
 	{
-		g_iHostIP = g_hHostIP.IntValue;
-		
-		LongToIp(g_iHostIP, g_sHostIP, sizeof(g_sHostIP));
+		UpdateHostIp();
 		
 		Forward_OnServerDataChanged(cvar, ServerData_HostIP, g_sHostIP, g_sHostIP);
 	}
@@ -1463,6 +1459,19 @@ stock void LongToIp(int long, char[] str, int maxlen)
 	pieces[3] = (long & 255); 
 	
 	Format(str, maxlen, "%d.%d.%d.%d", pieces[0], pieces[1], pieces[2], pieces[3]); 
+}
+
+
+
+// Updates the global g_sHostIP variable to the current ip of the server
+// Using the int value directly provides incorrect results, when given the time it should be examined why 
+void UpdateHostIp()
+{
+	char tmpString[sizeof(g_sHostIP)];
+	g_hHostIP.GetString(tmpString, sizeof(tmpString));
+	
+	int tmpInt = StringToInt(tmpString);
+	LongToIp(tmpInt, g_sHostIP, sizeof(g_sHostIP));
 }
 
 
