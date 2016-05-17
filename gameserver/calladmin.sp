@@ -1269,7 +1269,6 @@ void ShowBanReasonMenu(int client)
 	Menu menu = CreateMenu(MenuHandler_BanReason);
 	menu.SetTitle("%T", "CallAdmin_SelectReason", client, g_iTarget[client]);
 	
-	int index;
 	for (int i; i < count; i++)
 	{
 		g_hReasonAdt.GetString(i, sReasonBuffer, sizeof(sReasonBuffer));
@@ -1280,7 +1279,7 @@ void ShowBanReasonMenu(int client)
 		}
 
 		
-		menu.AddItem(sReasonBuffer[index], sReasonBuffer[index]);
+		menu.AddItem(sReasonBuffer, sReasonBuffer);
 	}
 	
 	// Own reason, call the forward
