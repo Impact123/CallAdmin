@@ -824,7 +824,7 @@ public Action Command_Call(int client, int args)
 	// Console cannot use this
 	if (client == 0)
 	{
-		PrintToServer("This command can't be used from console");
+		ReplyToCommand("This command can't be used from console");
 		
 		return Plugin_Handled;
 	}
@@ -844,7 +844,7 @@ public Action Command_Call(int client, int args)
 	}
 	else if (!g_bSawMesage[client])
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_CommandNotAllowed", g_iSpamTime - ( GetTime() - g_iLastReport[client] ));
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_CommandNotAllowed", g_iSpamTime - ( GetTime() - g_iLastReport[client] ));
 		g_bSawMesage[client] = true;
 	}
 
@@ -857,7 +857,7 @@ public Action Command_HandleCall(int client, int args)
 {
 	if (client == 0)
 	{
-		PrintToServer("This command can't be used from console");
+		ReplyToCommand("This command can't be used from console");
 		
 		return Plugin_Handled;
 	}
@@ -865,7 +865,7 @@ public Action Command_HandleCall(int client, int args)
 	
 	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
 		
 		return Plugin_Handled;
 	}
@@ -875,7 +875,7 @@ public Action Command_HandleCall(int client, int args)
 	{
 		char cmdName[64];
 		GetCmdArg(0, cmdName, sizeof(cmdName));
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t: %s <id>", "CallAdmin_WrongNumberOfArguments", cmdName);
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t: %s <id>", "CallAdmin_WrongNumberOfArguments", cmdName);
 		
 		return Plugin_Handled;
 	}
@@ -890,7 +890,7 @@ public Action Command_HandleCall(int client, int args)
 	
 	if (reportID > g_iCurrentReportID)
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_WrongReportID");
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_WrongReportID");
 		
 		return Plugin_Handled;	
 	}
@@ -900,7 +900,7 @@ public Action Command_HandleCall(int client, int args)
 	int reportIndex = g_hActiveReports.FindValue(reportID);
 	if (reportIndex == -1)
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_ReportAlreadyHandled");
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_ReportAlreadyHandled");
 		
 		return Plugin_Handled;	
 	}
@@ -918,7 +918,7 @@ public Action Command_Reload(int client, int args)
 {
 	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
 		
 		return Plugin_Handled;
 	}
