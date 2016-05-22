@@ -81,6 +81,9 @@ enum AuthStringType
 }
 
 
+ArrayList g_hRecipientAdt;
+
+
 
 // Updater
 #define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_steam.txt"
@@ -125,9 +128,12 @@ public void OnPluginStart()
 	g_hCommunityIDRegex = CompileRegex("^[0-9]{4,17}+$");
 	
 	
+	g_hRecipientAdt = new ArrayList(ByteCountToCells(21));
+	
 	
 	// Clear the recipients
 	MessageBot_ClearRecipients();
+	g_hRecipientAdt.Clear();
 	
 	// Read in all those steamids
 	ParseSteamIDList();
@@ -137,6 +143,7 @@ public void OnPluginStart()
 	
 
 	RegConsoleCmd("sm_calladmin_steam_reload", Command_Reload);
+	RegConsoleCmd("sm_calladmin_steam_listrecipients", Command_ListRecipients);
 	
 	
 	AutoExecConfig_SetFile("plugin.calladmin_steam");
@@ -274,6 +281,7 @@ void ParseSteamIDList()
 		
 		// Add as recipient
 		MessageBot_AddRecipient(sReadBuffer);
+		g_hRecipientAdt.PushString(sReadBuffer);
 	}
 	
 	hFile.Close();
@@ -408,6 +416,31 @@ public Action Command_Reload(int client, int args)
 	
 	// Read in all those groupids
 	ParseGroupIDList();
+
+	return Plugin_Handled;
+}
+
+
+
+
+public Action Command_ListRecipients(int client, int args)
+{
+	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
+	{
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
+		
+		return Plugin_Handled;
+	}
+	
+	int count = g_hRecipientAdt.Length;
+	char sRecipientBuffer[21];
+	
+	for (int i; i < count; i++)
+	{
+		g_hRecipientAdt.GetString(i, sRecipientBuffer, sizeof(sRecipientBuffer));
+		
+		ReplyToCommand(client, "Recipient %d: %s", i + 1, sRecipientBuffer);
+	}
 
 	return Plugin_Handled;
 }
@@ -631,6 +664,7 @@ public int OnSocketReceive(Handle socket, char[] data, const int size, any pack)
 				
 				// Add as recipient
 				MessageBot_AddRecipient(sTempID);
+				g_hRecipientAdt.PushString(sTempID);
 			}
 		}
 		
