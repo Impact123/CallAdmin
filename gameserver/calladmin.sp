@@ -925,6 +925,7 @@ public Action Command_Reload(int client, int args)
 	
 	
 	g_hActiveReports.Clear();
+	g_hReasonAdt.Clear();
 	ParseReasonList();
 
 	return Plugin_Handled;
