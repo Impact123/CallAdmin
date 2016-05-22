@@ -824,7 +824,7 @@ public Action Command_Call(int client, int args)
 	// Console cannot use this
 	if (client == 0)
 	{
-		ReplyToCommand("This command can't be used from console");
+		ReplyToCommand(client, "This command can't be used from console");
 		
 		return Plugin_Handled;
 	}
@@ -857,7 +857,7 @@ public Action Command_HandleCall(int client, int args)
 {
 	if (client == 0)
 	{
-		ReplyToCommand("This command can't be used from console");
+		ReplyToCommand(client, "This command can't be used from console");
 		
 		return Plugin_Handled;
 	}
