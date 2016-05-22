@@ -133,7 +133,6 @@ public void OnPluginStart()
 	
 	// Clear the recipients
 	MessageBot_ClearRecipients();
-	g_hRecipientAdt.Clear();
 	
 	// Read in all those steamids
 	ParseSteamIDList();
@@ -410,6 +409,7 @@ public Action Command_Reload(int client, int args)
 	
 	// Clear the recipients
 	MessageBot_ClearRecipients();
+	g_hRecipientAdt.Clear();
 	
 	// Read in all those steamids
 	ParseSteamIDList();
