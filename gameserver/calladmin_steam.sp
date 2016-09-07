@@ -441,7 +441,7 @@ public Action Command_ListRecipients(int client, int args)
 		{
 			g_hRecipientAdt.GetString(i, sRecipientBuffer, sizeof(sRecipientBuffer));
 			
-			ReplyToCommand(client, "Recipient %d: %s", i + 1, sRecipientBuffer);
+			ReplyToCommand(client, "Recipient %d: %s%s", i + 1, sRecipientBuffer, MessageBot_IsRecipient(sRecipientBuffer) ? "" : " (Not In Messagebot's list)");
 		}
 	}
 	else
