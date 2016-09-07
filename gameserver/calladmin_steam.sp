@@ -435,11 +435,18 @@ public Action Command_ListRecipients(int client, int args)
 	int count = g_hRecipientAdt.Length;
 	char sRecipientBuffer[21];
 	
-	for (int i; i < count; i++)
+	if (count)
 	{
-		g_hRecipientAdt.GetString(i, sRecipientBuffer, sizeof(sRecipientBuffer));
-		
-		ReplyToCommand(client, "Recipient %d: %s", i + 1, sRecipientBuffer);
+		for (int i; i < count; i++)
+		{
+			g_hRecipientAdt.GetString(i, sRecipientBuffer, sizeof(sRecipientBuffer));
+			
+			ReplyToCommand(client, "Recipient %d: %s", i + 1, sRecipientBuffer);
+		}
+	}
+	else
+	{
+		ReplyToCommand(client, "Recipient list is empty");
 	}
 
 	return Plugin_Handled;
