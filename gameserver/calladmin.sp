@@ -1344,6 +1344,15 @@ public int MenuHandler_BanReason(Menu menu, MenuAction action, int client, int p
 
 public Action ChatListener(int client, const char[] command, int argc)
 {
+	// There were a few cases were the client index was invalid which caused an index out-of-bounds error
+	// Invalid clients shouldn't be able to trigger this callback so the reason why this happens has yet to be found out
+	// Until then we have this check here to prevent it
+	if (!IsClientValid(client))
+	{
+		return Plugin_Continue;
+	}
+	
+	
 	if (g_bAwaitingReason[client] && !IsChatTrigger())
 	{
 		// 2 more for quotes
