@@ -14,17 +14,17 @@ env:
 
 
 before_script:
-    - SMPACKAGE="http://www.sourcemod.net/smdrop/${SMBRANCH}/$(wget -qO- "http://www.sourcemod.net/smdrop/${SMBRANCH}/" | grep linux*.tar.gz | cut -d "\"" -f 2 | tail -n 1)"
-    - wget $SMPACKAGE
+    - SMPACKAGE="https://sourcemod.net/latest.php?os=linux&version=${SMBRANCH}"
+    - wget "$SMPACKAGE" -o latest.tar.gz
     - mkdir $SMBRANCH
-    - tar xfz $(basename $SMPACKAGE) -C $SMBRANCH
-    - export SMBRANCH=$(pwd)/$SMBRANCH/addons/sourcemod/scripting
+    - tar xfz latest.tar.gz -C $SMBRANCH
+    - export SMPATH=$(pwd)/$SMBRANCH/addons/sourcemod/scripting
 
 
 script:
-    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin.sp
-    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_steam.sp
-    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_mysql.sp
-    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_ts3.sp
-    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_test.sp
-    - $SMBRANCH/spcomp -isharedinclude gameserver/calladmin_usermanager.sp
+    - $SMPATH/spcomp gameserver/calladmin.sp
+    - $SMPATH/spcomp gameserver/calladmin_steam.sp
+    - $SMPATH/spcomp gameserver/calladmin_mysql.sp
+    - $SMPATH/spcomp gameserver/calladmin_ts3.sp
+    - $SMPATH/spcomp gameserver/calladmin_test.sp
+    - $SMPATH/spcomp gameserver/calladmin_usermanager.sp
