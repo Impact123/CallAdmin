@@ -15,7 +15,7 @@ env:
 
 before_script:
     - SMPACKAGE="https://sourcemod.net/latest.php?os=linux&version=${SMBRANCH}"
-    - wget "$SMPACKAGE" -o latest.tar.gz
+    - wget "$SMPACKAGE" -O latest.tar.gz
     - mkdir $SMBRANCH
     - tar xfz latest.tar.gz -C $SMBRANCH
     - export SMPATH=$(pwd)/$SMBRANCH/addons/sourcemod/scripting
