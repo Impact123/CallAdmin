@@ -60,8 +60,8 @@ char g_sSteamUsername[128];
 ConVar g_hSteamPassword;
 char g_sSteamPassword[128];
 
-Handle g_hSteamIDRegex;
-Handle g_hSteamIDRegex2;
+Handle g_hSteamID2Regex;
+Handle g_hSteamID3Regex;
 Handle g_hCommunityIDRegex;
 
 
@@ -74,8 +74,8 @@ int g_iLastReportID;
 
 enum AuthStringType
 {
-	AuthString_SteamID,
 	AuthString_SteamID2,
+	AuthString_SteamID3,
 	AuthString_CommunityID,
 	AuthString_Unknown
 }
@@ -123,8 +123,8 @@ public void OnPluginStart()
 	
 	
 	// Just for simple validation usage
-	g_hSteamIDRegex     = CompileRegex("^STEAM_[0-1]{1}:[0-1]{1}:[0-9]+$");
-	g_hSteamIDRegex2    = CompileRegex("^\\[U:1:[0-9]{3,11}+\\]$");
+	g_hSteamID2Regex    = CompileRegex("^STEAM_[0-1]{1}:[0-1]{1}:[0-9]+$");
+	g_hSteamID3Regex    = CompileRegex("^\\[U:1:[0-9]{3,11}+\\]$");
 	g_hCommunityIDRegex = CompileRegex("^[0-9]{4,17}+$");
 	
 	
@@ -254,18 +254,18 @@ void ParseSteamIDList()
 		
 		AuthStringType type = GetAuthIDType(sReadBuffer);
 		
-		// Is a steamid
-		if (type == AuthString_SteamID)
-		{
-			GetRegexSubString(g_hSteamIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
-		}
 		// Is a steamid2
-		else if (type == AuthString_SteamID2)
+		if (type == AuthString_SteamID2)
 		{
-			GetRegexSubString(g_hSteamIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
+			GetRegexSubString(g_hSteamID2Regex, 1, sReadBuffer, sizeof(sReadBuffer));
+		}
+		// Is a steamid3
+		else if (type == AuthString_SteamID3)
+		{
+			GetRegexSubString(g_hSteamID3Regex, 1, sReadBuffer, sizeof(sReadBuffer));
 			
-			// Convert it to an steamid
-			SteamID2ToSteamId(sReadBuffer, sReadBuffer, sizeof(sReadBuffer));
+			// Convert it to an steamid2
+			SteamID3ToSteamId2(sReadBuffer, sReadBuffer, sizeof(sReadBuffer));
 		}
 		// Is a communityid
 		else if (type == AuthString_CommunityID)
@@ -713,13 +713,13 @@ public int OnSocketError(Handle socket, const int errorType, const int errorNum,
 
 stock AuthStringType GetAuthIDType(const char[] auth)
 {
-	if (MatchRegex(g_hSteamIDRegex, auth) == 1)
-	{
-		return AuthString_SteamID;
-	}
-	else if (MatchRegex(g_hSteamIDRegex2, auth) == 1)
+	if (MatchRegex(g_hSteamID2Regex, auth) == 1)
 	{
 		return AuthString_SteamID2;
+	}
+	else if (MatchRegex(g_hSteamID2Regex, auth) == 1)
+	{
+		return AuthString_SteamID3;
 	}
 	else if (MatchRegex(g_hCommunityIDRegex, auth) == 1)
 	{
@@ -731,10 +731,10 @@ stock AuthStringType GetAuthIDType(const char[] auth)
 
 
 
-stock void SteamID2ToSteamId(const char[] steamID2, char[] dest, int max_len)
+stock void SteamID3ToSteamId2(const char[] steamID3, char[] dest, int max_len)
 {
 	char sTemp[21];
-	strcopy(sTemp, sizeof(sTemp), steamID2);
+	strcopy(sTemp, sizeof(sTemp), steamID3);
 	
 	sTemp[strlen(sTemp)] = '\0';
 	
