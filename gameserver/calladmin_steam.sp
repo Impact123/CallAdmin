@@ -717,7 +717,7 @@ stock AuthStringType GetAuthIDType(const char[] auth)
 	{
 		return AuthString_SteamID2;
 	}
-	else if (MatchRegex(g_hSteamID2Regex, auth) == 1)
+	else if (MatchRegex(g_hSteamID3Regex, auth) == 1)
 	{
 		return AuthString_SteamID3;
 	}
