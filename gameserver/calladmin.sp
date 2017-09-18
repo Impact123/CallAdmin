@@ -777,11 +777,7 @@ public void OnCvarChanged(ConVar cvar, const char[] oldValue, const char[] newVa
 	}
 	else if (cvar == g_hAdvertInterval)
 	{
-		if (g_hAdvertTimer != null)
-		{
-			delete g_hAdvertTimer;
-			g_hAdvertTimer = null;
-		}
+		delete g_hAdvertTimer;
 		
 		g_fAdvertInterval = g_hAdvertInterval.FloatValue;
 		
