@@ -342,37 +342,37 @@ public void OnPluginStart()
 	
 	
 	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
-	HookConVarChange(g_hVersion, OnCvarChanged);
+	g_hVersion.AddChangeHook(OnCvarChanged);
 	
 	g_hServerName.GetString(g_sServerName, sizeof(g_sServerName));
-	HookConVarChange(g_hServerName, OnCvarChanged);
+	g_hServerName.AddChangeHook(OnCvarChanged);
 	
 	g_iHostPort = g_hHostPort.IntValue;
-	HookConVarChange(g_hHostPort, OnCvarChanged);
+	g_hHostPort.AddChangeHook(OnCvarChanged);
 	
 	UpdateHostIp();
-	HookConVarChange(g_hHostIP, OnCvarChanged);
+	g_hHostIP.AddChangeHook(OnCvarChanged);
 	
 	g_fAdvertInterval = g_hAdvertInterval.FloatValue;
-	HookConVarChange(g_hAdvertInterval, OnCvarChanged);
+	g_hAdvertInterval.AddChangeHook(OnCvarChanged);
 	
 	g_bPublicMessage = g_hPublicMessage.BoolValue;
-	HookConVarChange(g_hPublicMessage, OnCvarChanged);
+	g_hPublicMessage.AddChangeHook(OnCvarChanged);
 	
 	g_bOwnReason = g_hOwnReason.BoolValue;
-	HookConVarChange(g_hOwnReason, OnCvarChanged);
+	g_hOwnReason.AddChangeHook(OnCvarChanged);
 	
 	g_bConfirmCall = g_hConfirmCall.BoolValue;
-	HookConVarChange(g_hConfirmCall, OnCvarChanged);
+	g_hConfirmCall.AddChangeHook(OnCvarChanged);
 	
 	g_iSpamTime = g_hSpamTime.IntValue;
-	HookConVarChange(g_hSpamTime, OnCvarChanged);
+	g_hSpamTime.AddChangeHook(OnCvarChanged);
 	
 	g_iReportTime = g_hReportTime.IntValue;
-	HookConVarChange(g_hReportTime, OnCvarChanged);
+	g_hReportTime.AddChangeHook(OnCvarChanged);
 	
 	g_iAdminAction = g_hAdminAction.IntValue;
-	HookConVarChange(g_hAdminAction, OnCvarChanged);
+	g_hAdminAction.AddChangeHook(OnCvarChanged);
 	
 	
 	if (g_fAdvertInterval != 0.0)
@@ -779,7 +779,7 @@ public void OnCvarChanged(ConVar cvar, const char[] oldValue, const char[] newVa
 	{
 		if (g_hAdvertTimer != null)
 		{
-			CloseHandle(g_hAdvertTimer);
+			delete g_hAdvertTimer;
 			g_hAdvertTimer = null;
 		}
 		
@@ -978,7 +978,7 @@ void SetStates(int client, int target)
 
 void ConfirmCall(int client)
 {
-	Menu menu = CreateMenu(MenuHandler_ConfirmCall);
+	Menu menu = new Menu(MenuHandler_ConfirmCall);
 	menu.SetTitle("%T", "CallAdmin_ConfirmCall", client);
 	
 	char sConfirm[24];
@@ -1152,7 +1152,7 @@ int GetTotalTrackers()
 		}
 	}
 	
-	CloseHandle(hIter);
+	delete hIter;
 	
 	return count;
 }
@@ -1165,7 +1165,7 @@ void ShowClientSelectMenu(int client)
 	char sName[MAX_NAME_LENGTH];
 	char sID[24];
 	
-	Menu menu = CreateMenu(MenuHandler_ClientSelect);
+	Menu menu = new Menu(MenuHandler_ClientSelect);
 	menu.SetTitle("%T", "CallAdmin_SelectClient", client);
 	
 	for (int i; i <= MaxClients; i++)
@@ -1267,7 +1267,7 @@ void ShowBanReasonMenu(int client)
 	count = g_hReasonAdt.Length;
 
 	
-	Menu menu = CreateMenu(MenuHandler_BanReason);
+	Menu menu = new Menu(MenuHandler_BanReason);
 	menu.SetTitle("%T", "CallAdmin_SelectReason", client, g_iTarget[client]);
 	
 	for (int i; i < count; i++)

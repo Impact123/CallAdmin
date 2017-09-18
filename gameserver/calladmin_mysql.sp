@@ -119,16 +119,16 @@ public void OnPluginStart()
 	
 	
 	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
-	HookConVarChange(g_hVersion, OnCvarChanged);
+	g_hVersion.AddChangeHook(OnCvarChanged);
 
 	g_iEntryPruning = g_hEntryPruning.IntValue;
-	HookConVarChange(g_hEntryPruning, OnCvarChanged);
+	g_hEntryPruning.AddChangeHook(OnCvarChanged);
 
 	g_hServerKey.GetString(g_sServerKey, sizeof(g_sServerKey));
-	HookConVarChange(g_hServerKey, OnCvarChanged);
+	g_hServerKey.AddChangeHook(OnCvarChanged);
 	
 	g_iOhphanedEntryPruning = g_hOhphanedEntryPruning.IntValue;
-	HookConVarChange(g_hOhphanedEntryPruning, OnCvarChanged);
+	g_hOhphanedEntryPruning.AddChangeHook(OnCvarChanged);
 
 	CreateTimer(60.0, Timer_PruneEntries, _, TIMER_REPEAT);
 	CreateTimer(20.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
@@ -563,7 +563,7 @@ int GetCurrentTrackers()
 		char query[1024];
 
 		char sKey[(32 + 1) * 2];
-		SQL_EscapeString(g_hDbHandle, g_sServerKey, sKey, sizeof(sKey));
+		g_hDbHandle.Escape(g_sServerKey, sKey, sizeof(sKey));
 		
 		// Get current trackers (last 2 minutes)
 		Format(query, sizeof(query), "SELECT \

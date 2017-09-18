@@ -84,14 +84,14 @@ public void OnPluginStart()
 	
 	
 	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
-	HookConVarChange(g_hVersion, OnCvarChanged);
+	g_hVersion.AddChangeHook(OnCvarChanged);
 	
 	g_hUrl.GetString(g_sUrl, sizeof(g_sUrl));
 	PreFormatUrl();
-	HookConVarChange(g_hUrl, OnCvarChanged);
+	g_hUrl.AddChangeHook(OnCvarChanged);
 	
 	g_hKey.GetString(g_sKey, sizeof(g_sKey));
-	HookConVarChange(g_hKey, OnCvarChanged);
+	g_hKey.AddChangeHook(OnCvarChanged);
 	
 	CreateTimer(20.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
 	GetCurrentTrackers();
@@ -238,8 +238,7 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	SocketSetOption(Socket, SocketSendTimeout, 3);
 	
 	
-	// Create a datapack
-	Handle pack = CreateDataPack();
+	DataPack pack = new DataPack();
 	
 	
 	// Buffers
@@ -268,13 +267,13 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	
 	
 	// Write the data to the pack
-	WritePackString(pack, sClientID);
-	WritePackString(pack, sClientName);
+	pack.WriteString(sClientID);
+	pack.WriteString(sClientName);
 	
-	WritePackString(pack, sTargetID);
-	WritePackString(pack, sTargetName);
+	pack.WriteString(sTargetID);
+	pack.WriteString(sTargetName);
 	
-	WritePackString(pack, reason);
+	pack.WriteString(reason);
 	
 	
 	// Set the pack as argument to the callbacks, so we can read it out later
@@ -288,7 +287,7 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 
 
 
-public int OnSocketConnect(Handle socket, any pack)
+public int OnSocketConnect(Handle socket, DataPack pack)
 {
 	// If socket is connected, should be since this is the callback that is called if it is connected
 	if (SocketIsConnected(socket))
@@ -319,20 +318,20 @@ public int OnSocketConnect(Handle socket, any pack)
 		
 		
 		// Reset the pack
-		ResetPack(pack, false);
+		pack.Reset(false);
 		
 		
 		// Read data
-		ReadPackString(pack, sClientID, sizeof(sClientID));
-		ReadPackString(pack, sClientName, sizeof(sClientName));
+		pack.ReadString(sClientID, sizeof(sClientID));
+		pack.ReadString(sClientName, sizeof(sClientName));
 		
-		ReadPackString(pack, sTargetID, sizeof(sTargetID));
-		ReadPackString(pack, sTargetName, sizeof(sTargetName));
+		pack.ReadString(sTargetID, sizeof(sTargetID));
+		pack.ReadString(sTargetName, sizeof(sTargetName));
 		
-		ReadPackString(pack, sReason, sizeof(sReason));
+		pack.ReadString(sReason, sizeof(sReason));
 		
 		// Close the pack
-		CloseHandle(pack);
+		delete pack;
 		
 		
 		URLEncode(sClientName, sizeof(sClientName));
@@ -385,7 +384,7 @@ public int OnSocketDisconnect(Handle socket, any pack)
 {
 	if (socket != null)
 	{
-		CloseHandle(socket);
+		delete socket;
 	}
 }
 
@@ -397,7 +396,7 @@ public int OnSocketError(Handle socket, const int errorType, const int errorNum,
 	
 	if (socket != null)
 	{
-		CloseHandle(socket);
+		delete socket;
 	}
 }
 

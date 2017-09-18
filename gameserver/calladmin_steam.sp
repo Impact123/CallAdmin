@@ -60,9 +60,9 @@ char g_sSteamUsername[128];
 ConVar g_hSteamPassword;
 char g_sSteamPassword[128];
 
-Handle g_hSteamID2Regex;
-Handle g_hSteamID3Regex;
-Handle g_hCommunityIDRegex;
+Regex g_hSteamID2Regex;
+Regex g_hSteamID3Regex;
+Regex g_hCommunityIDRegex;
 
 
 char g_sSteamIDConfigFile[PLATFORM_MAX_PATH];
@@ -123,9 +123,9 @@ public void OnPluginStart()
 	
 	
 	// Just for simple validation usage
-	g_hSteamID2Regex    = CompileRegex("^STEAM_[0-1]{1}:[0-1]{1}:[0-9]+$");
-	g_hSteamID3Regex    = CompileRegex("^\\[U:1:[0-9]{3,11}+\\]$");
-	g_hCommunityIDRegex = CompileRegex("^[0-9]{4,17}+$");
+	g_hSteamID2Regex    = new Regex("^STEAM_[0-1]{1}:[0-1]{1}:[0-9]+$");
+	g_hSteamID3Regex    = new Regex("^\\[U:1:[0-9]{3,11}+\\]$");
+	g_hCommunityIDRegex = new Regex("^[0-9]{4,17}+$");
 	
 	
 	g_hRecipientAdt = new ArrayList(ByteCountToCells(21));
@@ -157,13 +157,13 @@ public void OnPluginStart()
 	
 	
 	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
-	HookConVarChange(g_hVersion, OnCvarChanged);
+	g_hVersion.AddChangeHook(OnCvarChanged);
 	
 	g_hSteamUsername.GetString(g_sSteamUsername, sizeof(g_sSteamUsername));
-	HookConVarChange(g_hSteamUsername, OnCvarChanged);
+	g_hSteamUsername.AddChangeHook(OnCvarChanged);
 	
 	g_hSteamPassword.GetString(g_sSteamPassword, sizeof(g_sSteamPassword));
-	HookConVarChange(g_hSteamPassword, OnCvarChanged);
+	g_hSteamPassword.AddChangeHook(OnCvarChanged);
 }
 
 
@@ -185,7 +185,7 @@ public void OnMessageResultReceived(MessageBotResult result, MessageBotError err
 
 void CreateSteamIDList()
 {
-	Handle hFile;
+	File hFile;
 	hFile = OpenFile(g_sSteamIDConfigFile, "w");
 	
 	// Failed to open
@@ -195,11 +195,11 @@ void CreateSteamIDList()
 		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for writing");
 	}
 	
-	WriteFileLine(hFile, "// List of steamids or communityids, seperated by a new line");
-	WriteFileLine(hFile, "// STEAM_0:0:1");
-	WriteFileLine(hFile, "// 76561197960265730");
+	hFile.WriteLine("// List of steamids or communityids, seperated by a new line");
+	hFile.WriteLine("// STEAM_0:0:1");
+	hFile.WriteLine("// 76561197960265730");
 	
-	CloseHandle(hFile);
+	delete hFile;
 }
 
 
@@ -225,7 +225,7 @@ void ParseSteamIDList()
 
 	
 	int len;
-	while (!IsEndOfFile(hFile) && hFile.ReadLine(sReadBuffer, sizeof(sReadBuffer)))
+	while (!hFile.EndOfFile() && hFile.ReadLine(sReadBuffer, sizeof(sReadBuffer)))
 	{
 		if (sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
 		{
@@ -257,12 +257,12 @@ void ParseSteamIDList()
 		// Is a steamid2
 		if (type == AuthString_SteamID2)
 		{
-			GetRegexSubString(g_hSteamID2Regex, 1, sReadBuffer, sizeof(sReadBuffer));
+			g_hSteamID2Regex.GetSubString(1, sReadBuffer, sizeof(sReadBuffer));
 		}
 		// Is a steamid3
 		else if (type == AuthString_SteamID3)
 		{
-			GetRegexSubString(g_hSteamID3Regex, 1, sReadBuffer, sizeof(sReadBuffer));
+			g_hSteamID3Regex.GetSubString(1, sReadBuffer, sizeof(sReadBuffer));
 			
 			// Convert it to an steamid2
 			SteamID3ToSteamId2(sReadBuffer, sReadBuffer, sizeof(sReadBuffer));
@@ -270,7 +270,7 @@ void ParseSteamIDList()
 		// Is a communityid
 		else if (type == AuthString_CommunityID)
 		{
-			GetRegexSubString(g_hCommunityIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
+			g_hCommunityIDRegex.GetSubString(1, sReadBuffer, sizeof(sReadBuffer));
 		}
 		// No match :(
 		else
@@ -554,7 +554,7 @@ void FetchGroupMembers(const char[] groupID)
 	
 
 	// Create a datapack
-	Handle pack = CreateDataPack();
+	DataPack pack = new DataPack();
 	
 	
 	// Buffers
@@ -563,7 +563,7 @@ void FetchGroupMembers(const char[] groupID)
 	
 	
 	// Write the data to the pack
-	WritePackString(pack, sGroupID);
+	pack.WriteString(sGroupID);
 	
 	
 	// Set the pack as argument to the callbacks, so we can read it out later
@@ -577,7 +577,7 @@ void FetchGroupMembers(const char[] groupID)
 
 
 
-public int OnSocketConnect(Handle socket, any pack)
+public int OnSocketConnect(Handle socket, DataPack pack)
 {
 	// If socket is connected, should be since this is the callback that is called if it is connected
 	if (SocketIsConnected(socket))
@@ -589,14 +589,14 @@ public int OnSocketConnect(Handle socket, any pack)
 		
 		
 		// Reset the pack
-		ResetPack(pack, false);
+		pack.Reset(false);
 		
 		
 		// Read data
-		ReadPackString(pack, sGroupID, sizeof(sGroupID));
+		pack.ReadString(sGroupID, sizeof(sGroupID));
 		
 		// Close the pack
-		CloseHandle(pack);
+		delete pack;
 		
 		
 		URLEncode(sGroupID, sizeof(sGroupID));
@@ -691,7 +691,7 @@ public int OnSocketDisconnect(Handle socket, any pack)
 {
 	if (socket != null)
 	{
-		CloseHandle(socket);
+		delete socket;
 	}
 }
 
@@ -704,7 +704,7 @@ public int OnSocketError(Handle socket, const int errorType, const int errorNum,
 	
 	if (socket != null)
 	{
-		CloseHandle(socket);
+		delete socket;
 	}
 }
 
@@ -713,15 +713,15 @@ public int OnSocketError(Handle socket, const int errorType, const int errorNum,
 
 stock AuthStringType GetAuthIDType(const char[] auth)
 {
-	if (MatchRegex(g_hSteamID2Regex, auth) == 1)
+	if (g_hSteamID2Regex.Match(auth) == 1)
 	{
 		return AuthString_SteamID2;
 	}
-	else if (MatchRegex(g_hSteamID3Regex, auth) == 1)
+	else if (g_hSteamID3Regex.Match(auth) == 1)
 	{
 		return AuthString_SteamID3;
 	}
-	else if (MatchRegex(g_hCommunityIDRegex, auth) == 1)
+	else if (g_hCommunityIDRegex.Match(auth) == 1)
 	{
 		return AuthString_CommunityID;
 	}
