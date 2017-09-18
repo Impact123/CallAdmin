@@ -382,10 +382,7 @@ public int OnSocketReceive(Handle socket, char[] data, const int size, any pack)
 
 public int OnSocketDisconnect(Handle socket, any pack)
 {
-	if (socket != null)
-	{
-		delete socket;
-	}
+	delete socket;
 }
 
 
@@ -394,10 +391,7 @@ public int OnSocketError(Handle socket, const int errorType, const int errorNum,
 {
 	CallAdmin_LogMessage("Socket Error: %d, %d", errorType, errorNum);
 	
-	if (socket != null)
-	{
-		delete socket;
-	}
+	delete socket;
 }
 
 
