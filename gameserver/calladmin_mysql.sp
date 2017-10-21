@@ -331,13 +331,25 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	{
 		GetClientName(client, clientNameBuf, sizeof(clientNameBuf));
 		g_hDbHandle.Escape(clientNameBuf, clientName, sizeof(clientName));
-		GetClientAuthId(client, AuthId_Steam2, clientAuth, sizeof(clientAuth));
+		
+		if (!GetClientAuthId(client, AuthId_Steam2, clientAuth, sizeof(clientAuth)))
+		{
+			CallAdmin_LogMessage("Failed to get authentication for client %d (%s)", client, clientNameBuf);
+			
+			return;
+		}
 	}
 	
 	
 	GetClientName(target, targetNameBuf, sizeof(targetNameBuf));
 	g_hDbHandle.Escape(targetNameBuf, targetName, sizeof(targetName));
-	GetClientAuthId(target, AuthId_Steam2, targetAuth, sizeof(targetAuth));
+	
+	if (!GetClientAuthId(target, AuthId_Steam2, targetAuth, sizeof(targetAuth)))
+	{
+		CallAdmin_LogMessage("Failed to get authentication for client %d (%s)", client, targetNameBuf);
+		
+		return;
+	}
 	
 	char serverName[(sizeof(g_sServerName) + 1) * 2];
 	g_hDbHandle.Escape(g_sServerName, serverName, sizeof(serverName));

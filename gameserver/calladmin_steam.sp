@@ -509,11 +509,23 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	else
 	{
 		GetClientName(client, sClientName, sizeof(sClientName));
-		GetClientAuthId(client, AuthId_Steam2, sClientID, sizeof(sClientID));
+		
+		if (!GetClientAuthId(client, AuthId_Steam2, sClientID, sizeof(sClientID)))
+		{
+			CallAdmin_LogMessage("Failed to get authentication for client %d (%s)", client, sClientName);
+			
+			return;
+		}
 	}
 	
 	GetClientName(target, sTargetName, sizeof(sTargetName));
-	GetClientAuthId(target, AuthId_Steam2, sTargetID, sizeof(sTargetID));
+	
+	if (!GetClientAuthId(target, AuthId_Steam2, sTargetID, sizeof(sTargetID)))
+	{
+		CallAdmin_LogMessage("Failed to get authentication for client %d (%s)", client, sTargetName);
+		
+		return;
+	}
 	
 	g_iLastReportID = CallAdmin_GetReportID();
 	
