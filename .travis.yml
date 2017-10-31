@@ -9,7 +9,6 @@ addons:
 
 
 env:
-    - SMBRANCH=1.7
     - SMBRANCH=1.8
     - SMBRANCH=1.9
 
