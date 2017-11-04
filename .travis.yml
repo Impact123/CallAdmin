@@ -24,16 +24,16 @@ before_script:
     - cp gameserver/*.phrases.txt translations/
 
 script:
-    - $SMPATH/spcomp gameserver/calladmin.sp
-    - $SMPATH/spcomp gameserver/calladmin_steam.sp
-    - $SMPATH/spcomp gameserver/calladmin_mysql.sp
-    - $SMPATH/spcomp gameserver/calladmin_ts3.sp
-    - $SMPATH/spcomp gameserver/calladmin_test.sp
-    - $SMPATH/spcomp gameserver/calladmin_usermanager.sp
+    - $SMPATH/spcomp -v0 gameserver/calladmin.sp
+    - $SMPATH/spcomp -v0 gameserver/calladmin_steam.sp
+    - $SMPATH/spcomp -v0 gameserver/calladmin_mysql.sp
+    - $SMPATH/spcomp -v0 gameserver/calladmin_ts3.sp
+    - $SMPATH/spcomp -v0 gameserver/calladmin_test.sp
+    - $SMPATH/spcomp -v0 gameserver/calladmin_usermanager.sp
     - mv calladmin*.smx plugins/
     - mv plugins/calladmin_test.smx plugins/disabled/
-    - zip -9 -r calladmin_gameserver.zip plugins/ scripting/ translations/
-    - zip -9 -r calladmin_web.zip web/
+    - zip -q -9 -r calladmin_gameserver.zip plugins/ scripting/ translations/
+    - zip -q -9 -r calladmin_web.zip web/
 
 deploy:
     provider: releases
