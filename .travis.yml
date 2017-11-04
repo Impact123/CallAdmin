@@ -41,7 +41,7 @@ deploy:
     api_key:
         secure: aluHVTVa3DatUISjPUUck1YNlOVqNiZI7F4Lk0DcTpGuSs38UtZYbxXXHibrq004LP/R1GvMxFZx0rkYDKJJyJw0HpoQlodsgm5T3g5OJAcHfrD8WcR0R5T5GBUBaTZ6copr5175TDhMcGTHTA66rFDmch7Sh1m86IVhwhlJbag=
     file:
-        - calladmin_development.zip
+        - calladmin_gameserver.zip
         - calladmin_web.zip
     on:
         condition: $SMBRANCH = 1.8
