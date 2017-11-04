@@ -5,13 +5,12 @@ addons:
     apt:
         packages:
             - lib32stdc++6
+            - zip
             - unzip
-
 
 env:
     - SMBRANCH=1.8
     - SMBRANCH=1.9
-
 
 before_script:
     - SMPACKAGE="http://sourcemod.net/latest.php?os=linux&version=${SMBRANCH}"
@@ -19,7 +18,10 @@ before_script:
     - mkdir $SMBRANCH
     - tar xfz latest.tar.gz -C $SMBRANCH
     - export SMPATH=$(pwd)/$SMBRANCH/addons/sourcemod/scripting
-
+    - mkdir -p plugins/disabled scripting/include translations
+    - cp gameserver/calladmin*.sp scripting/
+    - cp gameserver/include/*.inc scripting/include/
+    - cp gameserver/*.phrases.txt translations/
 
 script:
     - $SMPATH/spcomp gameserver/calladmin.sp
@@ -28,3 +30,24 @@ script:
     - $SMPATH/spcomp gameserver/calladmin_ts3.sp
     - $SMPATH/spcomp gameserver/calladmin_test.sp
     - $SMPATH/spcomp gameserver/calladmin_usermanager.sp
+    - mv calladmin*.smx plugins/
+    - mv plugins/calladmin_test.smx plugins/disabled/
+    - zip -9 -r calladmin_gameserver.zip plugins/ scripting/ translations/
+    - zip -9 -r calladmin_web.zip web/
+
+deploy:
+    provider: releases
+    skip_cleanup: true
+    api_key:
+        secure: aluHVTVa3DatUISjPUUck1YNlOVqNiZI7F4Lk0DcTpGuSs38UtZYbxXXHibrq004LP/R1GvMxFZx0rkYDKJJyJw0HpoQlodsgm5T3g5OJAcHfrD8WcR0R5T5GBUBaTZ6copr5175TDhMcGTHTA66rFDmch7Sh1m86IVhwhlJbag=
+    file:
+        - calladmin_development.zip
+        - calladmin_web.zip
+    on:
+        condition: $SMBRANCH = 1.8
+        tags: true
+        repo: Impact123/CallAdmin
+    branches:
+        only:
+            - master
+            - development
