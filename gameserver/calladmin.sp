@@ -1065,20 +1065,14 @@ bool ReportPlayer(int client, int target, char[] sReason)
 	{
 		return false;
 	}
-	
-	char clientNameBuf[MAX_NAME_LENGTH];
-	char targetNameBuf[MAX_NAME_LENGTH];
-
-	GetClientName(client, clientNameBuf, sizeof(clientNameBuf));
-	GetClientName(target, targetNameBuf, sizeof(targetNameBuf));
 
 	if (g_bPublicMessage)
 	{
-		PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_HasReported", clientNameBuf, targetNameBuf, sReason);
+		PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_HasReported", client, target, sReason);
 	}
 	else
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_YouHaveReported", targetNameBuf, sReason);
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_YouHaveReported", target, sReason);
 	}
 	
 	SetStates(client, target);

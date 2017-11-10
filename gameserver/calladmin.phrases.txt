@@ -10,7 +10,7 @@
 	}
 	"CallAdmin_HasReported"
 	{
-		"#format"	"{1:s},{2:s},{3:s}"
+		"#format"	"{1:N},{2:N},{3:s}"
 		"en"		"{1} reported {2} for {3}"
 		"de"		"{1} hat {2} wegen {3} gemeldet"
 		"fr"		"{1} a signalé {2} pour {3}"
@@ -18,7 +18,7 @@
 	}
 	"CallAdmin_YouHaveReported"
 	{
-		"#format"	"{1:s},{2:s}"
+		"#format"	"{1:N},{2:s}"
 		"en"		"You have reported {1} for {2}"
 		"de"		"Du hast {1} wegen {2} gemeldet"
 		"fr"		"Vous avez signalé {1} pour {2}"
