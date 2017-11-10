@@ -118,7 +118,7 @@ g_iLastReport[MAXPLAYERS +1];
 g_iLastReported[MAXPLAYERS +1];
 
 // Player saw the antispam message
-bool g_bSawMesage[MAXPLAYERS +1];
+bool g_bSawMessage[MAXPLAYERS +1];
 
 
 // Cookies, yummy
@@ -834,14 +834,14 @@ public Action Command_Call(int client, int args)
 	
 	if (g_iLastReport[client] == 0 || LastReportTimeCheck(client))
 	{
-		g_bSawMesage[client] = false;
+		g_bSawMessage[client] = false;
 		
 		ShowClientSelectMenu(client);
 	}
-	else if (!g_bSawMesage[client])
+	else if (!g_bSawMessage[client])
 	{
 		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_CommandNotAllowed", g_iSpamTime - ( GetTime() - g_iLastReport[client] ));
-		g_bSawMesage[client] = true;
+		g_bSawMessage[client] = true;
 	}
 
 	return Plugin_Handled;
@@ -1233,7 +1233,7 @@ public void OnClientDisconnect_Post(int client)
 	g_sTargetReason[client][0] = '\0';
 	g_iLastReport[client]      = 0;
 	g_iLastReported[client]    = 0;
-	g_bSawMesage[client]       = false;
+	g_bSawMessage[client]       = false;
 	g_bAwaitingReason[client]  = false;
 	
 	RemoveAsTarget(client);
