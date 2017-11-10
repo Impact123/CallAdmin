@@ -80,15 +80,15 @@ int g_iAdminAction;
 
 
 
-// Reportid used for handling
+// Report id used for handling
 int g_iCurrentReportID;
 
-// List of not handled ID's
+// List of not handled IDs
 ArrayList g_hActiveReports;
 
 
 
-// Logfile
+// Log file
 char g_sLogFile[PLATFORM_MAX_PATH];
 
 
@@ -96,15 +96,11 @@ char g_sLogFile[PLATFORM_MAX_PATH];
 #define ADMIN_ACTION_BLOCK_MESSAGE 1
 
 
-bool g_bLateLoad;
-#pragma unused g_bLateLoad
-
-
 int g_iCurrentTrackers;
 
 
 
-// User info
+// Current target info
 g_iTarget[MAXPLAYERS + 1];
 char g_sTargetReason[MAXPLAYERS + 1][REASON_MAX_LENGTH];
 
@@ -117,11 +113,11 @@ g_iLastReport[MAXPLAYERS +1];
 // When was this user reported the last time?
 g_iLastReported[MAXPLAYERS +1];
 
-// Player saw the antispam message
+// Whether or not a client saw the antispam message
 bool g_bSawMessage[MAXPLAYERS +1];
 
 
-// Cookies, yummy
+// Cookies
 Handle g_hLastReportCookie;
 Handle g_hLastReportedCookie;
 
@@ -158,8 +154,6 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-	g_bLateLoad = late;
-	
 	RegPluginLibrary("calladmin");
 	
 	
@@ -250,7 +244,6 @@ public int Native_ReportClient(Handle plugin, int numParams)
 		return false;
 	}
 
-	// Set the report id
 	g_iCurrentReportID++;
 	g_hActiveReports.Push(g_iCurrentReportID);
 
@@ -294,17 +287,19 @@ public void OnPluginStart()
 	g_hHostIP     = FindConVar("hostip");
 	g_hServerName = FindConVar("hostname");
 	
-	// Shouldn't happen
+	
 	if (g_hHostPort == null)
 	{
 		CallAdmin_LogMessage("Couldn't find cvar 'hostport'");
 		SetFailState("Couldn't find cvar 'hostport'");
 	}
+	
 	if (g_hHostIP == null)
 	{
 		CallAdmin_LogMessage("Couldn't find cvar 'hostip'");
 		SetFailState("Couldn't find cvar 'hostip'");
 	}
+	
 	if (g_hServerName == null)
 	{
 		CallAdmin_LogMessage("Couldn't find cvar 'hostname'");
@@ -385,7 +380,7 @@ public void OnPluginStart()
 	CreateTimer(10.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
 	
 	
-	// Used for the own reason
+	// Used to allow a client to input their own reason
 	AddCommandListener(ChatListener, "say");
 	AddCommandListener(ChatListener, "say2");
 	AddCommandListener(ChatListener, "say_team");
@@ -402,6 +397,7 @@ public void OnPluginStart()
 	g_hOnServerDataChangedForward   = CreateGlobalForward("CallAdmin_OnServerDataChanged", ET_Ignore, Param_Cell, Param_Cell, Param_String, Param_String);
 	g_hOnLogMessageForward          = CreateGlobalForward("CallAdmin_OnLogMessage", ET_Ignore, Param_Cell, Param_String);
 	g_hOnReportHandledForward       = CreateGlobalForward("CallAdmin_OnReportHandled", ET_Ignore, Param_Cell, Param_Cell); 
+	
 	
 	// Cookies
 	if (CLIENTPREFS_AVAILABLE())
@@ -687,7 +683,7 @@ public Action Timer_Advert(Handle timer)
 {
 	if (g_iCurrentTrackers > 0)
 	{
-		// Spelling is different (0 admins, 1 admin, 2 admins, 3 admins...), we account for that :)
+		// Spelling is different (0 admins, 1 admin, 2 admins, 3 admins...)
 		if (g_iCurrentTrackers == 1)
 		{
 			PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_AdvertMessageSingular", g_iCurrentTrackers);
@@ -1052,7 +1048,7 @@ bool ReportPlayer(int client, int target, char[] sReason)
 	
 	SetStates(client, target);
 	
-	// Set the report id
+	
 	g_iCurrentReportID++;
 	g_hActiveReports.Push(g_iCurrentReportID);
 
@@ -1101,7 +1097,7 @@ int GetTotalTrackers()
 		
 		if (GetPluginStatus(hPlugin) == Plugin_Running)
 		{
-			// We check if the plugin has the pesudo forward
+			// We check if the plugin has the public CallAdmin_OnRequestTrackersCountRefresh function
 			if ( (func = GetFunctionByName(hPlugin, "CallAdmin_OnRequestTrackersCountRefresh") ) != INVALID_FUNCTION)
 			{
 				Call_StartFunction(hPlugin, func);
@@ -1450,7 +1446,6 @@ void UpdateHostIp()
 
 
 
-// Gnah, this should be the default behavior
 stock void SetClientCookieEx(int client, Handle cookie, const char[] format, any:...)
 {
 	char sFormatBuf[1024];
