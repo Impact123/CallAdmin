@@ -558,12 +558,7 @@ bool Forward_OnDrawMenu(int client)
 	
 	Call_Finish(result);
 	
-	if (result == Plugin_Continue)
-	{
-		return true;
-	}
-	
-	return false;
+	return (result == Plugin_Continue);
 }
 
 
@@ -580,12 +575,7 @@ bool Forward_OnReportPre(int client, int target, const char[] reason)
 	
 	Call_Finish(result);
 	
-	if (result == Plugin_Continue)
-	{
-		return true;
-	}
-	
-	return false;
+	return (result == Plugin_Continue);
 }
 
 
@@ -612,12 +602,7 @@ bool Forward_OnDrawOwnReason(int client)
 	
 	Call_Finish(result);
 	
-	if (result == Plugin_Continue)
-	{
-		return true;
-	}
-	
-	return false;
+	return (result == Plugin_Continue);
 }
 
 
@@ -631,12 +616,7 @@ bool Forward_OnAddToAdminCount(int client)
 	
 	Call_Finish(result);
 	
-	if (result == Plugin_Continue)
-	{
-		return true;
-	}
-	
-	return false;
+	return (result == Plugin_Continue);
 }
 
 
@@ -662,12 +642,7 @@ bool Forward_OnDrawTarget(int client, int target)
 	
 	Call_Finish(result);
 	
-	if (result == Plugin_Continue)
-	{
-		return true;
-	}
-	
-	return false;
+	return (result == Plugin_Continue);
 }
 
 
