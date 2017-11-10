@@ -23,6 +23,7 @@
 
 /**
  * Called when the main CallAdmin client selection menu is about to be drawn for a client.
+ * Note: CallAdmin will not notify players why or if their menu was blocked.
  *
  * @param client        Client index of the caller.
  * @return              Plugin_Continue to allow, Plugin_Handled otherwise.
@@ -70,6 +71,7 @@ forward void CallAdmin_OnTrackerCountChanged(int oldVal, int newVal);
 
 /**
  * Called before a client (or module) has reported another client.
+ * Note: CallAdmin will not notify players why or if their report was blocked.
  *
  * @param client        Client index of the caller.
  * @param target        Client index of the target.
@@ -97,7 +99,7 @@ forward void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 
 /**
  * Initiates an report call.
- * If you report automatically (via a module for example) set the clientindex to REPORTER_CONSOLE.
+ * If you report automatically (via a module for example) set the client index to REPORTER_CONSOLE.
  *
  * @param client        Client index of the caller.
  * @param target        Client index of the target.
