@@ -815,7 +815,7 @@ public void OnCvarChanged(ConVar cvar, const char[] oldValue, const char[] newVa
 
 
 
-public Action Command_Call(int client, int args)
+public Action Command_Call(int client, int argc)
 {
 	// Console cannot use this
 	if (client == 0)
@@ -849,7 +849,7 @@ public Action Command_Call(int client, int args)
 
 
 
-public Action Command_HandleCall(int client, int args)
+public Action Command_HandleCall(int client, int argc)
 {
 	if (client == 0)
 	{
@@ -867,7 +867,7 @@ public Action Command_HandleCall(int client, int args)
 	}
 	
 	
-	if (GetCmdArgs() != 1)
+	if (argc != 1)
 	{
 		char cmdName[64];
 		GetCmdArg(0, cmdName, sizeof(cmdName));
@@ -910,7 +910,7 @@ public Action Command_HandleCall(int client, int args)
 
 
 
-public Action Command_Reload(int client, int args)
+public Action Command_Reload(int client, int argc)
 {
 	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
 	{
