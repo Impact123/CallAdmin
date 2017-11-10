@@ -1458,9 +1458,9 @@ stock void LongToIp(int long, char[] str, int maxlen)
 {
 	int pieces[4];
 	
-	pieces[0] = (long >>> 24 & 255);
-	pieces[1] = (long >>> 16 & 255);
-	pieces[2] = (long >>> 8 & 255);
+	pieces[0] = ((long >>> 24) & 255);
+	pieces[1] = ((long >>> 16) & 255);
+	pieces[2] = ((long >>> 8) & 255);
 	pieces[3] = (long & 255); 
 	
 	Format(str, maxlen, "%d.%d.%d.%d", pieces[0], pieces[1], pieces[2], pieces[3]); 
