@@ -155,11 +155,6 @@ void InitDB()
 
 public void OnAllPluginsLoaded()
 {
-	if (!LibraryExists("calladmin"))
-	{
-		SetFailState("CallAdmin not found");
-	}
-
 	if (LibraryExists("updater"))
 	{
 		Updater_AddPlugin(UPDATER_URL);
