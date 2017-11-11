@@ -35,9 +35,6 @@
 #pragma newdecls required
 
 
-#define CLIENTPREFS_AVAILABLE()      (LibraryExists("clientprefs"))
-
-
 
 // Banreasons
 ArrayList g_hReasonAdt;
@@ -400,7 +397,7 @@ public void OnPluginStart()
 	
 	
 	// Cookies
-	if (CLIENTPREFS_AVAILABLE())
+	if (LibraryExists("clientprefs"))
 	{
 		g_hLastReportCookie   = RegClientCookie("CallAdmin_LastReport", "Contains a timestamp when this user has reported the last time", CookieAccess_Private);
 		g_hLastReportedCookie = RegClientCookie("CallAdmin_LastReported", "Contains a timestamp when this user was reported the last time", CookieAccess_Private);
@@ -934,7 +931,7 @@ void SetStates(int client, int target)
 	
 	
 	// Cookies
-	if (CLIENTPREFS_AVAILABLE())
+	if (LibraryExists("clientprefs"))
 	{
 		SetClientCookieEx(client, g_hLastReportCookie, "%d", currentTime);
 		SetClientCookieEx(target, g_hLastReportedCookie, "%d", currentTime);
@@ -1146,7 +1143,7 @@ void ShowClientSelectMenu(int client)
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoPlayers");
 		g_iLastReport[client] = GetTime();
 		
-		if (CLIENTPREFS_AVAILABLE())
+		if (LibraryExists("clientprefs"))
 		{
 			SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
 		}
