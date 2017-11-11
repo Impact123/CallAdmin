@@ -41,10 +41,6 @@
 #pragma dynamic 32768
 
 
-#define CALLADMIN_STEAM_METHOD_AVAILABLE()      (GetFeatureStatus(FeatureType_Native, "MessageBot_SetSendMethod")      == FeatureStatus_Available)
-#define SOCKET_AVAILABLE()                      (GetFeatureStatus(FeatureType_Native, "SocketCreate")                  == FeatureStatus_Available)
-
-
 
 // Each array can have 150 items, this is hardcoded, bad things happen if you change this
 #define MAX_ITEMS 150
