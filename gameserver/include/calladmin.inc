@@ -49,7 +49,7 @@ forward Action CallAdmin_OnDrawOwnReason(int client);
  * Note: Called *n-1 times for the client selection menu where n is the amount of valid targets including the caller.
  *
  * @param client        Client index of the caller.
- * @param target        Client index of the target about to be drawed.
+ * @param target        Client index of the target about to be drawn.
  * @return              Plugin_Continue to allow the target to be drawn, Plugin_Handled otherwise.
  */
 forward Action CallAdmin_OnDrawTarget(int client, int target);
@@ -58,10 +58,10 @@ forward Action CallAdmin_OnDrawTarget(int client, int target);
 
 
 /**
- * Called when the trackercount was changed.
+ * Called when the tracker count was changed.
  *
- * @param oldVal        Trackercount before update.
- * @param newVal        Trackercount after update.
+ * @param oldVal        Tracker count before update.
+ * @param newVal        Tracker count after update.
  * @noreturn
  */
 forward void CallAdmin_OnTrackerCountChanged(int oldVal, int newVal);
@@ -99,7 +99,7 @@ forward void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 
 
 /**
- * Initiates an report call.
+ * Initiates a report call.
  * If you report automatically (via a module for example) set the client index to REPORTER_CONSOLE.
  *
  * @param client        Client index of the caller.
@@ -193,7 +193,7 @@ native void CallAdmin_GetHostName(char[] buffer, int max_size);
 
 
 /**
- * Returns the server's IP String.
+ * Returns the server's Ip String.
  *
  * @param buffer        String to copy hostip to.
  * @param max_size      Maximum size of buffer.
@@ -205,9 +205,9 @@ native void CallAdmin_GetHostIP(char[] buffer, int max_size);
 
 
 /**
- * Returns the server's HostPort.
+ * Returns the server's port.
  *
- * @return              Hostport.
+ * @return              Port of the server.
  */
 native int CallAdmin_GetHostPort();
 
@@ -230,8 +230,8 @@ native void CallAdmin_LogMessage(const char[] format, any ...);
 /**
  * Called when a message was logged to the calladmin logfile.
  *
- * @param plugin       Handle to the plugin which logged a message.
- * @param message      Message which was logged.
+ * @param plugin       Handle to the plugin which logged the message.
+ * @param message      Message that was logged.
  * @noreturn
  */
 forward void CallAdmin_OnLogMessage(Handle plugin, const char[] message);
@@ -241,7 +241,7 @@ forward void CallAdmin_OnLogMessage(Handle plugin, const char[] message);
 
 /**
  * Returns the server's current report id.
- * This is a temporary value and is increased with each report.
+ * This is a temporary value and is increased with each successfull report.
  *
  * @return      Current report id of the server.
  */
@@ -254,7 +254,7 @@ native int CallAdmin_GetReportID();
  * Called when a report was handled.
  *
  * @param client       Admin who handled the report.
- * @param id           ID of the handled report.
+ * @param id           Id of the handled report.
  * @noreturn
  */
 forward void CallAdmin_OnReportHandled(int client, int id);
