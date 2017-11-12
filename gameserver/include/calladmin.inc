@@ -71,6 +71,7 @@ forward void CallAdmin_OnTrackerCountChanged(int oldVal, int newVal);
 
 /**
  * Called before a client (or module) has reported another client.
+ * Be sure to check that client != REPORTER_CONSOLE if you expect a valid client index.
  * Note: CallAdmin will not notify players why or if their report was blocked.
  *
  * @param client        Client index of the caller.
