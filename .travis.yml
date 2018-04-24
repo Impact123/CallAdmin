@@ -21,6 +21,7 @@ before_script:
     - mkdir -p plugins/disabled scripting/include translations
     - cp gameserver/calladmin*.sp scripting/
     - cp gameserver/include/*.inc scripting/include/
+    - cp gameserver/include/system2/*.inc scripting/include/system2/
     - cp gameserver/*.phrases.txt translations/
 
 script:
