@@ -18,7 +18,7 @@ before_script:
     - mkdir $SMBRANCH
     - tar xfz latest.tar.gz -C $SMBRANCH
     - export SMPATH=$(pwd)/$SMBRANCH/addons/sourcemod/scripting
-    - mkdir -p plugins/disabled scripting/include translations
+    - mkdir -p plugins/disabled scripting/include scripting/include/system2/ translations
     - cp gameserver/calladmin*.sp scripting/
     - cp gameserver/include/*.inc scripting/include/
     - cp gameserver/include/system2/*.inc scripting/include/system2/
