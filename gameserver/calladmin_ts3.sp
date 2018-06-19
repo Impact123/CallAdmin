@@ -26,13 +26,18 @@
 #include <sourcemod>
 #include "include/autoexecconfig"
 #include "include/calladmin"
-#include "include/socket"
+#include "include/system2"
 #include <regex>
 
 #undef REQUIRE_PLUGIN
 #include "include/updater"
 #pragma semicolon 1
 #pragma newdecls required
+
+
+// This should be 128 KB which is more than enough
+// x * 4 -> bytes / 1024 -> KiloBytes
+#pragma dynamic 32768
 
 
 
@@ -43,7 +48,6 @@ ConVar g_hVersion;
 ConVar g_hUrl;
 char g_sUrl[PLATFORM_MAX_PATH];
 char g_sRealUrl[PLATFORM_MAX_PATH];
-char g_sRealPath[PLATFORM_MAX_PATH];
 
 
 ConVar g_hKey;
@@ -111,17 +115,19 @@ public Action Timer_UpdateTrackersCount(Handle timer)
 
 int GetCurrentTrackers()
 {
-	// Create a socket
-	Handle Socket = SocketCreate(SOCKET_TCP, OnSocketError);
+	// URL encode the key
+	char sKey[PLATFORM_MAX_PATH * 2];
+	System2_URLEncode(sKey, sizeof(sKey), g_sKey);
+
+	// Create a HTTP request
+	System2HTTPRequest httpRequest = new System2HTTPRequest(OnHTTPReceiveCount, "%s/onlinecount.php?key=%s", g_sRealUrl, sKey);
+	httpRequest.Timeout = 10;
 	
-	
-	// Optional tweaking stuff
-	SocketSetOption(Socket, ConcatenateCallbacks, 4096);
-	SocketSetOption(Socket, SocketReceiveTimeout, 3);
-	SocketSetOption(Socket, SocketSendTimeout, 3);
-	
-	// Connect
-	SocketConnect(Socket, OnSocketConnectCount, OnSocketReceiveCount, OnSocketDisconnect, g_sRealUrl, 80);
+	// Start the HTTP request
+	httpRequest.GET();
+
+	// Clean up
+	delete httpRequest;
 }
 
 
@@ -132,42 +138,11 @@ void PreFormatUrl()
 	// We work on a copy
 	strcopy(g_sRealUrl, sizeof(g_sRealUrl), g_sUrl);
 	
-	
-	// Strip http and such stuff here
-	if (StrContains(g_sRealUrl, "http://") == 0)
+	// Strip the slash of the path if there is one
+	int len = strlen(g_sRealUrl);
+	if (len > 0 && g_sRealUrl[len - 1] == '/')
 	{
-		ReplaceString(g_sRealUrl, sizeof(g_sRealUrl), "http://", "");
-	}
-
-	if (StrContains(g_sRealUrl, "https://") == 0)
-	{
-		ReplaceString(g_sRealUrl, sizeof(g_sRealUrl), "https://", "");
-	}
-	
-	if (StrContains(g_sRealUrl, "www.") == 0)
-	{
-		ReplaceString(g_sRealUrl, sizeof(g_sRealUrl), "www.", "");
-	}
-	
-	
-	int index;
-	
-	// We strip from / of the url to get the path
-	if ( (index = StrContains(g_sRealUrl, "/")) != -1 )
-	{
-		// Copy from there
-		strcopy(g_sRealPath, sizeof(g_sRealPath), g_sRealUrl[index]);
-		
-		
-		// Strip the slash of the path if there is one
-		int len = strlen(g_sRealPath);
-		if (len > 0 && g_sRealPath[len - 1] == '/')
-		{
-			g_sRealPath[len -1] = '\0';
-		}
-		
-		// Strip the url from there the rest
-		g_sRealUrl[index] = '\0';
+		g_sRealUrl[len -1] = '\0';
 	}
 }
 
@@ -205,10 +180,10 @@ public void OnAllPluginsLoaded()
 
 public void OnLibraryAdded(const char[] name)
 {
-    if (StrEqual(name, "updater"))
-    {
-        Updater_AddPlugin(UPDATER_URL);
-    }
+	if (StrEqual(name, "updater"))
+	{
+		Updater_AddPlugin(UPDATER_URL);
+	}
 }
 
 
@@ -223,26 +198,18 @@ public void CallAdmin_OnRequestTrackersCountRefresh(int &trackers)
 
 public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 {
-	// Create a socket
-	Handle Socket = SocketCreate(SOCKET_TCP, OnSocketError);
-	
-	
-	// Optional tweaking stuff
-	SocketSetOption(Socket, ConcatenateCallbacks, 4096);
-	SocketSetOption(Socket, SocketReceiveTimeout, 3);
-	SocketSetOption(Socket, SocketSendTimeout, 3);
-	
-	
-	DataPack pack = new DataPack();
-	
-	
 	// Buffers
 	char sClientID[21];
-	char sClientName[MAX_NAME_LENGTH];
+	char sClientName[MAX_NAME_LENGTH * 4];
 	
 	char sTargetID[21];
-	char sTargetName[MAX_NAME_LENGTH];
+	char sTargetName[MAX_NAME_LENGTH * 4];
 	
+	char sServerName[64 * 4];
+	char sServerIP[16 + 5];
+
+	// Currently maximum 48 in length
+	char sReason[REASON_MAX_LENGTH * 4];
 	
 	// Reporter wasn't a real client (initiated by a module)
 	if (client == REPORTER_CONSOLE)
@@ -271,160 +238,52 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 		
 		return;
 	}
-	
-	
-	// Write the data to the pack
-	pack.WriteString(sClientID);
-	pack.WriteString(sClientName);
-	
-	pack.WriteString(sTargetID);
-	pack.WriteString(sTargetName);
-	
-	pack.WriteString(reason);
-	
-	
-	// Set the pack as argument to the callbacks, so we can read it out later
-	SocketSetArg(Socket, pack);
-	
-	
-	// Connect
-	SocketConnect(Socket, OnSocketConnect, OnSocketReceive, OnSocketDisconnect, g_sRealUrl, 80);
-}
 
+	// Fetch serverdata here...
+	CallAdmin_GetHostName(sServerName, sizeof(sServerName));
+	CallAdmin_GetHostIP(sServerIP, sizeof(sServerIP));
+	Format(sServerIP, sizeof(sServerIP), "%s:%d", sServerIP, CallAdmin_GetHostPort());
 
-
-
-public int OnSocketConnect(Handle socket, DataPack pack)
-{
-	// If socket is connected, should be since this is the callback that is called if it is connected
-	if (SocketIsConnected(socket))
+	// URL encode the parameters
+	char sKey[PLATFORM_MAX_PATH * 2];
+	System2_URLEncode(sKey, sizeof(sKey), g_sKey);
+	System2_URLEncode(sClientName, sizeof(sClientName), sClientName);
+	System2_URLEncode(sTargetName, sizeof(sTargetName), sTargetName);
+	System2_URLEncode(sReason, sizeof(sReason), sReason);
+	System2_URLEncode(sServerName, sizeof(sServerName), sServerName);
+		
+	// Temp, for bots
+	if (strlen(sTargetID) < 1)
 	{
-		// Buffers
-		char sRequestString[2048];
-		char sRequestParams[2048];
-		
-		// Params
-		char sClientID[21];
-		char sClientName[MAX_NAME_LENGTH * 4];
-		
-		char sTargetID[21];
-		char sTargetName[MAX_NAME_LENGTH * 4];
-		
-		char sServerName[64 * 4];
-		char sServerIP[16 + 5];
-		
-		
-		// Fetch serverdata here...
-		CallAdmin_GetHostName(sServerName, sizeof(sServerName));
-		CallAdmin_GetHostIP(sServerIP, sizeof(sServerIP));
-		Format(sServerIP, sizeof(sServerIP), "%s:%d", sServerIP, CallAdmin_GetHostPort());
-		
-		
-		// Currently maximum 48 in length
-		char sReason[REASON_MAX_LENGTH * 4];
-		
-		
-		// Reset the pack
-		pack.Reset(false);
-		
-		
-		// Read data
-		pack.ReadString(sClientID, sizeof(sClientID));
-		pack.ReadString(sClientName, sizeof(sClientName));
-		
-		pack.ReadString(sTargetID, sizeof(sTargetID));
-		pack.ReadString(sTargetName, sizeof(sTargetName));
-		
-		pack.ReadString(sReason, sizeof(sReason));
-		
-		// Close the pack
-		delete pack;
-		
-		
-		URLEncode(sClientName, sizeof(sClientName));
-		URLEncode(sTargetName, sizeof(sTargetName));
-		URLEncode(sReason, sizeof(sReason));
-		URLEncode(sServerName, sizeof(sServerName));
-		
-		
-		// Temp, for bots
-		if (strlen(sTargetID) < 1)
-		{
-			Format(sTargetID, sizeof(sTargetID), "INVALID");
-		}
-		
-		
-		// Params
-		Format(sRequestParams, sizeof(sRequestParams), "index.php?key=%s&targetid=%s&targetname=%s%&targetreason=%s&clientid=%s&clientname=%s&servername=%s&serverip=%s", g_sKey, sTargetID, sTargetName, sReason, sClientID, sClientName, sServerName, sServerIP);
-		
-		
-		// Request String
-		Format(sRequestString, sizeof(sRequestString), "GET %s/%s HTTP/1.0\r\nHost: %s\r\nConnection: close\r\n\r\n", g_sRealPath, sRequestParams, g_sRealUrl);
-		
-		
-		// Send the request
-		SocketSend(socket, sRequestString);
+		Format(sTargetID, sizeof(sTargetID), "INVALID");
 	}
-}
-
-
-
-
-public int OnSocketReceive(Handle socket, char[] data, const int size, any pack) 
-{
-	if (socket != null)
-	{
-		// Check the response here and do something
-		
-		
-		// Close the socket
-		if (SocketIsConnected(socket))
-		{
-			SocketDisconnect(socket);
-		}
-	}
-}
-
-
-
-public int OnSocketDisconnect(Handle socket, any pack)
-{
-	delete socket;
-}
-
-
-
-public int OnSocketError(Handle socket, const int errorType, const int errorNum, any pack)
-{
-	CallAdmin_LogMessage("Socket Error: %d, %d", errorType, errorNum);
 	
-	delete socket;
+	// Create a HTTP request
+	System2HTTPRequest httpRequest = new System2HTTPRequest(OnHTTPReceive, "%s/index.php?key=%s&targetid=%s&targetname=%s%&targetreason=%s&clientid=%s&clientname=%s&servername=%s&serverip=%s", g_sRealUrl, sKey, sTargetID, sTargetName, sReason, sClientID, sClientName, sServerName, sServerIP);
+	httpRequest.Timeout = 10;
+	
+	// Start the HTTP request
+	httpRequest.GET();
+
+	// Clean up
+	delete httpRequest;
 }
 
 
 
 
-// Onlinecount callback
-public int OnSocketConnectCount(Handle socket, any pack)
+// Report callback
+public void OnHTTPReceive(bool success, const char[] error, System2HTTPRequest request, System2HTTPResponse response, HTTPRequestMethod method)
 {
-	// If socket is connected, should be since this is the callback that is called if it is connected
-	if (SocketIsConnected(socket))
+	// Check if request could be made
+	if (!success)
 	{
-		// Buffers
-		char sRequestString[2048];
-		char sRequestParams[2048];
-
-		
-		// Params
-		Format(sRequestParams, sizeof(sRequestParams), "onlinecount.php?key=%s", g_sKey);
-		
-		
-		// Request String
-		Format(sRequestString, sizeof(sRequestString), "GET %s/%s HTTP/1.0\r\nHost: %s\r\nConnection: close\r\n\r\n", g_sRealPath, sRequestParams, g_sRealUrl);
-		
-		
-		// Send the request
-		SocketSend(socket, sRequestString);
+		CallAdmin_LogMessage("Error on sending report: %s", error);
+	}
+	// Check for valid HTTP response status code
+	else if (response.StatusCode != 200)
+	{
+		CallAdmin_LogMessage("Error on sending report: HTTP status code %d", response.StatusCode);
 	}
 }
 
@@ -432,110 +291,65 @@ public int OnSocketConnectCount(Handle socket, any pack)
 
 
 // Onlinecount callback
-public int OnSocketReceiveCount(Handle socket, char[] data, const int size, any pack) 
+public void OnHTTPReceiveCount(bool success, const char[] error, System2HTTPRequest request, System2HTTPResponse response, HTTPRequestMethod method)
 {
-	if (socket != null)
+	// Check if request could be made
+	if (!success)
 	{
-		// This fixes an bug on windowsservers
-		// The receivefunction for socket is getting called twice on these systems, once for the headers, and a second time for the body
-		// Because we know that our response should begin with <?xml and contains a steamid we can quit here and don't waste resources on the first response
-		// Other than that if the api is down, the request was malformed etcetera we don't waste resources for working with useless data
-		if (StrContains(data, "<?xml", false) == -1)
-		{
-			return;
-		}
-		
-		
-		char Split[2][48];
-		
-		ExplodeString(data, "<onlineCount>", Split, sizeof(Split), sizeof(Split[]));
-		
-		
-		// Run though count
-		int splitsize = sizeof(Split);
-		int index;
-		for (int i; i < splitsize; i++)
-		{
-			if (strlen(Split[i]) > 0)
-			{
-				// If we find something we split off at the searchresult, we then then only have the steamid
-				if ( (index = StrContains(Split[i], "</onlineCount>", true)) != -1)
-				{
-					Split[i][index] = '\0';
-				}
-			}
-		}
-		
-		
-		// Add the count to the total trackers
-		if (strlen(Split[1]) > 0)
-		{
-			if (SimpleRegexMatch(Split[1], "^[0-9]+$"))
-			{
-				int temp = StringToInt(Split[1]);
-				
-				if (temp > 0)
-				{
-					g_iCurrentTrackers = temp;
-				}
-			}
-		}
-
-		
-		// Close the socket
-		if (SocketIsConnected(socket))
-		{
-			SocketDisconnect(socket);
-		}
+		CallAdmin_LogMessage("Error on receiving tracker count: %s", error);
+		return;
 	}
-}
 
-
-
-
-// Written by Peace-Maker (i guess), formatted for better readability
-stock void URLEncode(char[] sString, int maxlen, char safe[] = "/", bool bFormat = false)
-{
-	char sAlwaysSafe[256];
-	Format(sAlwaysSafe, sizeof(sAlwaysSafe), "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-%s", safe);
-	
-	// Need 2 '%' since sp's Format parses one as a parameter to replace
-	// http://wiki.alliedmods.net/Format_Class_Functions_%28SourceMod_Scripting%29
-	if (bFormat)
+	// Check for valid HTTP response status code
+	if (response.StatusCode != 200)
 	{
-		ReplaceString(sString, maxlen, "%", "%%25");
+		CallAdmin_LogMessage("Error on receiving tracker count: HTTP status code %d", response.StatusCode);
+		return;
 	}
-	else
+
+	// Get the data of the response
+	char[] data = new char[response.ContentLength + 1];
+	response.GetContent(data, response.ContentLength + 1);
+
+	// Check for valid data
+	if (StrContains(data, "<?xml", false) == -1)
 	{
-		ReplaceString(sString, maxlen, "%", "%25");
+		return;
 	}
 	
 	
-	char sChar[8];
-	char sReplaceChar[8];
+	char Split[2][48];
 	
-	for (int i = 1; i < 256; i++)
+	ExplodeString(data, "<onlineCount>", Split, sizeof(Split), sizeof(Split[]));
+	
+	
+	// Run though count
+	int splitsize = sizeof(Split);
+	int index;
+	for (int i; i < splitsize; i++)
 	{
-		// Skip the '%' double replace ftw..
-		if (i==37)
+		if (strlen(Split[i]) > 0)
 		{
-			continue;
+			// If we find something we split off at the searchresult, we then then only have the steamid
+			if ( (index = StrContains(Split[i], "</onlineCount>", true)) != -1)
+			{
+				Split[i][index] = '\0';
+			}
 		}
-		
-		
-		Format(sChar, sizeof(sChar), "%c", i);
-		if (StrContains(sAlwaysSafe, sChar) == -1 && StrContains(sString, sChar) != -1)
+	}
+	
+	
+	// Add the count to the total trackers
+	if (strlen(Split[1]) > 0)
+	{
+		if (SimpleRegexMatch(Split[1], "^[0-9]+$"))
 		{
-			if (bFormat)
-			{
-				Format(sReplaceChar, sizeof(sReplaceChar), "%%%%%02X", i);
-			}
-			else
-			{
-				Format(sReplaceChar, sizeof(sReplaceChar), "%%%02X", i);
-			}
+			int temp = StringToInt(Split[1]);
 			
-			ReplaceString(sString, maxlen, sChar, sReplaceChar);
+			if (temp > 0)
+			{
+				g_iCurrentTrackers = temp;
+			}
 		}
 	}
 }
