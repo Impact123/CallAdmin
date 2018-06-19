@@ -35,11 +35,6 @@
 #pragma newdecls required
 
 
-// This should be 128 KB which is more than enough
-// x * 4 -> bytes / 1024 -> KiloBytes
-#pragma dynamic 32768
-
-
 
 // Global stuff
 ConVar g_hVersion;
