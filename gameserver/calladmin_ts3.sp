@@ -199,10 +199,10 @@ public void CallAdmin_OnRequestTrackersCountRefresh(int &trackers)
 public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 {
 	// Buffers
-	char sClientID[21];
+	char sClientID[21 * 4];
 	char sClientName[MAX_NAME_LENGTH * 4];
 	
-	char sTargetID[21];
+	char sTargetID[21 * 4];
 	char sTargetName[MAX_NAME_LENGTH * 4];
 	
 	char sServerName[64 * 4];
@@ -248,7 +248,9 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	char sKey[PLATFORM_MAX_PATH * 2];
 	System2_URLEncode(sKey, sizeof(sKey), g_sKey);
 	System2_URLEncode(sClientName, sizeof(sClientName), sClientName);
+	System2_URLEncode(sClientID, sizeof(sClientID), sClientID);
 	System2_URLEncode(sTargetName, sizeof(sTargetName), sTargetName);
+	System2_URLEncode(sTargetID, sizeof(sTargetID), sTargetID);
 	System2_URLEncode(sReason, sizeof(sReason), sReason);
 	System2_URLEncode(sServerName, sizeof(sServerName), sServerName);
 		
