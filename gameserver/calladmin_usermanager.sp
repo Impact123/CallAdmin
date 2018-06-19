@@ -1,13 +1,13 @@
 /**
  * -----------------------------------------------------
  * File        calladmin_usermanager.sp
- * Authors     Popoklopsi, Impact
+ * Authors     dordnung, Impact
  * License     GPLv3
- * Web         http://popoklopsi.de, http://gugyclan.eu
+ * Web         https://dordnung.de, http://gugyclan.eu
  * -----------------------------------------------------
  * 
  * CallAdmin
- * Copyright (C) 2013 Popoklopsi, Impact
+ * Copyright (C) 2013-2018 dordnung, Impact
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,10 +68,10 @@ bool g_bClientImmune[MAXPLAYERS + 1];
 public Plugin myinfo = 
 {
 	name = "CallAdmin UserManager",
-	author = "Popoklopsi, Impact",
+	author = "dordnung, Impact",
 	description = "The usermanagermodule for CallAdmin",
 	version = CALLADMIN_VERSION,
-	url = "http://popoklopsi.de"
+	url = "https://dordnung.de"
 }
 
 

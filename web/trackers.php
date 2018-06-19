@@ -2,13 +2,13 @@
 /**
  * -----------------------------------------------------
  * File        trackers.php
- * Authors     Impact, Popoklopsi
+ * Authors     Impact, dordnung
  * License     GPLv3
- * Web         http://gugyclan.eu, http://popoklopsi.de
+ * Web         http://gugyclan.eu, https://dordnung.de
  * -----------------------------------------------------
  * 
  * CallAdmin
- * Copyright (C) 2013 Impact, Popoklopsi
+ * Copyright (C) 2013-2018 Impact, dordnung
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

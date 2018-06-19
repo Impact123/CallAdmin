@@ -3,7 +3,7 @@
  * File        request.inc
  * Authors     David Ordnung
  * License     GPLv3
- * Web         http://dordnung.de
+ * Web         https://dordnung.de
  * -----------------------------------------------------
  * 
  * Copyright (C) 2013-2018 David Ordnung

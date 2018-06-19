@@ -4,7 +4,7 @@ CallAdmin is a multilingual, modular and extendable system to allow in-game repo
 The system is based on multiple parts.  
 * A multilingual, extendable sourcemod-plugin to report players in-game  
 * Modules that catch reports and relay them to steam, ts3, mysql, etc
-* [A Desktop Client](https://github.com/popoklopsi/CallAdmin-Client) to notify admins when a new report was made  
+* [A Desktop Client](https://github.com/dordnung/CallAdmin-Client) to notify admins when a new report was made  
 * Web scripts to make reports available from outside the game and interact with the modules and/or the client
 
 Please take a look at [the wiki](https://github.com/Impact123/CallAdmin/wiki) for more information.

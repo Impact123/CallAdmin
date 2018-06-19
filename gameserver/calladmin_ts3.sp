@@ -1,13 +1,13 @@
 /**
  * -----------------------------------------------------
  * File        calladmin_ts3.sp
- * Authors     Impact, Popoklopsi
+ * Authors     Impact, dordnung
  * License     GPLv3
- * Web         http://gugyclan.eu, http://popoklopsi.de
+ * Web         http://gugyclan.eu, https://dordnung.de
  * -----------------------------------------------------
  * 
  * CallAdmin
- * Copyright (C) 2013 Impact, Popoklopsi
+ * Copyright (C) 2013-2018 Impact, dordnung
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ int g_iCurrentTrackers;
 public Plugin myinfo = 
 {
 	name = "CallAdmin: Ts3 module",
-	author = "Impact, Popoklopsi",
+	author = "Impact, dordnung",
 	description = "The ts3module for CallAdmin",
 	version = CALLADMIN_VERSION,
 	url = "http://gugyclan.eu"
