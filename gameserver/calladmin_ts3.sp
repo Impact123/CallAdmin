@@ -103,6 +103,45 @@ public void OnPluginStart()
 
 
 
+public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newValue)
+{
+	if (cvar == g_hVersion)
+	{
+		g_hVersion.SetString(CALLADMIN_VERSION, false, false);
+	}
+	else if (cvar == g_hUrl)
+	{
+		g_hUrl.GetString(g_sUrl, sizeof(g_sUrl));
+		PreFormatUrl();
+	}
+	else if (cvar == g_hKey)
+	{
+		g_hKey.GetString(g_sKey, sizeof(g_sKey));
+	}
+}
+
+
+
+public void OnAllPluginsLoaded()
+{
+	if (LibraryExists("updater"))
+	{
+		Updater_AddPlugin(UPDATER_URL);
+	}
+}
+
+
+
+public void OnLibraryAdded(const char[] name)
+{
+	if (StrEqual(name, "updater"))
+	{
+		Updater_AddPlugin(UPDATER_URL);
+	}
+}
+
+
+
 public Action Timer_UpdateTrackersCount(Handle timer)
 {
 	// Get current trackers
@@ -143,46 +182,6 @@ void PreFormatUrl()
 	if (len > 0 && g_sRealUrl[len - 1] == '/')
 	{
 		g_sRealUrl[len -1] = '\0';
-	}
-}
-
-
-
-
-public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newValue)
-{
-	if (cvar == g_hVersion)
-	{
-		g_hVersion.SetString(CALLADMIN_VERSION, false, false);
-	}
-	else if (cvar == g_hUrl)
-	{
-		g_hUrl.GetString(g_sUrl, sizeof(g_sUrl));
-		PreFormatUrl();
-	}
-	else if (cvar == g_hKey)
-	{
-		g_hKey.GetString(g_sKey, sizeof(g_sKey));
-	}
-}
-
-
-
-public void OnAllPluginsLoaded()
-{
-	if (LibraryExists("updater"))
-	{
-		Updater_AddPlugin(UPDATER_URL);
-	}
-}
-
-
-
-public void OnLibraryAdded(const char[] name)
-{
-	if (StrEqual(name, "updater"))
-	{
-		Updater_AddPlugin(UPDATER_URL);
 	}
 }
 
