@@ -93,7 +93,6 @@ public void OnPluginStart()
 	g_hKey.AddChangeHook(OnCvarChanged);
 	
 	CreateTimer(20.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
-	GetCurrentTrackers();
 }
 
 
