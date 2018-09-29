@@ -1,13 +1,13 @@
 /**
  * -----------------------------------------------------
  * File        calladmin_mysql.sp
- * Authors     Impact, Popoklopsi
+ * Authors     Impact, dordnung
  * License     GPLv3
- * Web         http://gugyclan.eu, http://popoklopsi.de
+ * Web         http://gugyclan.eu, https://dordnung.de
  * -----------------------------------------------------
  * 
  * CallAdmin
- * Copyright (C) 2013 Impact, Popoklopsi
+ * Copyright (C) 2013-2018 Impact, dordnung
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,11 +24,11 @@
  */
  
 #include <sourcemod>
-#include <autoexecconfig>
-#include "calladmin"
+#include "include/autoexecconfig"
+#include "include/calladmin"
 
 #undef REQUIRE_PLUGIN
-#include <updater>
+#include "include/updater"
 #pragma semicolon 1
 #pragma newdecls required
 
@@ -76,7 +76,7 @@ Database g_hDbHandle;
 public Plugin myinfo = 
 {
 	name = "CallAdmin: Mysql module",
-	author = "Impact, Popoklopsi",
+	author = "Impact, dordnung",
 	description = "The mysqlmodule for CallAdmin",
 	version = CALLADMIN_VERSION,
 	url = "http://gugyclan.eu"
@@ -119,18 +119,18 @@ public void OnPluginStart()
 	
 	
 	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
-	HookConVarChange(g_hVersion, OnCvarChanged);
+	g_hVersion.AddChangeHook(OnCvarChanged);
 
 	g_iEntryPruning = g_hEntryPruning.IntValue;
-	HookConVarChange(g_hEntryPruning, OnCvarChanged);
+	g_hEntryPruning.AddChangeHook(OnCvarChanged);
 
 	g_hServerKey.GetString(g_sServerKey, sizeof(g_sServerKey));
-	HookConVarChange(g_hServerKey, OnCvarChanged);
+	g_hServerKey.AddChangeHook(OnCvarChanged);
 	
 	g_iOhphanedEntryPruning = g_hOhphanedEntryPruning.IntValue;
-	HookConVarChange(g_hOhphanedEntryPruning, OnCvarChanged);
+	g_hOhphanedEntryPruning.AddChangeHook(OnCvarChanged);
 
-	CreateTimer(600.0, Timer_PruneEntries, _, TIMER_REPEAT);
+	CreateTimer(60.0, Timer_PruneEntries, _, TIMER_REPEAT);
 	CreateTimer(20.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
 }
 
@@ -155,11 +155,6 @@ void InitDB()
 
 public void OnAllPluginsLoaded()
 {
-	if (!LibraryExists("calladmin"))
-	{
-		SetFailState("CallAdmin not found");
-	}
-
 	if (LibraryExists("updater"))
 	{
 		Updater_AddPlugin(UPDATER_URL);
@@ -331,13 +326,25 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	{
 		GetClientName(client, clientNameBuf, sizeof(clientNameBuf));
 		g_hDbHandle.Escape(clientNameBuf, clientName, sizeof(clientName));
-		GetClientAuthId(client, AuthId_Steam2, clientAuth, sizeof(clientAuth));
+		
+		if (!GetClientAuthId(client, AuthId_Steam2, clientAuth, sizeof(clientAuth)))
+		{
+			CallAdmin_LogMessage("Failed to get authentication for client %d (%s)", client, clientNameBuf);
+			
+			return;
+		}
 	}
 	
 	
 	GetClientName(target, targetNameBuf, sizeof(targetNameBuf));
 	g_hDbHandle.Escape(targetNameBuf, targetName, sizeof(targetName));
-	GetClientAuthId(target, AuthId_Steam2, targetAuth, sizeof(targetAuth));
+	
+	if (!GetClientAuthId(target, AuthId_Steam2, targetAuth, sizeof(targetAuth)))
+	{
+		CallAdmin_LogMessage("Failed to get authentication for client %d (%s)", client, targetNameBuf);
+		
+		return;
+	}
 	
 	char serverName[(sizeof(g_sServerName) + 1) * 2];
 	g_hDbHandle.Escape(g_sServerName, serverName, sizeof(serverName));
@@ -563,7 +570,7 @@ int GetCurrentTrackers()
 		char query[1024];
 
 		char sKey[(32 + 1) * 2];
-		SQL_EscapeString(g_hDbHandle, g_sServerKey, sKey, sizeof(sKey));
+		g_hDbHandle.Escape(g_sServerKey, sKey, sizeof(sKey));
 		
 		// Get current trackers (last 2 minutes)
 		Format(query, sizeof(query), "SELECT \

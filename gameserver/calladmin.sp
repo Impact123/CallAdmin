@@ -1,13 +1,13 @@
 /**
  * -----------------------------------------------------
  * File        calladmin.sp
- * Authors     Impact, Popoklopsi
+ * Authors     Impact, dordnung
  * License     GPLv3
- * Web         http://gugyclan.eu, http://popoklopsi.de
+ * Web         http://gugyclan.eu, https://dordnung.de
  * -----------------------------------------------------
  * 
  * CallAdmin
- * Copyright (C) 2013 Impact, Popoklopsi
+ * Copyright (C) 2013-2018 Impact, dordnung
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,18 +24,15 @@
  */
  
 #include <sourcemod>
-#include <autoexecconfig>
-#include "calladmin"
-#include "calladmin_stocks"
+#include "include/autoexecconfig"
+#include "include/calladmin"
+#include "include/calladmin_stocks"
 
 #undef REQUIRE_PLUGIN
-#include <updater>
+#include "include/updater"
 #include <clientprefs>
 #pragma semicolon 1
 #pragma newdecls required
-
-
-#define CLIENTPREFS_AVAILABLE()      (LibraryExists("clientprefs"))
 
 
 
@@ -54,7 +51,6 @@ ConVar g_hHostPort;
 int g_iHostPort;
 
 ConVar g_hHostIP;
-int g_iHostIP;
 char g_sHostIP[16];
 
 Handle g_hAdvertTimer;
@@ -81,15 +77,15 @@ int g_iAdminAction;
 
 
 
-// Reportid used for handling
+// Report id used for handling
 int g_iCurrentReportID;
 
-// List of not handled ID's
+// List of not handled IDs
 ArrayList g_hActiveReports;
 
 
 
-// Logfile
+// Log file
 char g_sLogFile[PLATFORM_MAX_PATH];
 
 
@@ -97,15 +93,11 @@ char g_sLogFile[PLATFORM_MAX_PATH];
 #define ADMIN_ACTION_BLOCK_MESSAGE 1
 
 
-bool g_bLateLoad;
-#pragma unused g_bLateLoad
-
-
 int g_iCurrentTrackers;
 
 
 
-// User info
+// Current target info
 g_iTarget[MAXPLAYERS + 1];
 char g_sTargetReason[MAXPLAYERS + 1][REASON_MAX_LENGTH];
 
@@ -118,11 +110,11 @@ g_iLastReport[MAXPLAYERS +1];
 // When was this user reported the last time?
 g_iLastReported[MAXPLAYERS +1];
 
-// Player saw the antispam message
-bool g_bSawMesage[MAXPLAYERS +1];
+// Whether or not a client saw the antispam message
+bool g_bSawMessage[MAXPLAYERS +1];
 
 
-// Cookies, yummy
+// Cookies
 Handle g_hLastReportCookie;
 Handle g_hLastReportedCookie;
 
@@ -149,7 +141,7 @@ Handle g_hOnReportHandledForward;
 public Plugin myinfo = 
 {
 	name = "CallAdmin",
-	author = "Impact, Popoklopsi",
+	author = "Impact, dordnung",
 	description = "Call an Admin for help",
 	version = CALLADMIN_VERSION,
 	url = "http://gugyclan.eu"
@@ -159,8 +151,6 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-	g_bLateLoad = late;
-	
 	RegPluginLibrary("calladmin");
 	
 	
@@ -251,7 +241,6 @@ public int Native_ReportClient(Handle plugin, int numParams)
 		return false;
 	}
 
-	// Set the report id
 	g_iCurrentReportID++;
 	g_hActiveReports.Push(g_iCurrentReportID);
 
@@ -295,17 +284,19 @@ public void OnPluginStart()
 	g_hHostIP     = FindConVar("hostip");
 	g_hServerName = FindConVar("hostname");
 	
-	// Shouldn't happen
+	
 	if (g_hHostPort == null)
 	{
 		CallAdmin_LogMessage("Couldn't find cvar 'hostport'");
 		SetFailState("Couldn't find cvar 'hostport'");
 	}
+	
 	if (g_hHostIP == null)
 	{
 		CallAdmin_LogMessage("Couldn't find cvar 'hostip'");
 		SetFailState("Couldn't find cvar 'hostip'");
 	}
+	
 	if (g_hServerName == null)
 	{
 		CallAdmin_LogMessage("Couldn't find cvar 'hostname'");
@@ -343,38 +334,37 @@ public void OnPluginStart()
 	
 	
 	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
-	HookConVarChange(g_hVersion, OnCvarChanged);
+	g_hVersion.AddChangeHook(OnCvarChanged);
 	
 	g_hServerName.GetString(g_sServerName, sizeof(g_sServerName));
-	HookConVarChange(g_hServerName, OnCvarChanged);
+	g_hServerName.AddChangeHook(OnCvarChanged);
 	
 	g_iHostPort = g_hHostPort.IntValue;
-	HookConVarChange(g_hHostPort, OnCvarChanged);
+	g_hHostPort.AddChangeHook(OnCvarChanged);
 	
-	g_iHostIP = g_hHostIP.IntValue;
-	LongToIp(g_iHostIP, g_sHostIP, sizeof(g_sHostIP));
-	HookConVarChange(g_hHostIP, OnCvarChanged);
+	UpdateHostIp();
+	g_hHostIP.AddChangeHook(OnCvarChanged);
 	
 	g_fAdvertInterval = g_hAdvertInterval.FloatValue;
-	HookConVarChange(g_hAdvertInterval, OnCvarChanged);
+	g_hAdvertInterval.AddChangeHook(OnCvarChanged);
 	
 	g_bPublicMessage = g_hPublicMessage.BoolValue;
-	HookConVarChange(g_hPublicMessage, OnCvarChanged);
+	g_hPublicMessage.AddChangeHook(OnCvarChanged);
 	
 	g_bOwnReason = g_hOwnReason.BoolValue;
-	HookConVarChange(g_hOwnReason, OnCvarChanged);
+	g_hOwnReason.AddChangeHook(OnCvarChanged);
 	
 	g_bConfirmCall = g_hConfirmCall.BoolValue;
-	HookConVarChange(g_hConfirmCall, OnCvarChanged);
+	g_hConfirmCall.AddChangeHook(OnCvarChanged);
 	
 	g_iSpamTime = g_hSpamTime.IntValue;
-	HookConVarChange(g_hSpamTime, OnCvarChanged);
+	g_hSpamTime.AddChangeHook(OnCvarChanged);
 	
 	g_iReportTime = g_hReportTime.IntValue;
-	HookConVarChange(g_hReportTime, OnCvarChanged);
+	g_hReportTime.AddChangeHook(OnCvarChanged);
 	
 	g_iAdminAction = g_hAdminAction.IntValue;
-	HookConVarChange(g_hAdminAction, OnCvarChanged);
+	g_hAdminAction.AddChangeHook(OnCvarChanged);
 	
 	
 	if (g_fAdvertInterval != 0.0)
@@ -387,7 +377,7 @@ public void OnPluginStart()
 	CreateTimer(10.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
 	
 	
-	// Used for the own reason
+	// Used to allow a client to input their own reason
 	AddCommandListener(ChatListener, "say");
 	AddCommandListener(ChatListener, "say2");
 	AddCommandListener(ChatListener, "say_team");
@@ -405,8 +395,9 @@ public void OnPluginStart()
 	g_hOnLogMessageForward          = CreateGlobalForward("CallAdmin_OnLogMessage", ET_Ignore, Param_Cell, Param_String);
 	g_hOnReportHandledForward       = CreateGlobalForward("CallAdmin_OnReportHandled", ET_Ignore, Param_Cell, Param_Cell); 
 	
+	
 	// Cookies
-	if (CLIENTPREFS_AVAILABLE())
+	if (LibraryExists("clientprefs"))
 	{
 		g_hLastReportCookie   = RegClientCookie("CallAdmin_LastReport", "Contains a timestamp when this user has reported the last time", CookieAccess_Private);
 		g_hLastReportedCookie = RegClientCookie("CallAdmin_LastReported", "Contains a timestamp when this user was reported the last time", CookieAccess_Private);
@@ -560,12 +551,7 @@ bool Forward_OnDrawMenu(int client)
 	
 	Call_Finish(result);
 	
-	if (result == Plugin_Continue)
-	{
-		return true;
-	}
-	
-	return false;
+	return (result == Plugin_Continue);
 }
 
 
@@ -582,12 +568,7 @@ bool Forward_OnReportPre(int client, int target, const char[] reason)
 	
 	Call_Finish(result);
 	
-	if (result == Plugin_Continue)
-	{
-		return true;
-	}
-	
-	return false;
+	return (result == Plugin_Continue);
 }
 
 
@@ -614,12 +595,7 @@ bool Forward_OnDrawOwnReason(int client)
 	
 	Call_Finish(result);
 	
-	if (result == Plugin_Continue)
-	{
-		return true;
-	}
-	
-	return false;
+	return (result == Plugin_Continue);
 }
 
 
@@ -633,12 +609,7 @@ bool Forward_OnAddToAdminCount(int client)
 	
 	Call_Finish(result);
 	
-	if (result == Plugin_Continue)
-	{
-		return true;
-	}
-	
-	return false;
+	return (result == Plugin_Continue);
 }
 
 
@@ -664,12 +635,7 @@ bool Forward_OnDrawTarget(int client, int target)
 	
 	Call_Finish(result);
 	
-	if (result == Plugin_Continue)
-	{
-		return true;
-	}
-	
-	return false;
+	return (result == Plugin_Continue);
 }
 
 
@@ -714,7 +680,7 @@ public Action Timer_Advert(Handle timer)
 {
 	if (g_iCurrentTrackers > 0)
 	{
-		// Spelling is different (0 admins, 1 admin, 2 admins, 3 admins...), we account for that :)
+		// Spelling is different (0 admins, 1 admin, 2 admins, 3 admins...)
 		if (g_iCurrentTrackers == 1)
 		{
 			PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_AdvertMessageSingular", g_iCurrentTrackers);
@@ -763,9 +729,7 @@ public void OnCvarChanged(ConVar cvar, const char[] oldValue, const char[] newVa
 	}
 	else if (cvar == g_hHostIP)
 	{
-		g_iHostIP = g_hHostIP.IntValue;
-		
-		LongToIp(g_iHostIP, g_sHostIP, sizeof(g_sHostIP));
+		UpdateHostIp();
 		
 		Forward_OnServerDataChanged(cvar, ServerData_HostIP, g_sHostIP, g_sHostIP);
 	}
@@ -781,11 +745,7 @@ public void OnCvarChanged(ConVar cvar, const char[] oldValue, const char[] newVa
 	}
 	else if (cvar == g_hAdvertInterval)
 	{
-		if (g_hAdvertTimer != null)
-		{
-			CloseHandle(g_hAdvertTimer);
-			g_hAdvertTimer = null;
-		}
+		delete g_hAdvertTimer;
 		
 		g_fAdvertInterval = g_hAdvertInterval.FloatValue;
 		
@@ -823,12 +783,12 @@ public void OnCvarChanged(ConVar cvar, const char[] oldValue, const char[] newVa
 
 
 
-public Action Command_Call(int client, int args)
+public Action Command_Call(int client, int argc)
 {
 	// Console cannot use this
 	if (client == 0)
 	{
-		PrintToServer("This command can't be used from console");
+		ReplyToCommand(client, "This command can't be used from console");
 		
 		return Plugin_Handled;
 	}
@@ -842,14 +802,14 @@ public Action Command_Call(int client, int args)
 	
 	if (g_iLastReport[client] == 0 || LastReportTimeCheck(client))
 	{
-		g_bSawMesage[client] = false;
+		g_bSawMessage[client] = false;
 		
 		ShowClientSelectMenu(client);
 	}
-	else if (!g_bSawMesage[client])
+	else if (!g_bSawMessage[client])
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_CommandNotAllowed", g_iSpamTime - ( GetTime() - g_iLastReport[client] ));
-		g_bSawMesage[client] = true;
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_CommandNotAllowed", g_iSpamTime - ( GetTime() - g_iLastReport[client] ));
+		g_bSawMessage[client] = true;
 	}
 
 	return Plugin_Handled;
@@ -857,11 +817,11 @@ public Action Command_Call(int client, int args)
 
 
 
-public Action Command_HandleCall(int client, int args)
+public Action Command_HandleCall(int client, int argc)
 {
 	if (client == 0)
 	{
-		PrintToServer("This command can't be used from console");
+		ReplyToCommand(client, "This command can't be used from console");
 		
 		return Plugin_Handled;
 	}
@@ -869,17 +829,17 @@ public Action Command_HandleCall(int client, int args)
 	
 	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
 		
 		return Plugin_Handled;
 	}
 	
 	
-	if (GetCmdArgs() != 1)
+	if (argc != 1)
 	{
 		char cmdName[64];
 		GetCmdArg(0, cmdName, sizeof(cmdName));
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t: %s <id>", "CallAdmin_WrongNumberOfArguments", cmdName);
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t: %s <id>", "CallAdmin_WrongNumberOfArguments", cmdName);
 		
 		return Plugin_Handled;
 	}
@@ -894,7 +854,7 @@ public Action Command_HandleCall(int client, int args)
 	
 	if (reportID > g_iCurrentReportID)
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_WrongReportID");
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_WrongReportID");
 		
 		return Plugin_Handled;	
 	}
@@ -904,7 +864,7 @@ public Action Command_HandleCall(int client, int args)
 	int reportIndex = g_hActiveReports.FindValue(reportID);
 	if (reportIndex == -1)
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_ReportAlreadyHandled");
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_ReportAlreadyHandled");
 		
 		return Plugin_Handled;	
 	}
@@ -918,17 +878,18 @@ public Action Command_HandleCall(int client, int args)
 
 
 
-public Action Command_Reload(int client, int args)
+public Action Command_Reload(int client, int argc)
 {
 	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
 		
 		return Plugin_Handled;
 	}
 	
 	
 	g_hActiveReports.Clear();
+	g_hReasonAdt.Clear();
 	ParseReasonList();
 
 	return Plugin_Handled;
@@ -970,7 +931,7 @@ void SetStates(int client, int target)
 	
 	
 	// Cookies
-	if (CLIENTPREFS_AVAILABLE())
+	if (LibraryExists("clientprefs"))
 	{
 		SetClientCookieEx(client, g_hLastReportCookie, "%d", currentTime);
 		SetClientCookieEx(target, g_hLastReportedCookie, "%d", currentTime);
@@ -981,7 +942,7 @@ void SetStates(int client, int target)
 
 void ConfirmCall(int client)
 {
-	Menu menu = CreateMenu(MenuHandler_ConfirmCall);
+	Menu menu = new Menu(MenuHandler_ConfirmCall);
 	menu.SetTitle("%T", "CallAdmin_ConfirmCall", client);
 	
 	char sConfirm[24];
@@ -1072,25 +1033,19 @@ bool ReportPlayer(int client, int target, char[] sReason)
 	{
 		return false;
 	}
-	
-	char clientNameBuf[MAX_NAME_LENGTH];
-	char targetNameBuf[MAX_NAME_LENGTH];
-
-	GetClientName(client, clientNameBuf, sizeof(clientNameBuf));
-	GetClientName(target, targetNameBuf, sizeof(targetNameBuf));
 
 	if (g_bPublicMessage)
 	{
-		PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_HasReported", clientNameBuf, targetNameBuf, sReason);
+		PrintToChatAll("\x04[CALLADMIN]\x03 %t", "CallAdmin_HasReported", client, target, sReason);
 	}
 	else
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_YouHaveReported", targetNameBuf, sReason);
+		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_YouHaveReported", target, sReason);
 	}
 	
 	SetStates(client, target);
 	
-	// Set the report id
+	
 	g_iCurrentReportID++;
 	g_hActiveReports.Push(g_iCurrentReportID);
 
@@ -1139,7 +1094,7 @@ int GetTotalTrackers()
 		
 		if (GetPluginStatus(hPlugin) == Plugin_Running)
 		{
-			// We check if the plugin has the pesudo forward
+			// We check if the plugin has the public CallAdmin_OnRequestTrackersCountRefresh function
 			if ( (func = GetFunctionByName(hPlugin, "CallAdmin_OnRequestTrackersCountRefresh") ) != INVALID_FUNCTION)
 			{
 				Call_StartFunction(hPlugin, func);
@@ -1155,7 +1110,7 @@ int GetTotalTrackers()
 		}
 	}
 	
-	CloseHandle(hIter);
+	delete hIter;
 	
 	return count;
 }
@@ -1168,7 +1123,7 @@ void ShowClientSelectMenu(int client)
 	char sName[MAX_NAME_LENGTH];
 	char sID[24];
 	
-	Menu menu = CreateMenu(MenuHandler_ClientSelect);
+	Menu menu = new Menu(MenuHandler_ClientSelect);
 	menu.SetTitle("%T", "CallAdmin_SelectClient", client);
 	
 	for (int i; i <= MaxClients; i++)
@@ -1188,7 +1143,7 @@ void ShowClientSelectMenu(int client)
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoPlayers");
 		g_iLastReport[client] = GetTime();
 		
-		if (CLIENTPREFS_AVAILABLE())
+		if (LibraryExists("clientprefs"))
 		{
 			SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
 		}
@@ -1240,7 +1195,7 @@ public void OnClientDisconnect_Post(int client)
 	g_sTargetReason[client][0] = '\0';
 	g_iLastReport[client]      = 0;
 	g_iLastReported[client]    = 0;
-	g_bSawMesage[client]       = false;
+	g_bSawMessage[client]       = false;
 	g_bAwaitingReason[client]  = false;
 	
 	RemoveAsTarget(client);
@@ -1270,10 +1225,9 @@ void ShowBanReasonMenu(int client)
 	count = g_hReasonAdt.Length;
 
 	
-	Menu menu = CreateMenu(MenuHandler_BanReason);
+	Menu menu = new Menu(MenuHandler_BanReason);
 	menu.SetTitle("%T", "CallAdmin_SelectReason", client, g_iTarget[client]);
 	
-	int index;
 	for (int i; i < count; i++)
 	{
 		g_hReasonAdt.GetString(i, sReasonBuffer, sizeof(sReasonBuffer));
@@ -1284,7 +1238,7 @@ void ShowBanReasonMenu(int client)
 		}
 
 		
-		menu.AddItem(sReasonBuffer[index], sReasonBuffer[index]);
+		menu.AddItem(sReasonBuffer, sReasonBuffer);
 	}
 	
 	// Own reason, call the forward
@@ -1348,6 +1302,15 @@ public int MenuHandler_BanReason(Menu menu, MenuAction action, int client, int p
 
 public Action ChatListener(int client, const char[] command, int argc)
 {
+	// There were a few cases were the client index was invalid which caused an index out-of-bounds error
+	// Invalid clients shouldn't be able to trigger this callback so the reason why this happens has yet to be found out
+	// Until then we have this check here to prevent it
+	if (!IsClientValid(client))
+	{
+		return Plugin_Continue;
+	}
+	
+	
 	if (g_bAwaitingReason[client] && !IsChatTrigger())
 	{
 		// 2 more for quotes
@@ -1457,9 +1420,9 @@ stock void LongToIp(int long, char[] str, int maxlen)
 {
 	int pieces[4];
 	
-	pieces[0] = (long >>> 24 & 255);
-	pieces[1] = (long >>> 16 & 255);
-	pieces[2] = (long >>> 8 & 255);
+	pieces[0] = ((long >>> 24) & 255);
+	pieces[1] = ((long >>> 16) & 255);
+	pieces[2] = ((long >>> 8) & 255);
 	pieces[3] = (long & 255); 
 	
 	Format(str, maxlen, "%d.%d.%d.%d", pieces[0], pieces[1], pieces[2], pieces[3]); 
@@ -1467,7 +1430,19 @@ stock void LongToIp(int long, char[] str, int maxlen)
 
 
 
-// Gnah, this should be the default behavior
+// Updates the global g_sHostIP variable to the current ip of the server
+// Using the int value directly provides incorrect results, when given the time it should be examined why 
+void UpdateHostIp()
+{
+	char tmpString[sizeof(g_sHostIP)];
+	g_hHostIP.GetString(tmpString, sizeof(tmpString));
+	
+	int tmpInt = StringToInt(tmpString);
+	LongToIp(tmpInt, g_sHostIP, sizeof(g_sHostIP));
+}
+
+
+
 stock void SetClientCookieEx(int client, Handle cookie, const char[] format, any:...)
 {
 	char sFormatBuf[1024];

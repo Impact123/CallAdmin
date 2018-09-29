@@ -2,13 +2,13 @@
 /**
  * -----------------------------------------------------
  * File        rss.php
- * Authors     Impact, Popoklopsi
+ * Authors     Impact, dordnung
  * License     GPLv3
- * Web         http://gugyclan.eu, http://popoklopsi.de
+ * Web         http://gugyclan.eu, https://dordnung.de
  * -----------------------------------------------------
  * 
  * CallAdmin
- * Copyright (C) 2013 Impact, Popoklopsi
+ * Copyright (C) 2013-2018 Impact, dordnung
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -257,7 +257,7 @@ $dbi->close();
 $rss->setTitle("CallAdmin RSS Feed");
 $rss->setLink("https://github.com/Impact123/CallAdmin");
 $rss->setSelfLink(sprintf("%s://%s%s", (!empty($_SERVER['HTTPS']) ? "https" : "http"), $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI']));
-$rss->setImage("CallAdmin RSS Feed", "https://github.com/Impact123/CallAdmin", "http://popoklopsi.de/calladmin/img/calladmin.png");
+$rss->setImage("CallAdmin RSS Feed", "https://github.com/Impact123/CallAdmin", "https://dordnung.de/calladmin/img/calladmin.png");
 $rss->setDescription("CallAdmin RSS Feed");
 
 while (($row = $fetchresult->fetch_assoc()))

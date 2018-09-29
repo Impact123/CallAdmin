@@ -1,13 +1,13 @@
 /**
  * -----------------------------------------------------
  * File        calladmin_steam.sp
- * Authors     Impact, Popoklopsi
+ * Authors     Impact, dordnung
  * License     GPLv3
- * Web         http://gugyclan.eu, http://popoklopsi.de
+ * Web         http://gugyclan.eu, https://dordnung.de
  * -----------------------------------------------------
  * 
  * CallAdmin
- * Copyright (C) 2013 Impact, Popoklopsi
+ * Copyright (C) 2013-2018 Impact, dordnung
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@
  */
  
 #include <sourcemod>
-#include <autoexecconfig>
-#include <messagebot>
-#include "calladmin"
-#include <socket>
+#include "include/autoexecconfig"
+#include "include/messagebot"
+#include "include/calladmin"
+#include "include/system2"
 #include <regex>
 
 #undef REQUIRE_PLUGIN
-#include <updater>
+#include "include/updater"
 #pragma semicolon 1
 #pragma newdecls required
 
@@ -39,10 +39,6 @@
 // This should be 128 KB which is more than enough
 // x * 4 -> bytes / 1024 -> KiloBytes
 #pragma dynamic 32768
-
-
-#define CALLADMIN_STEAM_METHOD_AVAILABLE()      (GetFeatureStatus(FeatureType_Native, "MessageBot_SetSendMethod")      == FeatureStatus_Available)
-#define SOCKET_AVAILABLE()                      (GetFeatureStatus(FeatureType_Native, "SocketCreate")                  == FeatureStatus_Available)
 
 
 
@@ -60,9 +56,9 @@ char g_sSteamUsername[128];
 ConVar g_hSteamPassword;
 char g_sSteamPassword[128];
 
-Handle g_hSteamIDRegex;
-Handle g_hSteamIDRegex2;
-Handle g_hCommunityIDRegex;
+Regex g_hSteamID2Regex;
+Regex g_hSteamID3Regex;
+Regex g_hCommunityIDRegex;
 
 
 char g_sSteamIDConfigFile[PLATFORM_MAX_PATH];
@@ -74,11 +70,14 @@ int g_iLastReportID;
 
 enum AuthStringType
 {
-	AuthString_SteamID,
 	AuthString_SteamID2,
+	AuthString_SteamID3,
 	AuthString_CommunityID,
 	AuthString_Unknown
 }
+
+
+ArrayList g_hRecipientAdt;
 
 
 
@@ -89,7 +88,7 @@ enum AuthStringType
 public Plugin myinfo = 
 {
 	name = "CallAdmin: Steam module",
-	author = "Impact, Popoklopsi",
+	author = "Impact, dordnung",
 	description = "The steammodule for CallAdmin",
 	version = CALLADMIN_VERSION,
 	url = "http://gugyclan.eu"
@@ -120,10 +119,12 @@ public void OnPluginStart()
 	
 	
 	// Just for simple validation usage
-	g_hSteamIDRegex     = CompileRegex("^STEAM_[0-1]{1}:[0-1]{1}:[0-9]+$");
-	g_hSteamIDRegex2    = CompileRegex("^\\[U:1:[0-9]{3,11}+\\]$");
-	g_hCommunityIDRegex = CompileRegex("^[0-9]{4,17}+$");
+	g_hSteamID2Regex    = new Regex("^STEAM_[0-1]{1}:[0-1]{1}:[0-9]+$");
+	g_hSteamID3Regex    = new Regex("^\\[U:1:[0-9]{3,11}+\\]$");
+	g_hCommunityIDRegex = new Regex("^[0-9]{4,17}+$");
 	
+	
+	g_hRecipientAdt = new ArrayList(ByteCountToCells(21));
 	
 	
 	// Clear the recipients
@@ -137,6 +138,7 @@ public void OnPluginStart()
 	
 
 	RegConsoleCmd("sm_calladmin_steam_reload", Command_Reload);
+	RegConsoleCmd("sm_calladmin_steam_listrecipients", Command_ListRecipients);
 	
 	
 	AutoExecConfig_SetFile("plugin.calladmin_steam");
@@ -151,13 +153,13 @@ public void OnPluginStart()
 	
 	
 	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
-	HookConVarChange(g_hVersion, OnCvarChanged);
+	g_hVersion.AddChangeHook(OnCvarChanged);
 	
 	g_hSteamUsername.GetString(g_sSteamUsername, sizeof(g_sSteamUsername));
-	HookConVarChange(g_hSteamUsername, OnCvarChanged);
+	g_hSteamUsername.AddChangeHook(OnCvarChanged);
 	
 	g_hSteamPassword.GetString(g_sSteamPassword, sizeof(g_sSteamPassword));
-	HookConVarChange(g_hSteamPassword, OnCvarChanged);
+	g_hSteamPassword.AddChangeHook(OnCvarChanged);
 }
 
 
@@ -179,7 +181,7 @@ public void OnMessageResultReceived(MessageBotResult result, MessageBotError err
 
 void CreateSteamIDList()
 {
-	Handle hFile;
+	File hFile;
 	hFile = OpenFile(g_sSteamIDConfigFile, "w");
 	
 	// Failed to open
@@ -189,11 +191,11 @@ void CreateSteamIDList()
 		SetFailState("Failed to open configfile 'calladmin_steam_steamidlist.cfg' for writing");
 	}
 	
-	WriteFileLine(hFile, "// List of steamids or communityids, seperated by a new line");
-	WriteFileLine(hFile, "// STEAM_0:0:1");
-	WriteFileLine(hFile, "// 76561197960265730");
+	hFile.WriteLine("// List of steamids or communityids, seperated by a new line");
+	hFile.WriteLine("// STEAM_0:0:1");
+	hFile.WriteLine("// 76561197960265730");
 	
-	CloseHandle(hFile);
+	delete hFile;
 }
 
 
@@ -219,7 +221,7 @@ void ParseSteamIDList()
 
 	
 	int len;
-	while (!IsEndOfFile(hFile) && hFile.ReadLine(sReadBuffer, sizeof(sReadBuffer)))
+	while (!hFile.EndOfFile() && hFile.ReadLine(sReadBuffer, sizeof(sReadBuffer)))
 	{
 		if (sReadBuffer[0] == '/' || IsCharSpace(sReadBuffer[0]))
 		{
@@ -248,23 +250,23 @@ void ParseSteamIDList()
 		
 		AuthStringType type = GetAuthIDType(sReadBuffer);
 		
-		// Is a steamid
-		if (type == AuthString_SteamID)
-		{
-			GetRegexSubString(g_hSteamIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
-		}
 		// Is a steamid2
-		else if (type == AuthString_SteamID2)
+		if (type == AuthString_SteamID2)
 		{
-			GetRegexSubString(g_hSteamIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
+			g_hSteamID2Regex.GetSubString(1, sReadBuffer, sizeof(sReadBuffer));
+		}
+		// Is a steamid3
+		else if (type == AuthString_SteamID3)
+		{
+			g_hSteamID3Regex.GetSubString(1, sReadBuffer, sizeof(sReadBuffer));
 			
-			// Convert it to an steamid
-			SteamID2ToSteamId(sReadBuffer, sReadBuffer, sizeof(sReadBuffer));
+			// Convert it to an steamid2
+			SteamID3ToSteamId2(sReadBuffer, sReadBuffer, sizeof(sReadBuffer));
 		}
 		// Is a communityid
 		else if (type == AuthString_CommunityID)
 		{
-			GetRegexSubString(g_hCommunityIDRegex, 1, sReadBuffer, sizeof(sReadBuffer));
+			g_hCommunityIDRegex.GetSubString(1, sReadBuffer, sizeof(sReadBuffer));
 		}
 		// No match :(
 		else
@@ -274,6 +276,7 @@ void ParseSteamIDList()
 		
 		// Add as recipient
 		MessageBot_AddRecipient(sReadBuffer);
+		g_hRecipientAdt.PushString(sReadBuffer);
 	}
 	
 	hFile.Close();
@@ -394,7 +397,7 @@ public Action Command_Reload(int client, int args)
 {
 	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
 		
 		return Plugin_Handled;
 	}
@@ -402,6 +405,7 @@ public Action Command_Reload(int client, int args)
 	
 	// Clear the recipients
 	MessageBot_ClearRecipients();
+	g_hRecipientAdt.Clear();
 	
 	// Read in all those steamids
 	ParseSteamIDList();
@@ -415,13 +419,40 @@ public Action Command_Reload(int client, int args)
 
 
 
-public void OnAllPluginsLoaded()
+public Action Command_ListRecipients(int client, int args)
 {
-	if (!LibraryExists("calladmin"))
+	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
 	{
-		SetFailState("CallAdmin not found");
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
+		
+		return Plugin_Handled;
 	}
 	
+	int count = g_hRecipientAdt.Length;
+	char sRecipientBuffer[21];
+	
+	if (count)
+	{
+		for (int i; i < count; i++)
+		{
+			g_hRecipientAdt.GetString(i, sRecipientBuffer, sizeof(sRecipientBuffer));
+			
+			ReplyToCommand(client, "Recipient %d: %s%s", i + 1, sRecipientBuffer, MessageBot_IsRecipient(sRecipientBuffer) ? "" : " (Not In Messagebot's list)");
+		}
+	}
+	else
+	{
+		ReplyToCommand(client, "Recipient list is empty");
+	}
+
+	return Plugin_Handled;
+}
+
+
+
+
+public void OnAllPluginsLoaded()
+{
 	if (LibraryExists("updater"))
 	{
 		Updater_AddPlugin(UPDATER_URL);
@@ -469,11 +500,23 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	else
 	{
 		GetClientName(client, sClientName, sizeof(sClientName));
-		GetClientAuthId(client, AuthId_Steam2, sClientID, sizeof(sClientID));
+		
+		if (!GetClientAuthId(client, AuthId_Steam2, sClientID, sizeof(sClientID)))
+		{
+			CallAdmin_LogMessage("Failed to get authentication for client %d (%s)", client, sClientName);
+			
+			return;
+		}
 	}
 	
 	GetClientName(target, sTargetName, sizeof(sTargetName));
-	GetClientAuthId(target, AuthId_Steam2, sTargetID, sizeof(sTargetID));
+	
+	if (!GetClientAuthId(target, AuthId_Steam2, sTargetID, sizeof(sTargetID)))
+	{
+		CallAdmin_LogMessage("Failed to get authentication for client %d (%s)", client, sTargetName);
+		
+		return;
+	}
 	
 	g_iLastReportID = CallAdmin_GetReportID();
 	
@@ -502,168 +545,95 @@ public void CallAdmin_OnReportHandled(int client, int id)
 
 void FetchGroupMembers(const char[] groupID)
 {
-	// Create a new socket
-	Handle Socket = SocketCreate(SOCKET_TCP, OnSocketError);
-	
-	
-	// Optional tweaking stuff
-	SocketSetOption(Socket, ConcatenateCallbacks, 4096);
-	SocketSetOption(Socket, SocketReceiveTimeout, 3);
-	SocketSetOption(Socket, SocketSendTimeout, 3);
-	
-	
+	// URL encode the group Id
+	char sGroupID[64 * 4];
+	System2_URLEncode(sGroupID, sizeof(sGroupID), groupID);
 
-	// Create a datapack
-	Handle pack = CreateDataPack();
+	// Create a HTTP request
+	System2HTTPRequest httpRequest = new System2HTTPRequest(OnHTTPReceive, "https://steamcommunity.com/groups/%s/memberslistxml?xml=1", sGroupID);
+	httpRequest.Timeout = 10;
 	
-	
-	// Buffers
-	char sGroupID[64];
-	strcopy(sGroupID, sizeof(sGroupID), groupID);
-	
-	
-	// Write the data to the pack
-	WritePackString(pack, sGroupID);
-	
-	
-	// Set the pack as argument to the callbacks, so we can read it out later
-	SocketSetArg(Socket, pack);
-	
-	
-	// Connect
-	SocketConnect(Socket, OnSocketConnect, OnSocketReceive, OnSocketDisconnect, "steamcommunity.com", 80);
+	// Start the HTTP request
+	httpRequest.GET();
+
+	// Clean up
+	delete httpRequest;
 }
 
 
 
 
-public int OnSocketConnect(Handle socket, any pack)
+public void OnHTTPReceive(bool success, const char[] error, System2HTTPRequest request, System2HTTPResponse response, HTTPRequestMethod method) 
 {
-	// If socket is connected, should be since this is the callback that is called if it is connected
-	if (SocketIsConnected(socket))
+	// Check if request could be made
+	if (!success)
 	{
-		// Buffers
-		char sRequestString[1024];
-		char sRequestPath[512];
-		char sGroupID[64 * 4];
-		
-		
-		// Reset the pack
-		ResetPack(pack, false);
-		
-		
-		// Read data
-		ReadPackString(pack, sGroupID, sizeof(sGroupID));
-		
-		// Close the pack
-		CloseHandle(pack);
-		
-		
-		URLEncode(sGroupID, sizeof(sGroupID));
-		
-		
-		// Params
-		Format(sRequestPath, sizeof(sRequestPath), "groups/%s/memberslistxml?xml=1", sGroupID);
-
-		
-		// Request String
-		Format(sRequestString, sizeof(sRequestString), "GET /%s HTTP/1.0\r\nHost: %s\r\nConnection: close\r\n\r\n", sRequestPath, "steamcommunity.com");
-
-		
-		// Send the request
-		SocketSend(socket, sRequestString);
+		CallAdmin_LogMessage("Error on fetching group members: %s", error);
+		return;
 	}
-}
 
-
-
-
-public int OnSocketReceive(Handle socket, char[] data, const int size, any pack) 
-{
-	if (socket != null)
+	// Check for valid HTTP response status code
+	if (response.StatusCode != 200)
 	{
-		// We shoudln't need it, but we use a little bit of a buffer to filter out garbage
-		static int SPLITSIZE1 = MAX_ITEMS + 50;
-		static int SPLITSIZE2 = 64;
-		
-		char[][] Split = new char[SPLITSIZE1][SPLITSIZE2];
-		char sTempID[21];
-		
-		
-		// We only have an limited amount of lines we can split, we shouldn't waste this ;)
-		int startindex  = 0;
-		if ( (startindex = StrContains(data, "<members>", true)) == -1)
+		CallAdmin_LogMessage("Error on fetching group members: HTTP status code %d", response.StatusCode);
+		return;
+	}
+
+	// Get the data of the response
+	char[] data = new char[response.ContentLength + 1]; 
+	response.GetContent(data, response.ContentLength + 1); 
+
+	// We shoudln't need it, but we use a little bit of a buffer to filter out garbage
+	static int SPLITSIZE1 = MAX_ITEMS + 50;
+	static int SPLITSIZE2 = 64;
+	
+	char[][] Split = new char[SPLITSIZE1][SPLITSIZE2];
+	char sTempID[21];
+	
+	
+	// We only have an limited amount of lines we can split, we shouldn't waste this ;)
+	int startindex  = 0;
+	if ( (startindex = StrContains(data, "<members>", true)) == -1)
+	{
+		startindex = 0;
+	}
+	
+	int endindex  = strlen(data);
+	if ( (endindex = StrContains(data, "</members>", true)) != -1)
+	{
+		data[endindex] = '\0';
+	}
+	
+	
+	ExplodeString(data[startindex], "<steamID64>", Split, SPLITSIZE1, SPLITSIZE2);
+	
+	
+	// Run though Communityids
+	int splitsize = SPLITSIZE1;
+	int index;
+	for (int i; i < splitsize; i++)
+	{
+		if (strlen(Split[i]) > 0)
 		{
-			startindex = 0;
-		}
-		
-		int endindex  = strlen(data);
-		if ( (endindex = StrContains(data, "</members>", true)) != -1)
-		{
-			data[endindex] = '\0';
-		}
-		
-		
-		ExplodeString(data[startindex], "<steamID64>", Split, SPLITSIZE1, SPLITSIZE2);
-				
-		
-		// Run though Communityids
-		int splitsize = SPLITSIZE1;
-		int index;
-		for (int i; i < splitsize; i++)
-		{
-			if (strlen(Split[i]) > 0)
+			// If we find something we split off at the searchresult, we then then only have the steamid
+			if ( (index = StrContains(Split[i], "</steamID64>", true)) != -1)
 			{
-				// If we find something we split off at the searchresult, we then then only have the steamid
-				if ( (index = StrContains(Split[i], "</steamID64>", true)) != -1)
-				{
-					Split[i][index] = '\0';
-				}
-				
-				// No match :(
-				if (GetAuthIDType(Split[i]) != AuthString_CommunityID)
-				{
-					continue;
-				}
-				
-				// We might have a use for this later
-				strcopy(sTempID, sizeof(sTempID), Split[i]);
-				
-				// Add as recipient
-				MessageBot_AddRecipient(sTempID);
+				Split[i][index] = '\0';
 			}
+			
+			// No match :(
+			if (GetAuthIDType(Split[i]) != AuthString_CommunityID)
+			{
+				continue;
+			}
+			
+			// We might have a use for this later
+			strcopy(sTempID, sizeof(sTempID), Split[i]);
+			
+			// Add as recipient
+			MessageBot_AddRecipient(sTempID);
+			g_hRecipientAdt.PushString(sTempID);
 		}
-		
-		
-		// Close the socket
-		if (SocketIsConnected(socket))
-		{
-			SocketDisconnect(socket);
-		}
-	}
-}
-
-
-
-
-public int OnSocketDisconnect(Handle socket, any pack)
-{
-	if (socket != null)
-	{
-		CloseHandle(socket);
-	}
-}
-
-
-
-
-public int OnSocketError(Handle socket, const int errorType, const int errorNum, any pack)
-{
-	CallAdmin_LogMessage("Socket Error: %d, %d", errorType, errorNum);
-	
-	if (socket != null)
-	{
-		CloseHandle(socket);
 	}
 }
 
@@ -672,15 +642,15 @@ public int OnSocketError(Handle socket, const int errorType, const int errorNum,
 
 stock AuthStringType GetAuthIDType(const char[] auth)
 {
-	if (MatchRegex(g_hSteamIDRegex, auth) == 1)
-	{
-		return AuthString_SteamID;
-	}
-	else if (MatchRegex(g_hSteamIDRegex2, auth) == 1)
+	if (g_hSteamID2Regex.Match(auth) == 1)
 	{
 		return AuthString_SteamID2;
 	}
-	else if (MatchRegex(g_hCommunityIDRegex, auth) == 1)
+	else if (g_hSteamID3Regex.Match(auth) == 1)
+	{
+		return AuthString_SteamID3;
+	}
+	else if (g_hCommunityIDRegex.Match(auth) == 1)
 	{
 		return AuthString_CommunityID;
 	}
@@ -690,64 +660,14 @@ stock AuthStringType GetAuthIDType(const char[] auth)
 
 
 
-stock void SteamID2ToSteamId(const char[] steamID2, char[] dest, int max_len)
+stock void SteamID3ToSteamId2(const char[] steamID3, char[] dest, int max_len)
 {
 	char sTemp[21];
-	strcopy(sTemp, sizeof(sTemp), steamID2);
+	strcopy(sTemp, sizeof(sTemp), steamID3);
 	
 	sTemp[strlen(sTemp)] = '\0';
 	
 	int temp = StringToInt(sTemp[5]);
 	
 	Format(dest, max_len, "STEAM_0:%d:%d", temp & 1, temp >> 1);
-}
-
-
-
-
-// Written by Peace-Maker (i guess), formatted for better readability
-stock void URLEncode(char[] sString, int maxlen, char safe[] = "/", bool bFormat = false)
-{
-	char sAlwaysSafe[256];
-	Format(sAlwaysSafe, sizeof(sAlwaysSafe), "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-%s", safe);
-	
-	// Need 2 '%' since sp's Format parses one as a parameter to replace
-	// http://wiki.alliedmods.net/Format_Class_Functions_%28SourceMod_Scripting%29
-	if (bFormat)
-	{
-		ReplaceString(sString, maxlen, "%", "%%25");
-	}
-	else
-	{
-		ReplaceString(sString, maxlen, "%", "%25");
-	}
-	
-	
-	char sChar[8];
-	char sReplaceChar[8];
-	
-	for (int i = 1; i < 256; i++)
-	{
-		// Skip the '%' double replace ftw..
-		if (i==37)
-		{
-			continue;
-		}
-		
-		
-		Format(sChar, sizeof(sChar), "%c", i);
-		if (StrContains(sAlwaysSafe, sChar) == -1 && StrContains(sString, sChar) != -1)
-		{
-			if (bFormat)
-			{
-				Format(sReplaceChar, sizeof(sReplaceChar), "%%%%%02X", i);
-			}
-			else
-			{
-				Format(sReplaceChar, sizeof(sReplaceChar), "%%%02X", i);
-			}
-			
-			ReplaceString(sString, maxlen, sChar, sReplaceChar);
-		}
-	}
 }

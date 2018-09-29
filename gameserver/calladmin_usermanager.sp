@@ -1,13 +1,13 @@
 /**
  * -----------------------------------------------------
  * File        calladmin_usermanager.sp
- * Authors     Popoklopsi, Impact
+ * Authors     dordnung, Impact
  * License     GPLv3
- * Web         http://popoklopsi.de, http://gugyclan.eu
+ * Web         https://dordnung.de, http://gugyclan.eu
  * -----------------------------------------------------
  * 
  * CallAdmin
- * Copyright (C) 2013 Popoklopsi, Impact
+ * Copyright (C) 2013-2018 dordnung, Impact
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,12 +25,12 @@
  
 
 #include <sourcemod>
-#include <autoexecconfig>
-#include "calladmin"
-#include "calladmin_stocks"
+#include "include/autoexecconfig"
+#include "include/calladmin"
+#include "include/calladmin_stocks"
 
 #undef REQUIRE_PLUGIN
-#include <updater>
+#include "include/updater"
 #include <basecomm>
 
 #pragma semicolon 1
@@ -38,18 +38,18 @@
 
 
 // Version cvar
-Handle g_hVersion;
+ConVar g_hVersion;
 
 // Cvar to blacklist muted players
-Handle g_hBlacklistMuted;
+ConVar g_hBlacklistMuted;
 bool g_bBlacklistMuted;
 
 // Cvar to blacklist gagged players
-Handle g_hBlacklistGagged;
+ConVar g_hBlacklistGagged;
 bool g_bBlacklistGagged;
 
 // Cvar to show information
-Handle g_hShowInformation;
+ConVar g_hShowInformation;
 bool g_bShowInformation;
 
 
@@ -68,10 +68,10 @@ bool g_bClientImmune[MAXPLAYERS + 1];
 public Plugin myinfo = 
 {
 	name = "CallAdmin UserManager",
-	author = "Popoklopsi, Impact",
+	author = "dordnung, Impact",
 	description = "The usermanagermodule for CallAdmin",
 	version = CALLADMIN_VERSION,
-	url = "http://popoklopsi.de"
+	url = "https://dordnung.de"
 }
 
 
@@ -125,19 +125,19 @@ public void OnPluginStart()
 
 
 	// Read Config
-	g_bBlacklistMuted = GetConVarBool(g_hBlacklistMuted);
-	g_bBlacklistGagged = GetConVarBool(g_hBlacklistGagged);
-	g_bShowInformation = GetConVarBool(g_hShowInformation);
+	g_bBlacklistMuted = g_hBlacklistMuted.BoolValue;
+	g_bBlacklistGagged = g_hBlacklistGagged.BoolValue;
+	g_bShowInformation = g_hShowInformation.BoolValue;
 
 
 	// Set Version
-	SetConVarString(g_hVersion, CALLADMIN_VERSION);
+	g_hVersion.SetString(CALLADMIN_VERSION);
 
 	// Hook changes
-	HookConVarChange(g_hVersion, OnCvarChanged);
-	HookConVarChange(g_hBlacklistMuted, OnCvarChanged);
-	HookConVarChange(g_hBlacklistGagged, OnCvarChanged);
-	HookConVarChange(g_hShowInformation, OnCvarChanged);
+	g_hVersion.AddChangeHook(OnCvarChanged);
+	g_hBlacklistMuted.AddChangeHook(OnCvarChanged);
+	g_hBlacklistGagged.AddChangeHook(OnCvarChanged);
+	g_hShowInformation.AddChangeHook(OnCvarChanged);
 }
 
 
@@ -146,7 +146,7 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 {
 	if (cvar == g_hBlacklistMuted)
 	{
-		g_bBlacklistMuted = GetConVarBool(g_hBlacklistMuted);
+		g_bBlacklistMuted = g_hBlacklistMuted.BoolValue;
 
 		// Check basecomm
 		if (!LibraryExists("basecomm") && g_bBlacklistMuted)
@@ -157,7 +157,7 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 
 	else if (cvar == g_hBlacklistGagged)
 	{
-		g_bBlacklistGagged = GetConVarBool(g_hBlacklistGagged);
+		g_bBlacklistGagged = g_hBlacklistGagged.BoolValue;
 
 		// Check basecomm
 		if (!LibraryExists("basecomm") && g_hBlacklistGagged)
@@ -168,12 +168,12 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 
 	else if (cvar == g_hShowInformation)
 	{
-		g_bShowInformation = GetConVarBool(g_hShowInformation);
+		g_bShowInformation = g_hShowInformation.BoolValue;
 	}
 
 	else if (cvar == g_hVersion)
 	{
-		SetConVarString(g_hVersion, CALLADMIN_VERSION);
+		g_hVersion.SetString(CALLADMIN_VERSION);
 	}
 }
 
@@ -181,11 +181,6 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 // Updater
 public void OnAllPluginsLoaded()
 {
-	if (!LibraryExists("calladmin"))
-	{
-		SetFailState("CallAdmin not found");
-	}
-	
 	if (LibraryExists("updater"))
 	{
 		Updater_AddPlugin(UPDATER_URL);
