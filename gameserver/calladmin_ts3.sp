@@ -244,7 +244,7 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	System2_URLEncode(sClientID, sizeof(sClientID), sClientID);
 	System2_URLEncode(sTargetName, sizeof(sTargetName), sTargetName);
 	System2_URLEncode(sTargetID, sizeof(sTargetID), sTargetID);
-	System2_URLEncode(sReason, sizeof(sReason), sReason);
+	System2_URLEncode(sReason, sizeof(sReason), reason);
 	System2_URLEncode(sServerName, sizeof(sServerName), sServerName);
 		
 	// Temp, for bots
