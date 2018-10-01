@@ -9,8 +9,8 @@ addons:
             - unzip
 
 env:
-    - SMBRANCH=1.8
     - SMBRANCH=1.9
+    - SMBRANCH=1.10
 
 before_script:
     - SMPACKAGE="http://sourcemod.net/latest.php?os=linux&version=${SMBRANCH}"
@@ -45,7 +45,7 @@ deploy:
         - calladmin_gameserver.zip
         - calladmin_web.zip
     on:
-        condition: $SMBRANCH = 1.8
+        condition: $SMBRANCH = 1.9
         tags: true
         repo: Impact123/CallAdmin
     branches:
