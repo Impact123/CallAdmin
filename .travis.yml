@@ -12,8 +12,7 @@ env:
     matrix:
         - SMBRANCH=1.9
         - SMBRANCH=1.10
-    - secure: 
-        global:
+    global:
             # FTP_USER
             secure: uGG2kUnnc2L7gp8YOU9DzM2ySqA0kRJ8+ZZt4owZxx2rd5w6AjBtN23aVHchAipHnPKvWQwxCFrmVWd/bkFtYgVYRWdOO5bTCcW7yvhwMnizPH/VsaPoT3n79Z8snZOiChhOJpjumymlErsJ4Gi0X9rNBqjze8dW1MgnT3XPwEE=
             # FTP_PASSWORD
@@ -44,24 +43,23 @@ script:
 
 deploy:
     - provider: releases
-        skip_cleanup: true
-        api_key:
-            secure: aluHVTVa3DatUISjPUUck1YNlOVqNiZI7F4Lk0DcTpGuSs38UtZYbxXXHibrq004LP/R1GvMxFZx0rkYDKJJyJw0HpoQlodsgm5T3g5OJAcHfrD8WcR0R5T5GBUBaTZ6copr5175TDhMcGTHTA66rFDmch7Sh1m86IVhwhlJbag=
-        file:
-            - calladmin_gameserver.zip
-            - calladmin_web.zip
-        on:
-            condition: "$SMBRANCH = 1.9"
-            tags: true
-            repo: Impact123/CallAdmin
-        branches:
-            only:
-                - master
-                - development
+      skip_cleanup: true
+      api_key:
+          secure: aluHVTVa3DatUISjPUUck1YNlOVqNiZI7F4Lk0DcTpGuSs38UtZYbxXXHibrq004LP/R1GvMxFZx0rkYDKJJyJw0HpoQlodsgm5T3g5OJAcHfrD8WcR0R5T5GBUBaTZ6copr5175TDhMcGTHTA66rFDmch7Sh1m86IVhwhlJbag=
+      file:
+          - calladmin_gameserver.zip
+          - calladmin_web.zip
+      on:
+          condition: "$SMBRANCH = 1.9"
+          tags: true
+          repo: Impact123/CallAdmin
+          branches:
+              only:
+                  - master
+                  - development
     - provider: script
-        script:
-            - bash deploy.sh
-        on:
-            condition: "$SMBRANCH = 1.9"
-            repo: Impact123/CallAdmin
-            branch: development
+      script: bash deploy.sh
+      on:
+          condition: "$SMBRANCH = 1.9"
+          repo: Impact123/CallAdmin
+          branch: development
