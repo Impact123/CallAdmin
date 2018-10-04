@@ -13,10 +13,9 @@ env:
         - SMBRANCH=1.9
         - SMBRANCH=1.10
     global:
-            # FTP_USER
-            secure: "FWKtX3YFn30xhIEtlkxqBuW8z3/S43/zoxAJuHXTGM3CrCL8n6gsiRyqCJZP7f3Htv48h68SoHdYyihczMORObk0CxuOx0nzU6oasBEJDcinZ4pdcjxWLm0/GqPiW1KpC3xjoCB/SO7Vdocp6M0O/r/d67bjudHQ3mTVkCIpU/w="
-            # FTP_PASSWORD
-            secure: "rNihpg+iwnBcWeXYuPbBA4li/wlMbheLDRukeyTFXf2GFyLviCo4XtlGHg4ypm2kYqQHYnhMKlmrA8NnBv2V25BR+T12YKuB/n4hMlm4k7kI+i2w+7Gw4ePNaE0Or03sU90BXMYVgaoMG5VX4P6wxzqv4nNPjwDSeIGhEDWeptE="
+        - secure: "FWKtX3YFn30xhIEtlkxqBuW8z3/S43/zoxAJuHXTGM3CrCL8n6gsiRyqCJZP7f3Htv48h68SoHdYyihczMORObk0CxuOx0nzU6oasBEJDcinZ4pdcjxWLm0/GqPiW1KpC3xjoCB/SO7Vdocp6M0O/r/d67bjudHQ3mTVkCIpU/w="
+        - secure: "rNihpg+iwnBcWeXYuPbBA4li/wlMbheLDRukeyTFXf2GFyLviCo4XtlGHg4ypm2kYqQHYnhMKlmrA8NnBv2V25BR+T12YKuB/n4hMlm4k7kI+i2w+7Gw4ePNaE0Or03sU90BXMYVgaoMG5VX4P6wxzqv4nNPjwDSeIGhEDWeptE="
+
 before_script:
     - SMPACKAGE="http://sourcemod.net/latest.php?os=linux&version=${SMBRANCH}"
     - wget "$SMPACKAGE" -O latest.tar.gz
