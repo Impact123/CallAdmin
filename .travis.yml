@@ -58,6 +58,7 @@ deploy:
                   - master
                   - development
     - provider: script
+      skip_cleanup: true
       script: bash deploy.sh
       on:
           condition: "$SMBRANCH = 1.9"
