@@ -1372,9 +1372,9 @@ public Action ChatListener(int client, const char[] command, int argc)
 
 stock int GetRealClientCount()
 {
-	count;
+	int count;
 	
-	for (i; i <= MaxClients; i++)
+	for (int i; i <= MaxClients; i++)
 	{
 		if (IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i))
 		{
