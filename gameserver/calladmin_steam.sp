@@ -24,11 +24,13 @@
  */
  
 #include <sourcemod>
+#include <regex>
 #include "include/autoexecconfig"
 #include "include/messagebot"
 #include "include/calladmin"
+
+#undef REQUIRE_EXTENSIONS
 #include "include/system2"
-#include <regex>
 
 #undef REQUIRE_PLUGIN
 #include "include/updater"
@@ -361,6 +363,14 @@ void ParseGroupIDList()
 		if (len < 3 || len > 64)
 		{
 			continue;
+		}
+		
+		
+		if (!LibraryExists("system2"))
+		{
+			CallAdmin_LogMessage("Group fetching requires the system2 extension. Install it or remove/comment out your group names from the config file to hide this message");
+			
+			break;
 		}
 		
 		
