@@ -443,6 +443,10 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 	{
 		MessageBot_SetOption(OPTION_DEBUG, g_hDebug.BoolValue);
 	}
+	else if (cvar == g_hRequestTimeout)
+	{
+		MessageBot_SetOption(OPTION_REQUEST_TIMEOUT, g_hRequestTimeout.IntValue);
+	}
 }
 
 
