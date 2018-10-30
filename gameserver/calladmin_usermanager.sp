@@ -103,6 +103,17 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 }
 
 
+
+public void OnConfigsExecuted()
+{
+	g_bBlacklistMuted = g_hBlacklistMuted.BoolValue;
+	g_bBlacklistGagged = g_hBlacklistGagged.BoolValue;
+	g_bShowInformation = g_hShowInformation.BoolValue;
+}
+
+
+
+
 // Plugin Started
 public void OnPluginStart()
 {
@@ -110,8 +121,8 @@ public void OnPluginStart()
 	AutoExecConfig_SetFile("plugin.calladmin_usermanager");
 
 
-	g_hVersion = AutoExecConfig_CreateConVar("sm_calladmin_usermanager_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hBlacklistMuted = AutoExecConfig_CreateConVar("sm_calladmin_blacklist_muted", "1",  "Disallow muted players to report a player", FCVAR_NONE);
+	g_hVersion         = AutoExecConfig_CreateConVar("sm_calladmin_usermanager_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hBlacklistMuted  = AutoExecConfig_CreateConVar("sm_calladmin_blacklist_muted", "1",  "Disallow muted players to report a player", FCVAR_NONE);
 	g_hBlacklistGagged = AutoExecConfig_CreateConVar("sm_calladmin_blacklist_gagged", "1",  "Disallow gagged players to report a player", FCVAR_NONE);
 	g_hShowInformation = AutoExecConfig_CreateConVar("sm_calladmin_show_information", "1",  "Show status to player on mute/gag", FCVAR_NONE);
 
@@ -122,12 +133,6 @@ public void OnPluginStart()
 
 	// Load translation
 	LoadTranslations("calladmin_usermanager.phrases");
-
-
-	// Read Config
-	g_bBlacklistMuted = g_hBlacklistMuted.BoolValue;
-	g_bBlacklistGagged = g_hBlacklistGagged.BoolValue;
-	g_bShowInformation = g_hShowInformation.BoolValue;
 
 
 	// Set Version

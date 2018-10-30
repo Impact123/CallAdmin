@@ -84,8 +84,13 @@ public Plugin myinfo =
 
 
 
+
 public void OnConfigsExecuted()
 {
+	g_iEntryPruning = g_hEntryPruning.IntValue;
+	g_hServerKey.GetString(g_sServerKey, sizeof(g_sServerKey));
+	g_iOhphanedEntryPruning = g_hOhphanedEntryPruning.IntValue;
+	
 	if (!g_bDbInitTriggered)
 	{
 		// This convar is the only one which isn't hooked, we only fetch its content once before the connection to the database is made
@@ -118,16 +123,12 @@ public void OnPluginStart()
 	LoadTranslations("calladmin.phrases");
 	
 	
+	// This is done so that when the plugin is updated its version stays up to date too
 	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	g_hVersion.AddChangeHook(OnCvarChanged);
 
-	g_iEntryPruning = g_hEntryPruning.IntValue;
 	g_hEntryPruning.AddChangeHook(OnCvarChanged);
-
-	g_hServerKey.GetString(g_sServerKey, sizeof(g_sServerKey));
 	g_hServerKey.AddChangeHook(OnCvarChanged);
-	
-	g_iOhphanedEntryPruning = g_hOhphanedEntryPruning.IntValue;
 	g_hOhphanedEntryPruning.AddChangeHook(OnCvarChanged);
 
 	CreateTimer(60.0, Timer_PruneEntries, _, TIMER_REPEAT);

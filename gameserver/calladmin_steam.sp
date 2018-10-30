@@ -106,6 +106,19 @@ public Plugin myinfo =
 
 
 
+public void OnConfigsExecuted()
+{
+	g_hSteamUsername.GetString(g_sSteamUsername, sizeof(g_sSteamUsername));
+	g_hSteamPassword.GetString(g_sSteamPassword, sizeof(g_sSteamPassword));
+
+	MessageBot_SetOption(OPTION_WAIT_AFTER_LOGOUT, g_hLogOffDelay.IntValue);
+	MessageBot_SetOption(OPTION_WAIT_BETWEEN_MESSAGES, g_hMessageDelay.IntValue);
+	MessageBot_SetOption(OPTION_DEBUG, g_hDebug.BoolValue);
+	MessageBot_SetOption(OPTION_REQUEST_TIMEOUT, g_hRequestTimeout.IntValue);
+}
+
+
+
 
 public void OnPluginStart()
 {
@@ -174,27 +187,18 @@ public void OnPluginStart()
 	AutoExecConfig_CleanFile();
 	
 	
+	// // This is done so that when the plugin is updated its version stays up to date too
 	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	g_hVersion.AddChangeHook(OnCvarChanged);
 	
-	g_hSteamUsername.GetString(g_sSteamUsername, sizeof(g_sSteamUsername));
 	g_hSteamUsername.AddChangeHook(OnCvarChanged);
-	
-	g_hSteamPassword.GetString(g_sSteamPassword, sizeof(g_sSteamPassword));
 	g_hSteamPassword.AddChangeHook(OnCvarChanged);
 	
-	
 	g_hLogOffDelay.AddChangeHook(OnCvarChanged);
-	MessageBot_SetOption(OPTION_WAIT_AFTER_LOGOUT, g_hLogOffDelay.IntValue);
-	
 	g_hMessageDelay.AddChangeHook(OnCvarChanged);
-	MessageBot_SetOption(OPTION_WAIT_BETWEEN_MESSAGES, g_hMessageDelay.IntValue);
-	
 	g_hDebug.AddChangeHook(OnCvarChanged);
-	MessageBot_SetOption(OPTION_DEBUG, g_hDebug.BoolValue);
-	
 	g_hRequestTimeout.AddChangeHook(OnCvarChanged);
-	MessageBot_SetOption(OPTION_REQUEST_TIMEOUT, g_hRequestTimeout.IntValue);
+	
 }
 
 
