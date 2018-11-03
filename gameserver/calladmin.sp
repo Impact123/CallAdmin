@@ -1143,12 +1143,6 @@ void ShowClientSelectMenu(int client)
 	if (menu.ItemCount < 1)
 	{
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoPlayers");
-		g_iLastReport[client] = GetTime();
-		
-		if (LibraryExists("clientprefs"))
-		{
-			SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
-		}
 	}
 	else
 	{
