@@ -39,10 +39,10 @@ enum MessageBotResult
 
 enum MessageBotOption
 {
-    OPTION_DEBUG,                      // Option for enable or disable debugging
-    OPTION_WAIT_BETWEEN_MESSAGES,      // Option to set wait time in milliseconds between messages
-    OPTION_WAIT_AFTER_LOGOUT,          // Option to set wait time in milliseconds after logout
-    OPTION_REQUEST_TIMEOUT,            // Option to set request timeout for CURL requests
+    OPTION_DEBUG,                      // Option for enable or disable debugging (def. 0)
+    OPTION_WAIT_BETWEEN_MESSAGES,      // Option to set the wait time in milliseconds between messages (def. 2000)
+    OPTION_WAIT_AFTER_LOGOUT,          // Option to set the wait time in milliseconds after logout (def. 5000)
+    OPTION_REQUEST_TIMEOUT,            // Option to set the request timeout in seconds for CURL requests (def. 30)
 };
 
 
