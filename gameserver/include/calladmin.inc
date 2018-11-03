@@ -8,7 +8,7 @@
 
 
 /** Global calladmin version, do not change */
-#define CALLADMIN_VERSION	"0.1.7"
+#define CALLADMIN_VERSION	"0.1.8"
 
 
 
