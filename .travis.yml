@@ -62,6 +62,5 @@ deploy:
       script: bash deploy.sh
       on:
           condition: "$SMBRANCH = 1.9"
-          tags: true
           repo: Impact123/CallAdmin
           branch: master
