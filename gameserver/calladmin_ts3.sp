@@ -68,6 +68,16 @@ public Plugin myinfo =
 
 
 
+public void OnConfigsExecuted()
+{
+	g_hUrl.GetString(g_sUrl, sizeof(g_sUrl));
+	PreFormatUrl();
+	
+	g_hKey.GetString(g_sKey, sizeof(g_sKey));
+}
+
+
+
 
 public void OnPluginStart()
 {
@@ -82,14 +92,11 @@ public void OnPluginStart()
 	AutoExecConfig_CleanFile();
 	
 	
+	// This is done so that when the plugin is updated its version stays up to date too
 	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	g_hVersion.AddChangeHook(OnCvarChanged);
 	
-	g_hUrl.GetString(g_sUrl, sizeof(g_sUrl));
-	PreFormatUrl();
-	g_hUrl.AddChangeHook(OnCvarChanged);
-	
-	g_hKey.GetString(g_sKey, sizeof(g_sKey));
+	g_hUrl.AddChangeHook(OnCvarChanged);	
 	g_hKey.AddChangeHook(OnCvarChanged);
 	
 	CreateTimer(20.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);

@@ -10,6 +10,7 @@ addons:
 
 env:
     matrix:
+        - SMBRANCH=1.8
         - SMBRANCH=1.9
         - SMBRANCH=1.10
     global:
@@ -61,6 +62,5 @@ deploy:
       script: bash deploy.sh
       on:
           condition: "$SMBRANCH = 1.9"
-          tags: true
           repo: Impact123/CallAdmin
           branch: master

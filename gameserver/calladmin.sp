@@ -276,6 +276,32 @@ public int Native_GetReportID(Handle plugin, int numParams)
 
 
 
+public void OnConfigsExecuted()
+{
+	g_iHostPort = g_hHostPort.IntValue;
+	UpdateHostIp();
+	
+	g_hServerName.GetString(g_sServerName, sizeof(g_sServerName));
+	g_bPublicMessage = g_hPublicMessage.BoolValue;
+	g_bOwnReason = g_hOwnReason.BoolValue;
+	g_bConfirmCall = g_hConfirmCall.BoolValue;
+	g_iSpamTime = g_hSpamTime.IntValue;
+	g_iReportTime = g_hReportTime.IntValue;
+	g_iAdminAction = g_hAdminAction.IntValue;
+	
+	g_fAdvertInterval = g_hAdvertInterval.FloatValue;
+	
+	delete g_hAdvertTimer;
+	
+	if (g_fAdvertInterval != 0.0)
+	{
+		g_hAdvertTimer = CreateTimer(g_fAdvertInterval, Timer_Advert, _, TIMER_REPEAT);
+	}
+}
+
+
+
+
 public void OnPluginStart()
 {
 	BuildPath(Path_SM, g_sLogFile, sizeof(g_sLogFile), "logs/calladmin.log");
@@ -332,46 +358,22 @@ public void OnPluginStart()
 	
 	LoadTranslations("calladmin.phrases");
 	
-	
+	// This is done so that when the plugin is updated its version stays up to date too
 	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	g_hVersion.AddChangeHook(OnCvarChanged);
 	
-	g_hServerName.GetString(g_sServerName, sizeof(g_sServerName));
+	
 	g_hServerName.AddChangeHook(OnCvarChanged);
-	
-	g_iHostPort = g_hHostPort.IntValue;
 	g_hHostPort.AddChangeHook(OnCvarChanged);
-	
-	UpdateHostIp();
 	g_hHostIP.AddChangeHook(OnCvarChanged);
-	
-	g_fAdvertInterval = g_hAdvertInterval.FloatValue;
 	g_hAdvertInterval.AddChangeHook(OnCvarChanged);
-	
-	g_bPublicMessage = g_hPublicMessage.BoolValue;
 	g_hPublicMessage.AddChangeHook(OnCvarChanged);
-	
-	g_bOwnReason = g_hOwnReason.BoolValue;
 	g_hOwnReason.AddChangeHook(OnCvarChanged);
-	
-	g_bConfirmCall = g_hConfirmCall.BoolValue;
-	g_hConfirmCall.AddChangeHook(OnCvarChanged);
-	
-	g_iSpamTime = g_hSpamTime.IntValue;
+	g_hConfirmCall.AddChangeHook(OnCvarChanged);	
 	g_hSpamTime.AddChangeHook(OnCvarChanged);
-	
-	g_iReportTime = g_hReportTime.IntValue;
 	g_hReportTime.AddChangeHook(OnCvarChanged);
-	
-	g_iAdminAction = g_hAdminAction.IntValue;
 	g_hAdminAction.AddChangeHook(OnCvarChanged);
 	
-	
-	if (g_fAdvertInterval != 0.0)
-	{
-		g_hAdvertTimer = CreateTimer(g_fAdvertInterval, Timer_Advert, _, TIMER_REPEAT);
-	}
-
 	
 	// Modules must create their own updaters
 	CreateTimer(10.0, Timer_UpdateTrackersCount, _, TIMER_REPEAT);
@@ -1141,12 +1143,6 @@ void ShowClientSelectMenu(int client)
 	if (menu.ItemCount < 1)
 	{
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoPlayers");
-		g_iLastReport[client] = GetTime();
-		
-		if (LibraryExists("clientprefs"))
-		{
-			SetClientCookieEx(client, g_hLastReportCookie, "%d", GetTime());
-		}
 	}
 	else
 	{
@@ -1372,9 +1368,9 @@ public Action ChatListener(int client, const char[] command, int argc)
 
 stock int GetRealClientCount()
 {
-	count;
+	int count;
 	
-	for (i; i <= MaxClients; i++)
+	for (int i; i <= MaxClients; i++)
 	{
 		if (IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i))
 		{

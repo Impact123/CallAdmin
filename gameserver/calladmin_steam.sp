@@ -24,11 +24,13 @@
  */
  
 #include <sourcemod>
-#include "include/autoexecconfig"
-#include "include/messagebot"
-#include "include/calladmin"
-#include "include/system2"
 #include <regex>
+#include "include/autoexecconfig"
+#include "include/calladmin"
+
+#undef REQUIRE_EXTENSIONS
+#include "include/messagebot"
+#include "include/system2"
 
 #undef REQUIRE_PLUGIN
 #include "include/updater"
@@ -55,6 +57,13 @@ char g_sSteamUsername[128];
 
 ConVar g_hSteamPassword;
 char g_sSteamPassword[128];
+
+// MessageBot specific
+ConVar g_hLogOffDelay;
+ConVar g_hMessageDelay;
+ConVar g_hDebug;
+ConVar g_hRequestTimeout;
+
 
 Regex g_hSteamID2Regex;
 Regex g_hSteamID3Regex;
@@ -97,9 +106,31 @@ public Plugin myinfo =
 
 
 
+public void OnConfigsExecuted()
+{
+	g_hSteamUsername.GetString(g_sSteamUsername, sizeof(g_sSteamUsername));
+	g_hSteamPassword.GetString(g_sSteamPassword, sizeof(g_sSteamPassword));
+
+	MessageBot_SetOption(OPTION_WAIT_AFTER_LOGOUT, g_hLogOffDelay.IntValue);
+	MessageBot_SetOption(OPTION_WAIT_BETWEEN_MESSAGES, g_hMessageDelay.IntValue);
+	MessageBot_SetOption(OPTION_DEBUG, g_hDebug.BoolValue);
+	MessageBot_SetOption(OPTION_REQUEST_TIMEOUT, g_hRequestTimeout.IntValue);
+}
+
+
+
 
 public void OnPluginStart()
 {
+	// This update is crucial for the module to work again
+	// This is a nicer message than "Native not bound" for people who get the update via updater and might not know what's going on
+	if (GetFeatureStatus(FeatureType_Native, "MessageBot_SetOption") != FeatureStatus_Available)
+	{
+		CallAdmin_LogMessage("Please update your MessageBot extension");
+		SetFailState("Please update your MessageBot extension");
+	}
+	
+	
 	// Path to the SteamID list
 	BuildPath(Path_SM, g_sSteamIDConfigFile, sizeof(g_sSteamIDConfigFile), "configs/calladmin_steam_steamidlist.cfg");
 	
@@ -143,36 +174,44 @@ public void OnPluginStart()
 	
 	AutoExecConfig_SetFile("plugin.calladmin_steam");
 	
-	g_hVersion       = AutoExecConfig_CreateConVar("sm_calladmin_steam_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hSteamUsername = AutoExecConfig_CreateConVar("sm_calladmin_steam_username", "", "Your steam username", FCVAR_PROTECTED);
-	g_hSteamPassword = AutoExecConfig_CreateConVar("sm_calladmin_steam_password", "", "Your steam password", FCVAR_PROTECTED);
+	g_hVersion        = AutoExecConfig_CreateConVar("sm_calladmin_steam_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hSteamUsername  = AutoExecConfig_CreateConVar("sm_calladmin_steam_username", "", "Your steam bot's user name", FCVAR_PROTECTED);
+	g_hSteamPassword  = AutoExecConfig_CreateConVar("sm_calladmin_steam_password", "", "Your steam bot's password", FCVAR_PROTECTED);
+	g_hLogOffDelay    = AutoExecConfig_CreateConVar("sm_calladmin_steam_logoffdelay", "5000", "Delay after logoff in milliseconds. Use a higher value for limited accounts or when messages get lost");
+	g_hMessageDelay   = AutoExecConfig_CreateConVar("sm_calladmin_steam_messagedelay", "2000", "Delay between messages in milliseconds. Use a higher value for limited accounts or when messages get lost");
+	g_hDebug          = AutoExecConfig_CreateConVar("sm_calladmin_steam_debug", "0", "Enables debugging messages to be logged");
+	g_hRequestTimeout = AutoExecConfig_CreateConVar("sm_calladmin_steam_requesttimeout", "30", "Timeout in seconds for MessageBot's http(s) requests");
 	
 	
 	AutoExecConfig(true, "plugin.calladmin_steam");
 	AutoExecConfig_CleanFile();
 	
 	
+	// // This is done so that when the plugin is updated its version stays up to date too
 	g_hVersion.SetString(CALLADMIN_VERSION, false, false);
 	g_hVersion.AddChangeHook(OnCvarChanged);
 	
-	g_hSteamUsername.GetString(g_sSteamUsername, sizeof(g_sSteamUsername));
 	g_hSteamUsername.AddChangeHook(OnCvarChanged);
-	
-	g_hSteamPassword.GetString(g_sSteamPassword, sizeof(g_sSteamPassword));
 	g_hSteamPassword.AddChangeHook(OnCvarChanged);
+	
+	g_hLogOffDelay.AddChangeHook(OnCvarChanged);
+	g_hMessageDelay.AddChangeHook(OnCvarChanged);
+	g_hDebug.AddChangeHook(OnCvarChanged);
+	g_hRequestTimeout.AddChangeHook(OnCvarChanged);
+	
 }
 
 
 
-public void OnMessageResultReceived(MessageBotResult result, MessageBotError error)
+public void OnMessageResultReceived(MessageBotResult result, const char[] error)
 {
-	static char resultString[][] = {"No error", "Error while trying to login", "Operation timed out",
-	                                  "No recipients were setup prior to sending a message", "Couldn't send to any recipient"};
+	static char resultString[][] = {"No error", "No recipients were setup prior to sending a message",
+									"Error while trying to login", "Error during an API request"};
 
 
 	if (result != RESULT_NO_ERROR)
 	{
-		CallAdmin_LogMessage("Failed to send steam message: (result: %d [%s] | error: %d)", result, resultString[result], error);
+		CallAdmin_LogMessage("Failed to send steam message: (result: %d [%s] | error: %s)", result, resultString[result], error);
 	}
 }
 
@@ -364,6 +403,14 @@ void ParseGroupIDList()
 		}
 		
 		
+		if (!LibraryExists("system2"))
+		{
+			CallAdmin_LogMessage("Group fetching requires the system2 extension. Install it or remove/comment out your group names from the config file to hide this message");
+			
+			break;
+		}
+		
+		
 		// Go get them members
 		FetchGroupMembers(sReadBuffer);
 	}
@@ -387,6 +434,22 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 	else if (cvar == g_hSteamPassword)
 	{
 		g_hSteamPassword.GetString(g_sSteamPassword, sizeof(g_sSteamPassword));
+	}
+	else if (cvar == g_hLogOffDelay)
+	{
+		MessageBot_SetOption(OPTION_WAIT_AFTER_LOGOUT, g_hLogOffDelay.IntValue);
+	}
+	else if (cvar == g_hMessageDelay)
+	{
+		MessageBot_SetOption(OPTION_WAIT_BETWEEN_MESSAGES, g_hMessageDelay.IntValue);
+	}
+	else if (cvar == g_hDebug)
+	{
+		MessageBot_SetOption(OPTION_DEBUG, g_hDebug.BoolValue);
+	}
+	else if (cvar == g_hRequestTimeout)
+	{
+		MessageBot_SetOption(OPTION_REQUEST_TIMEOUT, g_hRequestTimeout.IntValue);
 	}
 }
 
