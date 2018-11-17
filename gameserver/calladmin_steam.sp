@@ -403,9 +403,10 @@ void ParseGroupIDList()
 		}
 		
 		
-		if (!LibraryExists("system2"))
+		// System2_URLEncode was added in v3.0
+		if (!LibraryExists("system2") || GetFeatureStatus(FeatureType_Native, "System2_URLEncode") != FeatureStatus_Available)
 		{
-			CallAdmin_LogMessage("Group fetching requires the system2 extension. Install it or remove/comment out your group names from the config file to hide this message");
+			CallAdmin_LogMessage("Group fetching requires a recent version of the system2 extension. Install it or remove/comment out your group names from the config file to hide this message");
 			
 			break;
 		}
