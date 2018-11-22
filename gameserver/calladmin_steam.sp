@@ -63,6 +63,7 @@ ConVar g_hLogOffDelay;
 ConVar g_hMessageDelay;
 ConVar g_hDebug;
 ConVar g_hRequestTimeout;
+ConVar g_hShuffleRecipients;
 
 
 Regex g_hSteamID2Regex;
@@ -115,6 +116,7 @@ public void OnConfigsExecuted()
 	MessageBot_SetOption(OPTION_WAIT_BETWEEN_MESSAGES, g_hMessageDelay.IntValue);
 	MessageBot_SetOption(OPTION_DEBUG, g_hDebug.BoolValue);
 	MessageBot_SetOption(OPTION_REQUEST_TIMEOUT, g_hRequestTimeout.IntValue);
+	MessageBot_SetOption(OPTION_SHUFFLE_RECIPIENTS, g_hShuffleRecipients.BoolValue);
 }
 
 
@@ -174,13 +176,14 @@ public void OnPluginStart()
 	
 	AutoExecConfig_SetFile("plugin.calladmin_steam");
 	
-	g_hVersion        = AutoExecConfig_CreateConVar("sm_calladmin_steam_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hSteamUsername  = AutoExecConfig_CreateConVar("sm_calladmin_steam_username", "", "Your steam bot's user name", FCVAR_PROTECTED);
-	g_hSteamPassword  = AutoExecConfig_CreateConVar("sm_calladmin_steam_password", "", "Your steam bot's password", FCVAR_PROTECTED);
-	g_hLogOffDelay    = AutoExecConfig_CreateConVar("sm_calladmin_steam_logoffdelay", "5000", "Delay after logoff in milliseconds. Use a higher value for limited accounts or when messages get lost");
-	g_hMessageDelay   = AutoExecConfig_CreateConVar("sm_calladmin_steam_messagedelay", "2000", "Delay between messages in milliseconds. Use a higher value for limited accounts or when messages get lost");
-	g_hDebug          = AutoExecConfig_CreateConVar("sm_calladmin_steam_debug", "0", "Enables debugging messages to be logged");
-	g_hRequestTimeout = AutoExecConfig_CreateConVar("sm_calladmin_steam_requesttimeout", "30", "Timeout in seconds for MessageBot's http(s) requests");
+	g_hVersion           = AutoExecConfig_CreateConVar("sm_calladmin_steam_version", CALLADMIN_VERSION, "Plugin version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_hSteamUsername     = AutoExecConfig_CreateConVar("sm_calladmin_steam_username", "", "Your steam bot's user name", FCVAR_PROTECTED);
+	g_hSteamPassword     = AutoExecConfig_CreateConVar("sm_calladmin_steam_password", "", "Your steam bot's password", FCVAR_PROTECTED);
+	g_hLogOffDelay       = AutoExecConfig_CreateConVar("sm_calladmin_steam_logoffdelay", "5000", "Delay after logoff in milliseconds. Use a higher value for limited accounts or when messages get lost");
+	g_hMessageDelay      = AutoExecConfig_CreateConVar("sm_calladmin_steam_messagedelay", "2000", "Delay between messages in milliseconds. Use a higher value for limited accounts or when messages get lost");
+	g_hDebug             = AutoExecConfig_CreateConVar("sm_calladmin_steam_debug", "0", "Enables debugging messages to be logged", _, true, 0.0, true, 1.0);
+	g_hRequestTimeout    = AutoExecConfig_CreateConVar("sm_calladmin_steam_requesttimeout", "30", "Timeout in seconds for MessageBot's http(s) requests");
+	g_hShuffleRecipients = AutoExecConfig_CreateConVar("sm_calladmin_steam_shufflerecipients", "1", "Enables shuffling of the recipient list before sending a message", _, true, 0.0, true, 1.0);
 	
 	
 	AutoExecConfig(true, "plugin.calladmin_steam");
@@ -198,7 +201,7 @@ public void OnPluginStart()
 	g_hMessageDelay.AddChangeHook(OnCvarChanged);
 	g_hDebug.AddChangeHook(OnCvarChanged);
 	g_hRequestTimeout.AddChangeHook(OnCvarChanged);
-	
+	g_hShuffleRecipients.AddChangeHook(OnCvarChanged);
 }
 
 
@@ -451,6 +454,10 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 	else if (cvar == g_hRequestTimeout)
 	{
 		MessageBot_SetOption(OPTION_REQUEST_TIMEOUT, g_hRequestTimeout.IntValue);
+	}
+	else if (cvar == g_hShuffleRecipients)
+	{
+		MessageBot_SetOption(OPTION_SHUFFLE_RECIPIENTS, g_hShuffleRecipients.BoolValue);
 	}
 }
 

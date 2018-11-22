@@ -43,6 +43,7 @@ enum MessageBotOption
     OPTION_WAIT_BETWEEN_MESSAGES,      // Option to set the wait time in milliseconds between messages (def. 2000)
     OPTION_WAIT_AFTER_LOGOUT,          // Option to set the wait time in milliseconds after logout (def. 5000)
     OPTION_REQUEST_TIMEOUT,            // Option to set the request timeout in seconds for CURL requests (def. 30)
+    OPTION_SHUFFLE_RECIPIENTS,         // Option to enable or disable shuffling of the recipient list before sending a message (def. 0)
 };
 
 
