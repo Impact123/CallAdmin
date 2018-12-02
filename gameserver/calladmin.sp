@@ -154,6 +154,11 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	RegPluginLibrary("calladmin");
 	
 	
+	// This needs to be done this early because we want modules to be able to use CallAdmin_LogMessage inside OnPluginStart
+	// Modules should be loaded after the plugin because they depend on it and this shouldn't be an issue, but oddly it is
+	BuildPath(Path_SM, g_sLogFile, sizeof(g_sLogFile), "logs/calladmin.log");
+	
+	
 	// Api
 	CreateNative("CallAdmin_GetTrackersCount", Native_GetCurrentTrackers);
 	CreateNative("CallAdmin_RequestTrackersCountRefresh", Native_RequestTrackersCountRefresh);
@@ -304,8 +309,6 @@ public void OnConfigsExecuted()
 
 public void OnPluginStart()
 {
-	BuildPath(Path_SM, g_sLogFile, sizeof(g_sLogFile), "logs/calladmin.log");
-	
 	g_hHostPort   = FindConVar("hostport");
 	g_hHostIP     = FindConVar("hostip");
 	g_hServerName = FindConVar("hostname");
