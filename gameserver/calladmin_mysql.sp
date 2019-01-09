@@ -373,8 +373,7 @@ public void SQLT_ConnectCallback(Database db, const char[] error, any data)
 	{
 		g_hDbHandle = db;
 		
-		// Set utf-8 encodings
-		g_hDbHandle.Query(SQLT_ErrorCheckCallback, "SET NAMES 'utf8'");
+		g_hDbHandle.SetCharset("utf8");
 		
 		// Create main Table
 		char query[1024];
