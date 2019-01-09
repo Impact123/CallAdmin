@@ -33,7 +33,7 @@ header("Content-type: text/xml; charset=utf-8");
 
 require_once("include/app.config.php");
 require_once("../include/calladmin_helpers.php");
-require_once("include/TeamSpeak3/TeamSpeak3.php");
+require_once("include/TeamSpeak3/libraries/TeamSpeak3/TeamSpeak3.php");
 
 
 $helpers = new CallAdmin_Helpers();
