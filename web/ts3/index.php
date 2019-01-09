@@ -87,7 +87,6 @@ $connect = "[url=steam://connect/" . $serverIP . "]connect now[/url]";
 
 
 
-require_once("include/TeamSpeak3/TeamSpeak3.php");
 $ts3 = new TeamSpeak3();
 $alreadyAdded = Array();
 $inMutedChannel = Array();
