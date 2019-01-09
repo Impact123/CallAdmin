@@ -373,6 +373,15 @@ public void SQLT_ConnectCallback(Database db, const char[] error, any data)
 	{
 		g_hDbHandle = db;
 		
+		// We only support the mysql driver
+		char ident[32];
+		g_hDbHandle.Driver.GetIdentifier(ident, sizeof(ident));
+		if (!StrEqual(ident, "mysql"))
+		{
+			CallAdmin_LogMessage("ConErr: driver id %s, expected mysql", ident);
+			SetFailState("ConErr: driver id %s, expected mysql", ident);
+		}
+		
 		g_hDbHandle.SetCharset("utf8");
 		
 		// Create main Table
