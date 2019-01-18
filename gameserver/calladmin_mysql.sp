@@ -51,10 +51,6 @@ ConVar g_hVersion;
 bool g_bAllLoaded;
 bool g_bDbInitTriggered;
 
-char g_iHostPort;
-char g_sServerName[64];
-char g_sHostIP[16];
-
 
 #define PRUNE_TRACKERS_TIME 3
 char g_iCurrentTrackers;
@@ -160,10 +156,6 @@ public void OnAllPluginsLoaded()
 	{
 		Updater_AddPlugin(UPDATER_URL);
 	}
-
-	g_iHostPort = CallAdmin_GetHostPort();
-	CallAdmin_GetHostIP(g_sHostIP, sizeof(g_sHostIP));
-	CallAdmin_GetHostName(g_sServerName, sizeof(g_sServerName));
 }
 
 
@@ -203,25 +195,6 @@ public void CallAdmin_OnRequestTrackersCountRefresh(int &trackers)
 
 
 
-public void CallAdmin_OnServerDataChanged(ConVar convar, ServerData type, const char[] oldVal, const char[] newVal)
-{
-	if (type == ServerData_HostIP)
-	{
-		CallAdmin_GetHostIP(g_sHostIP, sizeof(g_sHostIP));
-	}
-	else if (type == ServerData_HostName)
-	{
-		CallAdmin_GetHostName(g_sServerName, sizeof(g_sServerName));
-	}
-	else if (type == ServerData_HostPort)
-	{
-		g_iHostPort = CallAdmin_GetHostPort();
-	}
-}
-
-
-
-
 void PruneDatabase()
 {
 	if (g_hDbHandle != null && g_bAllLoaded)
@@ -256,11 +229,16 @@ void UpdateServerData()
 	{
 		char query[1024];
 		
-		char sHostName[(sizeof(g_sServerName) + 1) * 2];
-		g_hDbHandle.Escape(g_sServerName, sHostName, sizeof(sHostName));
+		char sServerIP[16];
+		int serverPort;
+		char sServerName[128];
+		
+		CallAdmin_GetHostIP(sServerIP, sizeof(sServerIP));
+		serverPort = CallAdmin_GetHostPort();
+		CallAdmin_GetHostName(sServerName, sizeof(sServerName));
 		
 		// Update the servername
-		Format(query, sizeof(query), "UPDATE IGNORE `%s` SET serverName = '%s', serverKey = '%s' WHERE serverIP = '%s' AND serverPort = %d", g_sTableName, sHostName, g_sServerKey, g_sHostIP, g_iHostPort);
+		g_hDbHandle.Format(query, sizeof(query), "UPDATE IGNORE `%s` SET serverName = '%s', serverKey = '%s' WHERE serverIP = '%s' AND serverPort = %d", g_sTableName, sServerName, g_sServerKey, sServerIP, serverPort);
 		g_hDbHandle.Query(SQLT_ErrorCheckCallback, query);
 	}
 }
@@ -309,12 +287,6 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	char targetNameBuf[MAX_NAME_LENGTH];
 	char targetName[(MAX_NAME_LENGTH + 1) * 2];
 	char targetAuth[21];
-
-	char sKey[(32 + 1) * 2];
-	g_hDbHandle.Escape(g_sServerKey, sKey, sizeof(sKey));
-
-	char sReason[(REASON_MAX_LENGTH + 1) * 2];
-	g_hDbHandle.Escape(reason, sReason, sizeof(sReason));
 	
 	
 	// Reporter wasn't a real client (initiated by a module)
@@ -326,11 +298,10 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	else
 	{
 		GetClientName(client, clientNameBuf, sizeof(clientNameBuf));
-		g_hDbHandle.Escape(clientNameBuf, clientName, sizeof(clientName));
 		
 		if (!GetClientAuthId(client, AuthId_Steam2, clientAuth, sizeof(clientAuth)))
 		{
-			CallAdmin_LogMessage("Failed to get authentication for client %d (%s)", client, clientNameBuf);
+			CallAdmin_LogMessage("Failed to get authentication for client %d (%s)", client, clientName);
 			
 			return;
 		}
@@ -338,24 +309,29 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	
 	
 	GetClientName(target, targetNameBuf, sizeof(targetNameBuf));
-	g_hDbHandle.Escape(targetNameBuf, targetName, sizeof(targetName));
 	
 	if (!GetClientAuthId(target, AuthId_Steam2, targetAuth, sizeof(targetAuth)))
 	{
-		CallAdmin_LogMessage("Failed to get authentication for client %d (%s)", client, targetNameBuf);
+		CallAdmin_LogMessage("Failed to get authentication for client %d (%s)", client, targetName);
 		
 		return;
 	}
 	
-	char serverName[(sizeof(g_sServerName) + 1) * 2];
-	g_hDbHandle.Escape(g_sServerName, serverName, sizeof(serverName));
+	char sServerIP[16];
+	int serverPort;
+	char sServerName[128];
+	
+	CallAdmin_GetHostIP(sServerIP, sizeof(sServerIP));
+	serverPort = CallAdmin_GetHostPort();
+	CallAdmin_GetHostName(sServerName, sizeof(sServerName));
+	
 	
 	char query[1024];
-	Format(query, sizeof(query), "INSERT INTO `%s`\
+	g_hDbHandle.Format(query, sizeof(query), "INSERT INTO `%s`\
 												(serverIP, serverPort, serverName, serverKey, targetName, targetID, targetReason, clientName, clientID, callHandled, reportedAt)\
 											VALUES\
 												('%s', %d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', 0, UNIX_TIMESTAMP())",
-											g_sTableName, g_sHostIP, g_iHostPort, serverName, sKey, targetName, targetAuth, sReason, clientName, clientAuth);
+											g_sTableName, sServerIP, serverPort, sServerName, g_sServerKey, targetName, targetAuth, reason, clientName, clientAuth);
 	g_hDbHandle.Query(SQLT_ErrorCheckCallback, query);
 }
 
@@ -577,18 +553,15 @@ int GetCurrentTrackers()
 	if (g_hDbHandle != null && g_bAllLoaded)
 	{
 		char query[1024];
-
-		char sKey[(32 + 1) * 2];
-		g_hDbHandle.Escape(g_sServerKey, sKey, sizeof(sKey));
 		
 		// Get current trackers (last 2 minutes)
-		Format(query, sizeof(query), "SELECT \
+		g_hDbHandle.Format(query, sizeof(query), "SELECT \
 											COUNT(`trackerID`) as currentTrackers \
 										FROM \
 											`%s_Trackers` \
 										WHERE \
 											TIMESTAMPDIFF(MINUTE, FROM_UNIXTIME(lastView), NOW()) < 2 AND \
-											`accessID` & (SELECT `accessBit` FROM `%s_Access` WHERE `serverKey`='%s')", g_sTableName, g_sTableName, sKey);
+											`accessID` & (SELECT `accessBit` FROM `%s_Access` WHERE `serverKey`='%s')", g_sTableName, g_sTableName, g_sServerKey);
 		g_hDbHandle.Query(SQLT_CurrentTrackersCallback, query);
 	}
 	else
