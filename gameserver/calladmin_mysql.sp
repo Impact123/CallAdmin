@@ -280,12 +280,10 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	}
 
 
-	char clientNameBuf[MAX_NAME_LENGTH];
-	char clientName[(MAX_NAME_LENGTH + 1) * 2];
+	char clientName[MAX_NAME_LENGTH];
 	char clientAuth[21];
 	
-	char targetNameBuf[MAX_NAME_LENGTH];
-	char targetName[(MAX_NAME_LENGTH + 1) * 2];
+	char targetName[MAX_NAME_LENGTH];
 	char targetAuth[21];
 	
 	
@@ -297,7 +295,7 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	}
 	else
 	{
-		GetClientName(client, clientNameBuf, sizeof(clientNameBuf));
+		GetClientName(client, clientName, sizeof(clientName));
 		
 		if (!GetClientAuthId(client, AuthId_Steam2, clientAuth, sizeof(clientAuth)))
 		{
@@ -308,7 +306,7 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	}
 	
 	
-	GetClientName(target, targetNameBuf, sizeof(targetNameBuf));
+	GetClientName(target, targetName, sizeof(targetName));
 	
 	if (!GetClientAuthId(target, AuthId_Steam2, targetAuth, sizeof(targetAuth)))
 	{
