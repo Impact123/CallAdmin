@@ -9,7 +9,6 @@ addons:
 
 env:
     matrix:
-        - SMBRANCH=1.8
         - SMBRANCH=1.9
         - SMBRANCH=1.10
     global:
