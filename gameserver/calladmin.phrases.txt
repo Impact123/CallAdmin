@@ -165,4 +165,9 @@
 		"de"		"Du hast eine falsche Melde-id benutzt"
 		"ru"		"Указан неправильный ID жалобы"
 	}
+	"CallAdmin_RecentlyReported"
+	{
+		"en"		"Recently reported"
+		"de"		"Kürzlich gemeldet"
+	}
 }

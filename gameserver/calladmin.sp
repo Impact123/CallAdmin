@@ -1125,7 +1125,7 @@ int GetTotalTrackers()
 
 void ShowClientSelectMenu(int client)
 {
-	char sName[MAX_NAME_LENGTH];
+	char sBuffer[128];
 	char sID[24];
 	
 	Menu menu = new Menu(MenuHandler_ClientSelect);
@@ -1133,12 +1133,21 @@ void ShowClientSelectMenu(int client)
 	
 	for (int i; i <= MaxClients; i++)
 	{
-		if (i != client && LastReportedTimeCheck(i) && IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && Forward_OnDrawTarget(client, i))
+		if (i != client && IsClientValid(i) && !IsFakeClient(i) && !IsClientSourceTV(i) && !IsClientReplay(i) && Forward_OnDrawTarget(client, i))
 		{
-			GetClientName(i, sName, sizeof(sName));
+			GetClientName(i, sBuffer, sizeof(sBuffer));
 			Format(sID, sizeof(sID), "%d", GetClientSerial(i));
 			
-			menu.AddItem(sID, sName);
+			if (LastReportedTimeCheck(i))
+			{
+				menu.AddItem(sID, sBuffer);
+			}
+			else
+			{
+				// Player was recently reported, their item is disabled
+				Format(sBuffer, sizeof(sBuffer), "%s (%T)", sBuffer, "CallAdmin_RecentlyReported", client);
+				menu.AddItem(sID, sBuffer, ITEMDRAW_DISABLED);
+			}
 		}
 	}
 	
