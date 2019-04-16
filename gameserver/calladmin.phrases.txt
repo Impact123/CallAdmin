@@ -146,28 +146,33 @@
 		"en"		"This report was already handled"
 		"de"		"Diese Meldung wurde bereits erledigt"
 		"ru"		"Эта жалоба уже была рассмотрена"
+		"fr"		"Ce signalement a déjà été traité"
 	}
 	"CallAdmin_NoAdmin"
 	{
 		"en"		"Only admins have access to this command"
 		"de"		"Nur Admins können diesen Befehl ausführen"
 		"ru"		"Только администраторы имеют доступ к этой команде"
+		"fr"		"Seuls les administrateurs ont accès à cette commande"
 	}
 	"CallAdmin_WrongNumberOfArguments"
 	{
 		"en"		"You've used a wrong number of arguments"
 		"de"		"Du hast eine falsche Anzahl an Argumenten benutzt"
 		"ru"		"Указано неправильное количество аргументов"
+		"fr"		"Vous avez utilisé un mauvais nombre d'arguments"
 	}
 	"CallAdmin_WrongReportID"
 	{
 		"en"		"You've used a wrong report id"
 		"de"		"Du hast eine falsche Melde-id benutzt"
 		"ru"		"Указан неправильный ID жалобы"
+		"fr"		"Vous avez utilisé un mauvais identifiant de signalement"
 	}
 	"CallAdmin_RecentlyReported"
 	{
 		"en"		"Recently reported"
 		"de"		"Kürzlich gemeldet"
+		"fr"		"Récemment signalé"
 	}
 }
