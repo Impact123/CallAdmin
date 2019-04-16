@@ -52,14 +52,33 @@ public void OnPluginStart()
 
 public Action Command_Test(int client, int args)
 {
+	PrintToServer("Current trackercount: %d", CallAdmin_GetTrackersCount());
+	
+	char sServerName[128];
+	CallAdmin_GetHostName(sServerName, sizeof(sServerName));
+	PrintToServer("Current host name: %s", sServerName);
+	
+	char sServerIp[16];
+	CallAdmin_GetHostIP(sServerIp, sizeof(sServerIp));
+	PrintToServer("Current host ip: %s", sServerIp);
+	
+	int iServerPort = CallAdmin_GetHostPort();
+	PrintToServer("Current host port: %d", iServerPort);
+	
+	int iReportId = CallAdmin_GetReportID();
+	PrintToServer("Current report id: %d", iReportId);
+	
 	static char sReasons[][] = {"I was harassed", "I had an urge and felt like it needed to happen", "I don't like his face"};
 	
 	if (client)
 	{
-		CallAdmin_ReportClient(REPORTER_CONSOLE, client, sReasons[GetRandomInt(0, sizeof(sReasons) -1)]);
+		int index = GetRandomInt(0, sizeof(sReasons) -1);
+		PrintToServer("Reporting client %N (%d) for: %s", client, client, sReasons[index]);
+		
+		CallAdmin_ReportClient(REPORTER_CONSOLE, client, sReasons[index]);
 	}
 	
-	PrintToServer("Current trackercount: %d", CallAdmin_GetTrackersCount());
+	PrintToServer("Logging message");
 	CallAdmin_LogMessage("Loggingtest");
 	
 	return Plugin_Handled;
@@ -115,11 +134,11 @@ public Action CallAdmin_OnReportPre(int client, int target, const char[] reason)
 	// Reporter wasn't a real client (initiated by a module)
 	if (client == REPORTER_CONSOLE)
 	{
-		PrintToServer("%N is about to be reported by Server for %s", target, reason);
+		PrintToServer("%N is about to be reported by Server for: %s", target, reason);
 	}
 	else
 	{
-		PrintToServer("%N is about to be reported by %N for %s", target, client, reason);
+		PrintToServer("%N is about to be reported by %N for: %s", target, client, reason);
 	}
 	
 	return Plugin_Continue;
@@ -134,11 +153,11 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	// Reporter wasn't a real client (initiated by a module)
 	if (client == REPORTER_CONSOLE)
 	{
-		PrintToServer("%N (ReportID: %i) was reported by Server for %s", target, id, reason);
+		PrintToServer("%N (ReportID: %i) was reported by Server for: %s", target, id, reason);
 	}
 	else
 	{
-		PrintToServer("%N (ReportID: %i) was reported by %N for %s", target, id, client, reason);
+		PrintToServer("%N (ReportID: %i) was reported by %N for: %s", target, id, client, reason);
 	}
 }
 
