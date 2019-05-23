@@ -260,7 +260,7 @@ public int Native_ReportClient(Handle plugin, int numParams)
 public int Native_LogMessage(Handle plugin, int numParams)
 {
 	char sPluginName[64];
-	char sMessage[256];
+	char sMessage[2048];
 	GetPluginInfo(plugin, PlInfo_Name, sPluginName, sizeof(sPluginName));
 	
 	FormatNativeString(0, 1, 2, sizeof(sMessage), _, sMessage);
