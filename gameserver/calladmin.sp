@@ -89,8 +89,9 @@ ArrayList g_hActiveReports;
 char g_sLogFile[PLATFORM_MAX_PATH];
 
 
-#define ADMIN_ACTION_PASS          0
-#define ADMIN_ACTION_BLOCK_MESSAGE 1
+#define ADMIN_ACTION_PASS                       0
+#define ADMIN_ACTION_BLOCK_NOTIFY               1
+#define ADMIN_ACTION_PASS_NOTIFY                2
 
 
 int g_iCurrentTrackers;
@@ -351,7 +352,7 @@ public void OnPluginStart()
 	g_hConfirmCall            = AutoExecConfig_CreateConVar("sm_calladmin_confirm_call", "1",  "Whether or not a call must be confirmed by the client", FCVAR_NONE, true, 0.0, true, 1.0);
 	g_hSpamTime               = AutoExecConfig_CreateConVar("sm_calladmin_spamtime", "25", "An user must wait this many seconds after a report before he can issue a new one", FCVAR_NONE, true, 0.0);
 	g_hReportTime             = AutoExecConfig_CreateConVar("sm_calladmin_reporttime", "300", "An user cannot be reported again for this many seconds", FCVAR_NONE, true, 0.0);
-	g_hAdminAction            = AutoExecConfig_CreateConVar("sm_calladmin_admin_action", "0", "What happens when admins are in-game on report: 0 - Do nothing, let the report pass, 1 - Block the report and notify the caller and admins in-game about it", FCVAR_NONE, true, 0.0, true, 1.0);
+	g_hAdminAction            = AutoExecConfig_CreateConVar("sm_calladmin_admin_action", "0", "What happens when admins are in-game on report: 0 - Let the report pass, 1 - Block the report and notify the caller and admins in-game about it, 2 - Let the report pass and notify the caller and admins in-game about it", FCVAR_NONE, true, 0.0, true, 1.0);
 
 	
 	
@@ -1022,15 +1023,25 @@ bool ReportPlayer(int client, int target, char[] sReason)
 	}
 	
 	
-	// Admins available and we want to notify them instead of sending the report
-	if (GetAdminCount() > 0 && g_iAdminAction == ADMIN_ACTION_BLOCK_MESSAGE)
+	// Admins available and...
+	if (GetAdminCount() > 0)
 	{
-		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
-		PrintNotifyMessageToAdmins(client, g_iTarget[client]);
-		
-		SetStates(client, g_iTarget[client]);
-		
-		return false;
+		// we want to notify instead of sending the report
+		if (g_iAdminAction == ADMIN_ACTION_BLOCK_NOTIFY)
+		{
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
+			PrintNotifyMessageToAdmins(client, g_iTarget[client]);
+			
+			SetStates(client, g_iTarget[client]);
+			
+			return false;
+		}
+		// we want to notify in addition to sending the report
+		else if (g_iAdminAction == ADMIN_ACTION_PASS_NOTIFY)
+		{
+			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_IngameAdminNotified");
+			PrintNotifyMessageToAdmins(client, g_iTarget[client]);
+		}
 	}
 	
 	
