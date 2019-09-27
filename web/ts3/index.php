@@ -147,8 +147,9 @@ try
 			
 			if ($enablePoke)
 			{
-				$subReason = substr($targetReason, 0, 50) . '...';
-				$ts3_Client->poke("[CallAdmin] New report on: $serverName ($serverIP) $clientName $subReason");
+				$subServerName = substr($serverName, 0, 32) . strlen($serverName) >= 32 ? '...' : '';
+				$subReason = substr($targetReason, 0, 45) . strlen($targetReason) >= 45 ? '...' : '';
+				$ts3_Client->poke("[CallAdmin] New report: $subServerName $clientName $subReason");
 			}
 			
 			$ts3_Client->message("----------------------------------------------------");
