@@ -145,6 +145,12 @@ try
 			// Add to already added list 
 			array_push($alreadyAdded, $uid);
 			
+			if ($enablePoke)
+			{
+				$subReason = substr($targetReason, 0, 50) . '...';
+				$ts3_Client->poke("[CallAdmin] New report on: $serverName ($serverIP) $clientName $subReason");
+			}
+			
 			$ts3_Client->message("----------------------------------------------------");
 			$ts3_Client->message("[CallAdmin] New report on:   $serverName ($serverIP) $connect");
 			$ts3_Client->message("[CallAdmin] Reporter:        $clientName ($clientCommBB)");

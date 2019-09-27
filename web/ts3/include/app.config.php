@@ -57,6 +57,10 @@ $muted_channels = array
 );
 
 
+/*
+Whether or not we should poke the recipient before sending the message
+*/
+$enablePoke = true;
 
 
 /*
