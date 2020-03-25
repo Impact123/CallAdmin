@@ -352,7 +352,7 @@ public void OnPluginStart()
 	g_hConfirmCall            = AutoExecConfig_CreateConVar("sm_calladmin_confirm_call", "1",  "Whether or not a call must be confirmed by the client", FCVAR_NONE, true, 0.0, true, 1.0);
 	g_hSpamTime               = AutoExecConfig_CreateConVar("sm_calladmin_spamtime", "25", "An user must wait this many seconds after a report before he can issue a new one", FCVAR_NONE, true, 0.0);
 	g_hReportTime             = AutoExecConfig_CreateConVar("sm_calladmin_reporttime", "300", "An user cannot be reported again for this many seconds", FCVAR_NONE, true, 0.0);
-	g_hAdminAction            = AutoExecConfig_CreateConVar("sm_calladmin_admin_action", "0", "What happens when admins are in-game on report: 0 - Let the report pass, 1 - Block the report and notify the caller and admins in-game about it, 2 - Let the report pass and notify the caller and admins in-game about it", FCVAR_NONE, true, 0.0, true, 1.0);
+	g_hAdminAction            = AutoExecConfig_CreateConVar("sm_calladmin_admin_action", "0", "What happens when admins are in-game on report: 0 - Let the report pass, 1 - Block the report and notify the caller and admins in-game about it, 2 - Let the report pass and notify the caller and admins in-game about it", FCVAR_NONE, true, 0.0, true, 2.0);
 
 	
 	
