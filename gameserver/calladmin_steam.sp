@@ -128,8 +128,8 @@ public void OnPluginStart()
 	// This is a nicer message than "Native not bound" for people who get the update via updater and might not know what's going on
 	if (GetFeatureStatus(FeatureType_Native, "MessageBot_SetOption") != FeatureStatus_Available)
 	{
-		CallAdmin_LogMessage("Please update your MessageBot extension");
-		SetFailState("Please update your MessageBot extension");
+		CallAdmin_LogMessage("Please update your MessageBot extension. You can find the latest version here: https://github.com/dordnung/MessageBot/releases");
+		SetFailState("Please update your MessageBot extension. You can find the latest version here: https://github.com/dordnung/MessageBot/releases");
 	}
 	
 	
