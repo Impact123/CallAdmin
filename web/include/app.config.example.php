@@ -54,6 +54,8 @@ $data_limit = 50;
 // By default we only fetch the entries of the last hour, set to 0 to disable
 $data_from  = (time() - 3600);
 
+// Whether to allow cross origin resource sharing
+$allow_cors = true;
 
 
 /*

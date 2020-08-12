@@ -36,6 +36,10 @@ require_once('autoload.php');
 
 $helpers = new CallAdmin_Helpers();
 
+if (isset($allow_cors) && $allow_cors === true) {
+	 header("Access-Control-Allow-Origin: *");
+}
+
 
 // Key set and no key given or key is wrong
 if (!isset($_GET['key']) || !$helpers->keyToServerKeys($access_keys, $_GET['key']))
