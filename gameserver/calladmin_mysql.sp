@@ -356,21 +356,21 @@ public void SQLT_ConnectCallback(Database db, const char[] error, any data)
 			SetFailState("ConErr: driver id %s, expected mysql", ident);
 		}
 		
-		g_hDbHandle.SetCharset("utf8");
+		g_hDbHandle.SetCharset("utf8mb4");
 		
 		// Create main Table
 		char query[1024];
 		Format(query, sizeof(query), "CREATE TABLE IF NOT EXISTS `%s` (\
 															`callID` INT UNSIGNED NOT NULL AUTO_INCREMENT,\
-															`serverIP` VARCHAR(15) NOT NULL,\
+															`serverIP` VARCHAR(15) COLLATE utf8mb4_unicode_ci NOT NULL,\
 															`serverPort` SMALLINT UNSIGNED NOT NULL,\
-															`serverName` VARCHAR(64) NOT NULL,\
-															`serverKey` VARCHAR(32) NOT NULL,\
-															`targetName` VARCHAR(32) NOT NULL,\
-															`targetID` VARCHAR(21) NOT NULL,\
-															`targetReason` VARCHAR(%d) NOT NULL,\
-															`clientName` VARCHAR(32) NOT NULL,\
-															`clientID` VARCHAR(21) NOT NULL,\
+															`serverName` VARCHAR(64) COLLATE utf8mb4_unicode_ci NOT NULL,\
+															`serverKey` VARCHAR(32) COLLATE utf8mb4_unicode_ci NOT NULL,\
+															`targetName` VARCHAR(32) COLLATE utf8mb4_unicode_ci NOT NULL,\
+															`targetID` VARCHAR(21) COLLATE utf8mb4_unicode_ci NOT NULL,\
+															`targetReason` VARCHAR(%d) COLLATE utf8mb4_unicode_ci NOT NULL,\
+															`clientName` VARCHAR(32) COLLATE utf8mb4_unicode_ci NOT NULL,\
+															`clientID` VARCHAR(21) COLLATE utf8mb4_unicode_ci NOT NULL,\
 															`callHandled` TINYINT UNSIGNED NOT NULL,\
 															`reportedAt` INT UNSIGNED NOT NULL,\
 															INDEX `serverIP_serverPort` (`serverIP`, `serverPort`),\
@@ -378,35 +378,35 @@ public void SQLT_ConnectCallback(Database db, const char[] error, any data)
 															INDEX `callHandled` (`callHandled`),\
 															INDEX `serverKey` (`serverKey`),\
 															PRIMARY KEY (`callID`))\
-															COLLATE='utf8_unicode_ci'\
+															ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\
 														", g_sTableName, REASON_MAX_LENGTH);
 		g_hDbHandle.Query(SQLT_ErrorCheckCallback, query);
 														
 		// Create trackers Table
 		Format(query, sizeof(query), "CREATE TABLE IF NOT EXISTS `%s_Trackers` (\
-															`trackerIP` VARCHAR(15) NOT NULL,\
-															`trackerID` VARCHAR(21) NOT NULL,\
+															`trackerIP` VARCHAR(15) COLLATE utf8mb4_unicode_ci NOT NULL,\
+															`trackerID` VARCHAR(21) COLLATE utf8mb4_unicode_ci NOT NULL,\
 															`lastView` INT UNSIGNED NOT NULL,\
 															`accessID` BIGINT UNSIGNED NOT NULL,\
 															INDEX `lastView` (`lastView`),\
 															UNIQUE INDEX `trackerIP` (`trackerIP`))\
-															COLLATE='utf8_unicode_ci'\
+															ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\
 														", g_sTableName);
 		g_hDbHandle.Query(SQLT_ErrorCheckCallback, query);
 														
 		// Create Access Table
 		Format(query, sizeof(query), "CREATE TABLE IF NOT EXISTS `%s_Access` (\
-															`serverKey` VARCHAR(32) NOT NULL,\
+															`serverKey` VARCHAR(32) COLLATE utf8mb4_unicode_ci NOT NULL,\
 															`accessBit` BIGINT UNSIGNED NOT NULL,\
 															UNIQUE INDEX `serverKey` (`serverKey`))\
-															COLLATE='utf8_unicode_ci'\
+															ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\
 														", g_sTableName);
 		g_hDbHandle.Query(SQLT_ErrorCheckCallback, query);
 										
 		// Create Version Table
 		Format(query, sizeof(query), "CREATE TABLE IF NOT EXISTS `%s_Settings` (\
-															`version` VARCHAR(12) NOT NULL)\
-															COLLATE='utf8_unicode_ci'\
+															`version` VARCHAR(12) COLLATE utf8mb4_unicode_ci NOT NULL)\
+															ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\
 														", g_sTableName);
 		g_hDbHandle.Query(SQLT_ErrorCheckCallback, query);
 		
