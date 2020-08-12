@@ -29,7 +29,7 @@
 #define _system2_included
 
 // Include request stuff
-#include "include/system2/request"
+#include "system2/request"
 
 
 /**
@@ -333,7 +333,7 @@ native bool System2_GetFileCRC32(const char[] file, char[] buffer, int maxlength
 
 
 // Include legacy stuff
-#include "include/system2/legacy"
+#include "system2/legacy"
 
 
 public Extension __ext_system2 =
