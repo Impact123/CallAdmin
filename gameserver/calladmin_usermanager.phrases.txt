@@ -6,6 +6,7 @@
 		"de"		"Aufgrund eines Mutes bist du nun auf der Blacklist. Du kannst jetzt keine Spieler mehr reporten!"
 		"ru"		"Из-за того, что вам был отключён микрофон, вы попали в чёрный список и больше не можете жаловаться на других игроков!"
 		"chi"           "因你被静音或者在封禁名单,你不能报告其他玩家!"
+		"fr"		"Vous êtes maintenant sur la liste noire car vous avez été muté. Vous ne pouvez plus report de joueurs."
 	}
 	"CallAdmin_ClientBlacklistGag"
 	{
@@ -13,6 +14,7 @@
 		"de"		"Aufgrund eines Maulkorbes bist du nun auf der Blacklist. Du kannst jetzt keine Spieler mehr reporten!"
 		"ru"		"Из-за того, что вам был отключён чат, вы попали в чёрный список и больше не можете жаловаться на других игроков!"
 		"chi"           "因你被禁言或者在封禁名单,你不能报告其他玩家!"
+		"fr"		"Vous êtes maintenant sur la liste noire car vous avez été gag. Vous ne pouvez plus report de joueurs."
 	}
 	"CallAdmin_ClientBlacklistRemove"
 	{
@@ -20,6 +22,7 @@
 		"de"		"Du wurdest von der Blacklist entfernt. Du kannst jetzt wieder Spieler reporten!"
 		"ru"		"Вы были удалены из чёрного списка и теперь снова можете жаловаться на других игроков!"
 		"chi"           "你已从封禁名单中移除,现在你可以报告其他玩家了!"
+		"fr"		"Vous n'êtes plus sur la liste noire. Vous de nouveau pouvez report des joueurs."
 	}
 	"CallAdmin_ClientOnBlacklist"
 	{
@@ -27,6 +30,7 @@
 		"de"		"Du bist zurzeit auf der Blacklist. Du kannst keine Spieler reporten!"
 		"ru"		"Вы находитесь в чёрном списке и не можете жаловаться на других игроков!"
 		"chi"           "你目前在封禁名单中. 你不能报告其他玩家!"
+		"fr"		"Vous êtes actuellement sur la liste noire. Vous ne pouvez plus report de joueurs."
 	}
 	"CallAdmin_TargetImmune"
 	{
@@ -35,5 +39,6 @@
 		"de"		"Spieler {1} ist Immun. Du kannst ihn nicht reporten!"
 		"ru"		"У игрока {1} есть иммунитет. Вы не можете жаловаться на него."
 		"chi"           "玩家 {1} 从报告中豁免. 你不能报告他."
+		"fr"		"Le joueur {1} est immunisé. Vous ne pouvez pas le report."
 	}
 }
