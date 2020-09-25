@@ -7,6 +7,8 @@
 		"ru"		"Из-за того, что вам был отключён микрофон, вы попали в чёрный список и больше не можете жаловаться на других игроков!"
 		"chi"           "因你被静音或者在封禁名单,你不能报告其他玩家!"
 		"fr"		"Vous êtes maintenant sur la liste noire car vous avez été muté. Vous ne pouvez plus report de joueurs."
+		"es" 		"Ahora estás en la blacklist por estar muteado. ¡No puedes reportar jugadores!"
+		"pt"		"Você está agora na blacklist por ter sido mutado. Você não pode denunciar jogadores!"
 	}
 	"CallAdmin_ClientBlacklistGag"
 	{
@@ -15,6 +17,8 @@
 		"ru"		"Из-за того, что вам был отключён чат, вы попали в чёрный список и больше не можете жаловаться на других игроков!"
 		"chi"           "因你被禁言或者在封禁名单,你不能报告其他玩家!"
 		"fr"		"Vous êtes maintenant sur la liste noire car vous avez été gag. Vous ne pouvez plus report de joueurs."
+		"es" 		"Ahora estás en la blacklist por estar gaggeado. ¡No puedes reportar jugadores!"
+		"pt"		"Você está agora na blacklist por ter sido gaggado. Você não pode denunciar jogadores!"
 	}
 	"CallAdmin_ClientBlacklistRemove"
 	{
@@ -23,6 +27,8 @@
 		"ru"		"Вы были удалены из чёрного списка и теперь снова можете жаловаться на других игроков!"
 		"chi"           "你已从封禁名单中移除,现在你可以报告其他玩家了!"
 		"fr"		"Vous n'êtes plus sur la liste noire. Vous de nouveau pouvez report des joueurs."
+		"es" 		"Has sido removido de la blacklist. ¡Ya puedes reportar jugadores!"
+		"pt"		"Você foi removido da blacklist. Agora você pode denunciar jogadores!"
 	}
 	"CallAdmin_ClientOnBlacklist"
 	{
@@ -31,6 +37,8 @@
 		"ru"		"Вы находитесь в чёрном списке и не можете жаловаться на других игроков!"
 		"chi"           "你目前在封禁名单中. 你不能报告其他玩家!"
 		"fr"		"Vous êtes actuellement sur la liste noire. Vous ne pouvez plus report de joueurs."
+		"es"		"Estás en la blacklist. ¡No puedes reportar jugadores!"
+		"pt"		"Você está na blacklist. Você não pode denunciar jogadores!"
 	}
 	"CallAdmin_TargetImmune"
 	{
@@ -40,5 +48,7 @@
 		"ru"		"У игрока {1} есть иммунитет. Вы не можете жаловаться на него."
 		"chi"           "玩家 {1} 从报告中豁免. 你不能报告他."
 		"fr"		"Le joueur {1} est immunisé. Vous ne pouvez pas le report."
+		"es"		"El jugador {1} es inmune. No puedes reportarlo."
+		"pt"		"O jogador {1} é imune. Você não pode denunciá-lo."
 	}
 }
