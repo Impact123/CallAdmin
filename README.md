@@ -10,6 +10,8 @@ The system is based on multiple parts.
 Please take a look at [the wiki](https://github.com/Impact123/CallAdmin/wiki) for more information.
 
 ## Development builds
-[![Build Status](https://travis-ci.org/Impact123/CallAdmin.svg)](https://travis-ci.org/Impact123/CallAdmin)  
+![Build plugin](https://github.com/Impact123/CallAdmin/workflows/Build%20plugin/badge.svg)  
+![Build plugin release](https://github.com/Impact123/CallAdmin/workflows/Build%20plugin%20release/badge.svg)  
+
 We encourage you to to use our development builds and tell us about problems that arise.  
 Prebuild packages of CallAdmin can be found at [the releases page](https://github.com/Impact123/CallAdmin/releases). If you want the newest changes you can clone/[download](https://github.com/Impact123/CallAdmin/archive/development.zip) this repository and [compile](https://github.com/Impact123/CallAdmin/wiki/Compiling) the code yourself. We tried to make this as easy as possible.  
