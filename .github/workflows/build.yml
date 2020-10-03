@@ -1,0 +1,26 @@
+name: Build plugin
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sm-version: ["1.10.x", "1.11.x"]
+
+    name: SM version ${{ matrix.sm-version }}
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Setup SP
+        uses: rumblefrog/setup-sp@master
+        with:
+          version: ${{ matrix.sm-version }}
+
+      - run: |
+           spcomp gameserver/scripting/calladmin.sp
+           spcomp gameserver/scripting/calladmin_steam.sp
+           spcomp gameserver/scripting/calladmin_mysql.sp
+           spcomp gameserver/scripting/calladmin_ts3.sp
+           spcomp gameserver/scripting/calladmin_test.sp
+           spcomp gameserver/scripting/calladmin_usermanager.sp
