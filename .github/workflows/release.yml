@@ -1,0 +1,52 @@
+name: Build plugin release
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sm-version: ["1.10.x"]
+
+    name: SM version ${{ matrix.sm-version }}
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Setup SP
+        uses: rumblefrog/setup-sp@master
+        with:
+          version: ${{ matrix.sm-version }}
+
+      - run: |
+          mkdir -p gameserver/plugins/disabled/
+          spcomp gameserver/scripting/calladmin.sp -o gameserver/plugins/calladmin.smx
+          spcomp gameserver/scripting/calladmin_steam.sp -o gameserver/plugins/calladmin_steam.smx
+          spcomp gameserver/scripting/calladmin_mysql.sp -o gameserver/plugins/calladmin_mysql.smx
+          spcomp gameserver/scripting/calladmin_ts3.sp -o gameserver/plugins/calladmin_ts3.smx
+          spcomp gameserver/scripting/calladmin_test.sp -o gameserver/plugins/disabled/calladmin_test.smx
+          spcomp gameserver/scripting/calladmin_usermanager.sp -o gameserver/plugins/calladmin_usermanager.smx
+          zip -q -9 -r calladmin.zip gameserver/ web/
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./calladmin.zip
+          asset_name: calladmin.zip
+          asset_content_type: application/zip
