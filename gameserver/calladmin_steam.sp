@@ -33,7 +33,6 @@
 #include "include/system2"
 
 #undef REQUIRE_PLUGIN
-#include "include/updater"
 #pragma semicolon 1
 #pragma newdecls required
 
@@ -91,9 +90,6 @@ ArrayList g_hRecipientAdt;
 
 
 
-// Updater
-#define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_steam.txt"
-
 
 public Plugin myinfo = 
 {
@@ -125,7 +121,7 @@ public void OnConfigsExecuted()
 public void OnPluginStart()
 {
 	// This update is crucial for the module to work again
-	// This is a nicer message than "Native not bound" for people who get the update via updater and might not know what's going on
+	// This is a nicer message than "Native not bound" and might not know what's going on
 	if (GetFeatureStatus(FeatureType_Native, "MessageBot_SetOption") != FeatureStatus_Available)
 	{
 		CallAdmin_LogMessage("Please update your MessageBot extension. You can find the latest version here: https://github.com/dordnung/MessageBot/releases");
@@ -517,28 +513,6 @@ public Action Command_ListRecipients(int client, int args)
 	}
 
 	return Plugin_Handled;
-}
-
-
-
-
-public void OnAllPluginsLoaded()
-{
-	if (LibraryExists("updater"))
-	{
-		Updater_AddPlugin(UPDATER_URL);
-	}
-}
-
-
-
-
-public void OnLibraryAdded(const char[] name)
-{
-	if (StrEqual(name, "updater"))
-	{
-		Updater_AddPlugin(UPDATER_URL);
-	}
 }
 
 

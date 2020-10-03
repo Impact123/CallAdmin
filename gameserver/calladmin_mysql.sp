@@ -28,7 +28,6 @@
 #include "include/calladmin"
 
 #undef REQUIRE_PLUGIN
-#include "include/updater"
 #pragma semicolon 1
 #pragma newdecls required
 
@@ -64,9 +63,6 @@ Database g_hDbHandle;
 #define SQL_DB_CONF "CallAdmin"
 
 
-
-// Updater
-#define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_mysql.txt"
 
 
 public Plugin myinfo = 
@@ -144,29 +140,6 @@ void InitDB()
 	}
 	
 	Database.Connect(SQLT_ConnectCallback, SQL_CheckConfig(SQL_DB_CONF) ? SQL_DB_CONF : "default");
-}
-
-
-
-
-
-public void OnAllPluginsLoaded()
-{
-	if (LibraryExists("updater"))
-	{
-		Updater_AddPlugin(UPDATER_URL);
-	}
-}
-
-
-
-
-public void OnLibraryAdded(const char[] name)
-{
-    if (StrEqual(name, "updater"))
-    {
-        Updater_AddPlugin(UPDATER_URL);
-    }
 }
 
 

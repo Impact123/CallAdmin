@@ -30,7 +30,6 @@
 #include <regex>
 
 #undef REQUIRE_PLUGIN
-#include "include/updater"
 #pragma semicolon 1
 #pragma newdecls required
 
@@ -51,9 +50,6 @@ char g_sKey[PLATFORM_MAX_PATH];
 int g_iCurrentTrackers;
 
 
-
-// Updater
-#define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_ts3.txt"
 
 
 public Plugin myinfo = 
@@ -121,25 +117,6 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 	}
 }
 
-
-
-public void OnAllPluginsLoaded()
-{
-	if (LibraryExists("updater"))
-	{
-		Updater_AddPlugin(UPDATER_URL);
-	}
-}
-
-
-
-public void OnLibraryAdded(const char[] name)
-{
-	if (StrEqual(name, "updater"))
-	{
-		Updater_AddPlugin(UPDATER_URL);
-	}
-}
 
 
 

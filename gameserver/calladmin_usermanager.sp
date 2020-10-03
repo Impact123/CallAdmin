@@ -30,7 +30,6 @@
 #include "include/calladmin_stocks"
 
 #undef REQUIRE_PLUGIN
-#include "include/updater"
 #include <basecomm>
 
 #pragma semicolon 1
@@ -59,9 +58,6 @@ bool g_bClientOnBlacklist[MAXPLAYERS + 1];
 bool g_bClientImmune[MAXPLAYERS + 1];
 
 
-
-// Updater
-#define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin_usermanager.txt"
 
 
 
@@ -183,29 +179,14 @@ public void OnCvarChanged(Handle cvar, const char[] oldValue, const char[] newVa
 }
 
 
-// Updater
 public void OnAllPluginsLoaded()
 {
-	if (LibraryExists("updater"))
-	{
-		Updater_AddPlugin(UPDATER_URL);
-	}
-
 	if (!LibraryExists("basecomm") && (g_bBlacklistMuted || g_bBlacklistGagged))
 	{
 		CallAdmin_LogMessage("Couldn't find Plugin basecomm.smx. But you've activated mute or gag blacklisting!");
 	}
 }
 
-
-// Updater
-public void OnLibraryAdded(const char[] name)
-{
-	if (StrEqual(name, "updater"))
-	{
-		Updater_AddPlugin(UPDATER_URL);
-	}
-}
 
 
 

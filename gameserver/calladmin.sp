@@ -29,7 +29,6 @@
 #include "include/calladmin_stocks"
 
 #undef REQUIRE_PLUGIN
-#include "include/updater"
 #include <clientprefs>
 #pragma semicolon 1
 #pragma newdecls required
@@ -135,8 +134,6 @@ Handle g_hOnReportHandledForward;
 
 
 
-// Updater
-#define UPDATER_URL "http://plugins.gugyclan.eu/calladmin/calladmin.txt"
 
 
 public Plugin myinfo = 
@@ -700,27 +697,6 @@ public Action Timer_Advert(Handle timer)
 	return Plugin_Handled;
 }
 
-
-
-
-public void OnAllPluginsLoaded()
-{
-    if (LibraryExists("updater"))
-    {
-        Updater_AddPlugin(UPDATER_URL);
-    }
-}
-
-
-
-
-public void OnLibraryAdded(const char[] name)
-{
-    if (StrEqual(name, "updater"))
-    {
-        Updater_AddPlugin(UPDATER_URL);
-    }
-}
 
 
 
