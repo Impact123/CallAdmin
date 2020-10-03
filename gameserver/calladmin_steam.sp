@@ -121,7 +121,7 @@ public void OnConfigsExecuted()
 public void OnPluginStart()
 {
 	// This update is crucial for the module to work again
-	// This is a nicer message than "Native not bound" and might not know what's going on
+	// This is a nicer message than "Native not bound"
 	if (GetFeatureStatus(FeatureType_Native, "MessageBot_SetOption") != FeatureStatus_Available)
 	{
 		CallAdmin_LogMessage("Please update your MessageBot extension. You can find the latest version here: https://github.com/dordnung/MessageBot/releases");
