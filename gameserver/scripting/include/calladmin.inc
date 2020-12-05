@@ -278,7 +278,7 @@ public SharedPlugin __pl_calladmin =
 
 
 #if !defined REQUIRE_PLUGIN
-public __pl_calladmin_SetNTVOptional()
+public void __pl_calladmin_SetNTVOptional()
 {
 	MarkNativeAsOptional("CallAdmin_GetTrackersCount");
 	MarkNativeAsOptional("CallAdmin_RequestTrackersCountRefresh");
