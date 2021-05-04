@@ -1141,6 +1141,8 @@ void ShowClientSelectMenu(int client)
 	// Menu has no items, no players to report
 	if (menu.ItemCount < 1)
 	{
+		delete menu;
+		
 		PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoPlayers");
 	}
 	else
