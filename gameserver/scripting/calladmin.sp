@@ -1440,7 +1440,7 @@ void UpdateHostIp()
 
 
 
-stock void SetClientCookieEx(int client, Handle cookie, const char[] format, any:...)
+stock void SetClientCookieEx(int client, Handle cookie, const char[] format, any ...)
 {
 	char sFormatBuf[1024];
 	VFormat(sFormatBuf, sizeof(sFormatBuf), format, 4);
