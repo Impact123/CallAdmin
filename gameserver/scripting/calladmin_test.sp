@@ -45,6 +45,7 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	RegConsoleCmd("calladmin_test", Command_Test);
+	RegConsoleCmd("sm_calladmin_test", Command_Test);
 }
 
 
@@ -52,43 +53,124 @@ public void OnPluginStart()
 
 public Action Command_Test(int client, int args)
 {
-	PrintToServer("Current trackercount: %d", CallAdmin_GetTrackersCount());
+	if (!CheckCommandAccess(client, "sm_calladmin_admin", ADMFLAG_BAN, false))
+	{
+		ReplyToCommand(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_NoAdmin");
+		
+		return Plugin_Handled;
+	}
+	
+	ReplyToCommand(client, "Current trackercount: %d", CallAdmin_GetTrackersCount());
 	
 	char sServerName[128];
 	CallAdmin_GetHostName(sServerName, sizeof(sServerName));
-	PrintToServer("Current host name: %s", sServerName);
+	ReplyToCommand(client, "Current host name: %s", sServerName);
 	
 	char sServerIp[16];
 	CallAdmin_GetHostIP(sServerIp, sizeof(sServerIp));
-	PrintToServer("Current host ip: %s", sServerIp);
+	ReplyToCommand(client, "Current host ip: %s", sServerIp);
 	
 	int iServerPort = CallAdmin_GetHostPort();
-	PrintToServer("Current host port: %d", iServerPort);
+	ReplyToCommand(client, "Current host port: %d", iServerPort);
 	
 	int iReportId = CallAdmin_GetReportID();
-	PrintToServer("Current report id: %d", iReportId);
+	ReplyToCommand(client, "Current report id: %d", iReportId);
 	
-	static char sReasons[][] = {"I was harassed", "I had an urge and felt like it needed to happen", "I don't like his face"};
+	static char sReasons[][] = {"I was harassed", "I had an urge and felt like it needed to happen", "I don't like their face", "I misclicked"};
 	
 	if (client)
 	{
 		int index = GetRandomInt(0, sizeof(sReasons) -1);
-		PrintToServer("Reporting client %N (%d) for: %s", client, client, sReasons[index]);
+		ReplyToCommand(client, "Reporting client %N (%d) for: %s", client, client, sReasons[index]);
 		
 		CallAdmin_ReportClient(REPORTER_CONSOLE, client, sReasons[index]);
 	}
+	else
+	{
+		ReplyToCommand(client, "Not in-game. Not creating a report");
+	}
 	
-	PrintToServer("Logging message");
+	ReplyToCommand(client, "Logging message");
 	CallAdmin_LogMessage("Loggingtest");
+	
+	
+	static char forwardNames[][] = {
+		"CallAdmin_OnDrawMenu",
+		"CallAdmin_OnDrawOwnReason",
+		"CallAdmin_OnDrawTarget",
+		"CallAdmin_OnTrackerCountChanged",
+		"CallAdmin_OnReportPre",
+		"CallAdmin_OnReportPost",
+		"CallAdmin_OnAddToAdminCount",
+		"CallAdmin_OnRequestTrackersCountRefresh",
+		"CallAdmin_OnServerDataChanged",
+		"CallAdmin_OnLogMessage",
+		"CallAdmin_OnReportHandled"
+	};
+	
+	for (int i=0; i < sizeof(forwardNames); i++)
+	{
+		ReplyToCommand(client, "Number of listeners for %s: %d", forwardNames[i], GetFunctionCountByName(forwardNames[i]));
+	}
 	
 	return Plugin_Handled;
 }
 
 
+stock int GetFunctionCountByName(const char[] name, bool excludeMyself=true)
+{
+	Handle myself = GetMyHandle();
+	Handle hIter;
+	Handle hPlugin;
+	Function func;
+	int count;
+	
+	hIter = GetPluginIterator();
+	
+	while (MorePlugins(hIter))
+	{
+		hPlugin = ReadPlugin(hIter);
+		
+		if (
+			(!excludeMyself || (excludeMyself && hPlugin != myself)) && 
+			GetPluginStatus(hPlugin) == Plugin_Running
+		)
+		{
+			if ( (func = GetFunctionByName(hPlugin, name) ) != INVALID_FUNCTION)
+			{
+				char sBuffer[128];
+				GetPluginFilename(hPlugin, sBuffer, sizeof(sBuffer));
+				PrintToCallAdminAdmins("Plugin %s has function %s", sBuffer, name);
+				count++;
+			}
+		}
+	}
+	
+	delete hIter;
+	
+	return count;
+}
+
+
+stock void PrintToCallAdminAdmins(const char[] format, any ...)
+{
+	char buffer[254];
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (IsClientInGame(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false))
+		{
+			SetGlobalTransTarget(i);
+			VFormat(buffer, sizeof(buffer), format, 2);
+			PrintToChat(i, "%s", buffer);
+		}
+	}
+}
+
 
 public Action CallAdmin_OnDrawMenu(int client)
 {
-	PrintToServer("The main CallAdmin client selection menu is drawn to: %N", client);
+	PrintToCallAdminAdmins("The main CallAdmin client selection menu is drawn to: %N", client);
 	
 	return Plugin_Continue;
 }
@@ -97,7 +179,7 @@ public Action CallAdmin_OnDrawMenu(int client)
 
 public Action CallAdmin_OnDrawOwnReason(int client)
 {
-	PrintToServer("An own reason menu is drawn to: %N", client);
+	PrintToCallAdminAdmins("An own reason menu is drawn to: %N", client);
 	
 	return Plugin_Continue;
 }
@@ -106,7 +188,7 @@ public Action CallAdmin_OnDrawOwnReason(int client)
 
 public Action CallAdmin_OnDrawTarget(int client, int target)
 {
-	PrintToServer("Client %N is drawn to %N", target, client);
+	PrintToCallAdminAdmins("Client %N is drawn to %N", target, client);
 	
 	return Plugin_Continue;
 }
@@ -115,14 +197,14 @@ public Action CallAdmin_OnDrawTarget(int client, int target)
 
 public void CallAdmin_OnTrackerCountChanged(int oldVal, int newVal)
 {
-	PrintToServer("Trackercount has changed from %d to %d", oldVal, newVal);
+	PrintToCallAdminAdmins("Trackercount has changed from %d to %d", oldVal, newVal);
 }
 
 
 
 public Action CallAdmin_OnAddToAdminCount(int client)
 {
-	PrintToServer("Client %N is being added to admin count", client);
+	PrintToCallAdminAdmins("Client %N is being added to admin count", client);
 	
 	return Plugin_Continue;
 }
@@ -134,11 +216,11 @@ public Action CallAdmin_OnReportPre(int client, int target, const char[] reason)
 	// Reporter wasn't a real client (initiated by a module)
 	if (client == REPORTER_CONSOLE)
 	{
-		PrintToServer("%N is about to be reported by Server for: %s", target, reason);
+		PrintToCallAdminAdmins("%N is about to be reported by Server for: %s", target, reason);
 	}
 	else
 	{
-		PrintToServer("%N is about to be reported by %N for: %s", target, client, reason);
+		PrintToCallAdminAdmins("%N is about to be reported by %N for: %s", target, client, reason);
 	}
 	
 	return Plugin_Continue;
@@ -153,11 +235,11 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	// Reporter wasn't a real client (initiated by a module)
 	if (client == REPORTER_CONSOLE)
 	{
-		PrintToServer("%N (ReportID: %i) was reported by Server for: %s", target, id, reason);
+		PrintToCallAdminAdmins("%N (ReportID: %i) was reported by Server for: %s", target, id, reason);
 	}
 	else
 	{
-		PrintToServer("%N (ReportID: %i) was reported by %N for: %s", target, id, client, reason);
+		PrintToCallAdminAdmins("%N (ReportID: %i) was reported by %N for: %s", target, id, client, reason);
 	}
 }
 
@@ -165,7 +247,7 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 
 public void CallAdmin_OnRequestTrackersCountRefresh(int &trackers)
 {
-	PrintToServer("Base plugin requested a tracker count from us");
+	PrintToCallAdminAdmins("Base plugin requested a tracker count from us");
 }
 
 
@@ -175,20 +257,20 @@ public void CallAdmin_OnLogMessage(Handle plugin, const char[] message)
 	char sPluginName[64];
 	GetPluginInfo(plugin, PlInfo_Name, sPluginName, sizeof(sPluginName));
 	
-	PrintToServer("Plugin: %s (handle: %x) logged a message: %s", sPluginName, plugin, message);
+	PrintToCallAdminAdmins("Plugin: %s (handle: %x) logged a message: %s", sPluginName, plugin, message);
 }
 
 
 
 public void CallAdmin_OnServerDataChanged(ConVar convar, ServerData type, const char[] oldVal, const char[] newVal)
 {
-	PrintToServer("Convar: %x (type: %d) was changed from '%s' to '%s'", convar, type, oldVal, newVal);
+	PrintToCallAdminAdmins("Convar: %x (type: %d) was changed from '%s' to '%s'", convar, type, oldVal, newVal);
 }
 
 
 
 public void CallAdmin_OnReportHandled(int client, int id)
 {
-	PrintToServer("ReportID: %d was handled by: %N", id, client);
+	PrintToCallAdminAdmins("ReportID: %d was handled by: %N", id, client);
 }
 
