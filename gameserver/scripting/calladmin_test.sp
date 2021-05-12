@@ -60,38 +60,38 @@ public Action Command_Test(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	ReplyToCommand(client, "Current trackercount: %d", CallAdmin_GetTrackersCount());
+	PrintToConsole(client, "[CallAdmin Test] Current trackercount: %d", CallAdmin_GetTrackersCount());
 	
 	char sServerName[128];
 	CallAdmin_GetHostName(sServerName, sizeof(sServerName));
-	ReplyToCommand(client, "Current host name: %s", sServerName);
+	PrintToConsole(client, "[CallAdmin Test] Current host name: %s", sServerName);
 	
 	char sServerIp[16];
 	CallAdmin_GetHostIP(sServerIp, sizeof(sServerIp));
-	ReplyToCommand(client, "Current host ip: %s", sServerIp);
+	PrintToConsole(client, "[CallAdmin Test] Current host ip: %s", sServerIp);
 	
 	int iServerPort = CallAdmin_GetHostPort();
-	ReplyToCommand(client, "Current host port: %d", iServerPort);
+	PrintToConsole(client, "[CallAdmin Test] Current host port: %d", iServerPort);
 	
 	int iReportId = CallAdmin_GetReportID();
-	ReplyToCommand(client, "Current report id: %d", iReportId);
+	PrintToConsole(client, "[CallAdmin Test] Current report id: %d", iReportId);
 	
 	static char sReasons[][] = {"I was harassed", "I had an urge and felt like it needed to happen", "I don't like their face", "I misclicked"};
 	
 	if (client)
 	{
 		int index = GetRandomInt(0, sizeof(sReasons) -1);
-		ReplyToCommand(client, "Reporting client %N (%d) for: %s", client, client, sReasons[index]);
+		PrintToConsole(client, "[CallAdmin Test] Reporting client %N (%d) for: %s", client, client, sReasons[index]);
 		
 		CallAdmin_ReportClient(REPORTER_CONSOLE, client, sReasons[index]);
 	}
 	else
 	{
-		ReplyToCommand(client, "Not in-game. Not creating a report");
+		PrintToConsole(client, "[CallAdmin Test] Not in-game. Not creating a report");
 	}
 	
-	ReplyToCommand(client, "Logging message");
-	CallAdmin_LogMessage("Loggingtest");
+	PrintToConsole(client, "[CallAdmin Test] Logging message");
+	CallAdmin_LogMessage("[CallAdmin Test] Loggingtest");
 	
 	
 	static char forwardNames[][] = {
@@ -110,7 +110,12 @@ public Action Command_Test(int client, int args)
 	
 	for (int i=0; i < sizeof(forwardNames); i++)
 	{
-		ReplyToCommand(client, "Number of listeners for %s: %d", forwardNames[i], GetFunctionCountByName(forwardNames[i]));
+		PrintToConsole(client, "[CallAdmin Test] Number of listeners for %s: %d", forwardNames[i], GetFunctionCountByName(forwardNames[i]));
+	}
+	
+	if (GetCmdReplySource() == SM_REPLY_TO_CHAT)
+	{
+		ReplyToCommand(client, "[CallAdmin Test] Check console for output");
 	}
 	
 	return Plugin_Handled;
@@ -155,14 +160,16 @@ stock int GetFunctionCountByName(const char[] name, bool excludeMyself=true)
 stock void PrintToCallAdminAdmins(const char[] format, any ...)
 {
 	char buffer[254];
-
-	for (int i = 1; i <= MaxClients; i++)
+	
+	// Start from 0 because the sever shall be included
+	for (int i = 0; i <= MaxClients; i++)
 	{
-		if (IsClientInGame(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false))
+		if (i == 0 || (IsClientInGame(i) && CheckCommandAccess(i, "sm_calladmin_admin", ADMFLAG_BAN, false)) )
 		{
 			SetGlobalTransTarget(i);
 			VFormat(buffer, sizeof(buffer), format, 2);
-			PrintToChat(i, "%s", buffer);
+			
+			PrintToConsole(i, "[CallAdmin Test] %s", buffer);
 		}
 	}
 }
