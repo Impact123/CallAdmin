@@ -183,7 +183,7 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 	char sTargetName[MAX_NAME_LENGTH * 4];
 	
 	char sServerName[64 * 4];
-	char sServerIP[16 + 5];
+	char sServerIP[16 + 6];
 
 	// Currently maximum 48 in length
 	char sReason[REASON_MAX_LENGTH * 4];
