@@ -1,11 +1,11 @@
 # SourcePawn
-gameserver/*.smx
+*.smx
 gameserver/todo.txt
 gameserver/changelog.txt
 web/todo.txt
 web/changelog.txt
 todo.txt
 doc/
-misc/
+/misc/
 .history
 app.config.php
