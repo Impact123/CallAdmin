@@ -1,5 +1,5 @@
 #include <sourcemod>
-#include "../include/calladmin"
+#include "../scripting/include/calladmin"
 #include "include/discord.inc"
 
 #define PLUGIN_VERSION "1.1.2"
