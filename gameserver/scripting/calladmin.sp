@@ -98,17 +98,17 @@ int g_iCurrentTrackers;
 
 
 // Current target info
-g_iTarget[MAXPLAYERS + 1];
+int g_iTarget[MAXPLAYERS + 1];
 char g_sTargetReason[MAXPLAYERS + 1][REASON_MAX_LENGTH];
 
 // Is this player writing his own reason?
 bool g_bAwaitingReason[MAXPLAYERS +1];
 
 // When has this user reported the last time
-g_iLastReport[MAXPLAYERS +1];
+int g_iLastReport[MAXPLAYERS +1];
 
 // When was this user reported the last time?
-g_iLastReported[MAXPLAYERS +1];
+int g_iLastReported[MAXPLAYERS +1];
 
 // Whether or not a client saw the antispam message
 bool g_bSawMessage[MAXPLAYERS +1];
