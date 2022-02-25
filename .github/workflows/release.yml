@@ -22,12 +22,12 @@ jobs:
 
       - run: |
           mkdir -p gameserver/plugins/disabled/
-          spcomp gameserver/scripting/calladmin.sp -o gameserver/plugins/calladmin.smx
-          spcomp gameserver/scripting/calladmin_steam.sp -o gameserver/plugins/calladmin_steam.smx
-          spcomp gameserver/scripting/calladmin_mysql.sp -o gameserver/plugins/calladmin_mysql.smx
-          spcomp gameserver/scripting/calladmin_ts3.sp -o gameserver/plugins/calladmin_ts3.smx
-          spcomp gameserver/scripting/calladmin_test.sp -o gameserver/plugins/disabled/calladmin_test.smx
-          spcomp gameserver/scripting/calladmin_usermanager.sp -o gameserver/plugins/calladmin_usermanager.smx
+          spcomp -i$includePath gameserver/scripting/calladmin.sp -o gameserver/plugins/calladmin.smx
+          spcomp -i$includePath gameserver/scripting/calladmin_steam.sp -o gameserver/plugins/calladmin_steam.smx
+          spcomp -i$includePath gameserver/scripting/calladmin_mysql.sp -o gameserver/plugins/calladmin_mysql.smx
+          spcomp -i$includePath gameserver/scripting/calladmin_ts3.sp -o gameserver/plugins/calladmin_ts3.smx
+          spcomp -i$includePath gameserver/scripting/calladmin_test.sp -o gameserver/plugins/disabled/calladmin_test.smx
+          spcomp -i$includePath gameserver/scripting/calladmin_usermanager.sp -o gameserver/plugins/calladmin_usermanager.smx
           rm -rf gameserver/misc
           zip -q -9 -r calladmin.zip gameserver/ web/
 

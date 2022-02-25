@@ -18,12 +18,12 @@ jobs:
           version: ${{ matrix.sm-version }}
 
       - run: |
-          spcomp gameserver/scripting/calladmin.sp
-          spcomp gameserver/scripting/calladmin_steam.sp
-          spcomp gameserver/scripting/calladmin_mysql.sp
-          spcomp gameserver/scripting/calladmin_ts3.sp
-          spcomp gameserver/scripting/calladmin_test.sp
-          spcomp gameserver/scripting/calladmin_usermanager.sp
-          spcomp gameserver/misc/calladmin_block.sp
-          spcomp gameserver/misc/calladmin_immunity.sp
-          spcomp gameserver/misc/discord_calladmin.sp
+          spcomp -i$includePath gameserver/scripting/calladmin.sp
+          spcomp -i$includePath gameserver/scripting/calladmin_steam.sp
+          spcomp -i$includePath gameserver/scripting/calladmin_mysql.sp
+          spcomp -i$includePath gameserver/scripting/calladmin_ts3.sp
+          spcomp -i$includePath gameserver/scripting/calladmin_test.sp
+          spcomp -i$includePath gameserver/scripting/calladmin_usermanager.sp
+          spcomp -i$includePath gameserver/misc/calladmin_block.sp
+          spcomp -i$includePath gameserver/misc/calladmin_immunity.sp
+          spcomp -i$includePath gameserver/misc/discord_calladmin.sp
