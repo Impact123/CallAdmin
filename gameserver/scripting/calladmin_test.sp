@@ -127,7 +127,6 @@ stock int GetFunctionCountByName(const char[] name, bool excludeMyself=true)
 	Handle myself = GetMyHandle();
 	Handle hIter;
 	Handle hPlugin;
-	Function func;
 	int count;
 	
 	hIter = GetPluginIterator();
@@ -141,7 +140,7 @@ stock int GetFunctionCountByName(const char[] name, bool excludeMyself=true)
 			GetPluginStatus(hPlugin) == Plugin_Running
 		)
 		{
-			if ( (func = GetFunctionByName(hPlugin, name) ) != INVALID_FUNCTION)
+			if (GetFunctionByName(hPlugin, name) != INVALID_FUNCTION)
 			{
 				char sBuffer[128];
 				GetPluginFilename(hPlugin, sBuffer, sizeof(sBuffer));
@@ -254,7 +253,13 @@ public void CallAdmin_OnReportPost(int client, int target, const char[] reason)
 
 public void CallAdmin_OnRequestTrackersCountRefresh(int &trackers)
 {
-	PrintToCallAdminAdmins("Base plugin requested a tracker count from us");
+	static float lastCall;
+	
+	float fTime = GetEngineTime();
+	float diff  = fTime - lastCall;
+	lastCall    = fTime;
+	
+	PrintToCallAdminAdmins("Base plugin requested a tracker count from us. Diff: %.2fs", lastCall == diff ? 0.0 : diff);
 }
 
 
