@@ -256,7 +256,7 @@ stock void URLEncode(char[] stringToEncode, int maxlength, char[] safe = "/", bo
     char sChar[8];
     char sReplaceChar[8];
     
-    for (new int i = 1; i < 256; i++)
+    for (int i = 1; i < 256; i++)
     {
         // Skip the '%' double replace ftw..
         if (i == 37)

@@ -130,7 +130,7 @@ public Action Timer_UpdateTrackersCount(Handle timer)
 
 
 
-int GetCurrentTrackers()
+void GetCurrentTrackers()
 {
 	// URL encode the key
 	char sKey[PLATFORM_MAX_PATH * 2];

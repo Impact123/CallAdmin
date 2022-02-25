@@ -209,6 +209,8 @@ public int Native_SetClientOnBlacklist(Handle plugin, int numParams)
 	{
 		g_bClientOnBlacklist[client] = GetNativeCell(2);
 	}
+	
+	return 1;
 }
 
 
@@ -221,6 +223,8 @@ public int Native_SetClientImmune(Handle plugin, int numParams)
 	{
 		g_bClientImmune[client] = GetNativeCell(2);
 	}
+	
+	return 1;
 }
 
 

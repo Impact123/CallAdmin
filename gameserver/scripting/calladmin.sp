@@ -186,6 +186,8 @@ public int Native_GetCurrentTrackers(Handle plugin, int numParams)
 public int Native_RequestTrackersCountRefresh(Handle plugin, int numParams)
 {
 	Timer_UpdateTrackersCount(null);
+	
+	return 1;
 }
 
 
@@ -195,6 +197,8 @@ public int Native_GetHostName(Handle plugin, int numParams)
 {
 	int max_size = GetNativeCell(2);
 	SetNativeString(1, g_sServerName, max_size);
+	
+	return 1;
 }
 
 
@@ -204,6 +208,8 @@ public int Native_GetHostIP(Handle plugin, int numParams)
 {
 	int max_size = GetNativeCell(2);
 	SetNativeString(1, g_sHostIP, max_size);
+	
+	return 1;
 }
 
 
@@ -266,6 +272,8 @@ public int Native_LogMessage(Handle plugin, int numParams)
 	LogToFileEx(g_sLogFile, "[%s] %s", sPluginName, sMessage);
 	
 	Forward_OnLogMessage(plugin, sMessage);
+	
+	return 1;
 }
 
 
@@ -952,7 +960,7 @@ public int MenuHandler_ConfirmCall(Menu menu, MenuAction action, int client, int
 		{
 			if (!ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]))
 			{
-				return;
+				return 0;
 			}
 		}
 		else
@@ -964,6 +972,8 @@ public int MenuHandler_ConfirmCall(Menu menu, MenuAction action, int client, int
 	{
 		menu.Close();
 	}
+	
+	return 1;
 }
 
 
@@ -1170,7 +1180,7 @@ public int MenuHandler_ClientSelect(Menu menu, MenuAction action, int client, in
 
 		if (!PreReportCheck(client, iID))
 		{
-			return;					
+			return 0;					
 		}
 		
 		g_iTarget[client] = iID;
@@ -1181,6 +1191,8 @@ public int MenuHandler_ClientSelect(Menu menu, MenuAction action, int client, in
 	{
 		menu.Close();
 	}
+	
+	return 1;
 }
 
 
@@ -1265,14 +1277,15 @@ public int MenuHandler_BanReason(Menu menu, MenuAction action, int client, int p
 		{
 			g_bAwaitingReason[client] = true;
 			PrintToChat(client, "\x04[CALLADMIN]\x03 %t", "CallAdmin_TypeOwnReason");
-			return;
+			
+			return 0;
 		}
 		
 		Format(g_sTargetReason[client], sizeof(g_sTargetReason[]), sInfo);
 		
 		if (!PreReportCheck(client, g_iTarget[client]))
 		{
-			return;
+			return 0;
 		}
 		
 			
@@ -1284,7 +1297,7 @@ public int MenuHandler_BanReason(Menu menu, MenuAction action, int client, int p
 		{
 			if (!ReportPlayer(client, g_iTarget[client], g_sTargetReason[client]))
 			{
-				return;
+				return 0;
 			}
 		}			
 	}
@@ -1292,6 +1305,8 @@ public int MenuHandler_BanReason(Menu menu, MenuAction action, int client, int p
 	{
 		menu.Close();
 	}
+	
+	return 1;
 }
 
 

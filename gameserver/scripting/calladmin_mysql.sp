@@ -540,6 +540,8 @@ int GetCurrentTrackers()
 		// Set to zero
 		g_iCurrentTrackers = 0;
 	}
+	
+	return 1;
 }
 
 
