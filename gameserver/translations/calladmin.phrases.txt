@@ -6,10 +6,8 @@
 		"en"		"You are not allowed to use this command for the next {1} seconds"
 		"de"		"Du darfst diesen Befehl nicht innerhalb der nächsten {1} Sekunden benutzen"
 		"fr"		"Vous ne pouvez pas utiliser cette commande avant {1} secondes"
+		"lv"		"Tu nevari izmanto šo komandu nākamās {1} sekundes"
 		"ru"		"Вы не можете использовать эту команду в течение следующих {1} секунд"
-		"pl"		"Nie możesz użyć tej komendy przez {1} sekund"
-		"es"		"No tienes permitido utilizar este comando por los próximos {1} segundos"
-		"pt"		"Você não tem permissão para usar este comando nos próximos {1} segundos"
 	}
 	"CallAdmin_HasReported"
 	{
@@ -17,10 +15,8 @@
 		"en"		"{1} reported {2} for {3}"
 		"de"		"{1} hat {2} wegen {3} gemeldet"
 		"fr"		"{1} a signalé {2} pour {3}"
+		"lv"		"{1} Apsūdz {2} par {3}"
 		"ru"		"{1} пожаловался на {2} по причине {3}"
-		"pl"		"{1} zgłosił {2} za {3}"
-		"es"		"{1} reportó a {2} por {3}"
-		"pt"		"{1} denunciou {2} por {3}"
 	}
 	"CallAdmin_YouHaveReported"
 	{
@@ -28,40 +24,32 @@
 		"en"		"You have reported {1} for {2}"
 		"de"		"Du hast {1} wegen {2} gemeldet"
 		"fr"		"Vous avez signalé {1} pour {2}"
+		"lv"		"Tu apsūdzi {1} par {2}"
 		"ru"		"Вы успешно пожаловались на {1} по причине {2}"
-		"pl"		"Zgłosiłeś {1} za {2}"
-		"es"		"Has reportado a {1} por {2}"
-		"pt" 		"Você denunciou {1} por {2}"
 	}
 	"CallAdmin_NoPlayers"
 	{
 		"en"		"There are no players you can report at this time"
 		"de"		"Es sind derzeit keine Spieler vorhanden die du melden kannst"
 		"fr"		"Aucun joueur ne peut être signalé pour le moment"
+		"lv"		"Šobrīd serverī nav neviena spēlētāja par kuru tu vari sūdzēties"
 		"ru"		"В настоящее время на сервере нет игроков, на которых вы можете пожаловаться"
-		"pl"		"Nie ma graczy, których możesz teraz zgłosić"
-		"es"		"No hay jugadores a los que puedas reportar en este momento"
-		"pt"		"Não há jogadores que você possa denunciar neste momento"
 	}
 	"CallAdmin_NotInGame"
 	{
 		"en"		"Player is not on the server anymore"
 		"de"		"Spieler ist nicht mehr auf dem Server"
 		"fr"		"Le joueur n'est plus sur le serveur"
+		"lv"		"Spēlētājs nav vairāk serverī"
 		"ru"		"Игрок уже покинул данный сервер"
-		"pl"		"Gracza nie ma już na serwerze"
-		"es"		"El jugador ya no está en el servidor"
-		"pt"		"O jogador não está mais no servidor"
 	}
 	"CallAdmin_SelectClient"
 	{
 		"en"		"Select a client to report"
 		"de"		"Wähle einen Spieler zum Melden"
 		"fr"		"Sélectionnez un joueur à signaler"
+		"lv"		"Izvēlies spēlētāju kuru tu vēlies apsūdzēt"
 		"ru"		"Выберите игрока, на которого вы хотите пожаловаться"
-		"pl"		"Wybierz gracza, którego chcesz zgłosić"
-		"es"		"Elige un cliente para reportar"
-		"pt"		"Selecione um cliente para denunciar"
 	}
 	"CallAdmin_SelectReason"
 	{
@@ -69,10 +57,8 @@
 		"en"		"Select a reason to report {1}"
 		"de"		"Wähle einen Grund um {1} zu melden"
 		"fr"		"Sélectionnez une raison pour signaler {1}"
+		"lv"		"Izvēlies iemeslu apsūdzībai {1}"
 		"ru"		"Выберите причину, по которой вы хотите пожаловаться на {1}"
-		"pl"		"Wybierz powód, dla którego chcesz zgłosić {1}"
-		"es"		"Elige una razón para reportar a {1}"
-		"pt"		"Selecione um motivo para denunciar {1}"
 	}
 	// Used when exactly 1 admin is available
 	"CallAdmin_AdvertMessageSingular"
@@ -81,10 +67,8 @@
 		"en"		"There is {1} admin available, type !call or /call in chat to report a player"
 		"de"		"Es ist {1} Admin verfügbar, tippe !call oder /call in den Chat um einen Spieler zu melden"
 		"fr"		"Il y a {1} admin disponible , tapez !call ou /call dans le chat pour signaler un joueur"
+		"lv"		"Serverī ir {1} admins, raksti čatā !call vai /call lai ziņotu par spēlētāju"
 		"ru"		"Сейчас на сервере находится {1} администратор. Напишите в чате !call или /call, чтобы пожаловаться ему на игрока"
-		"pl"		"Jest teraz dokładnie jeden admin na serwerze, wpisz !call lub /call na czacie aby zgłosić gracza"
-		"es"		"Hay {1} admin disponible, escribe !call o /call en el chat para reportar a un jugador"
-		"pt"		"Há {1} admin disponível, digite !call ou /call no chat para denunciar um jogador"
 	}
 	"CallAdmin_AdvertMessagePlural"
 	{
@@ -92,100 +76,80 @@
 		"en"		"There are {1} admins available, type !call or /call in chat to report a player"
 		"de"		"Es sind {1} Admins verfügbar, tippe !call oder /call in den Chat um einen Spieler zu melden"
 		"fr"		"Il y a {1} admins disponibles , tapez !call ou /call dans le chat pour signaler un joueur"
+		"lv"		"Serverī ir {1} admini, raksti čatā !call vai /call lai ziņotu par spēlētāju"
 		"ru"		"Администраторов на сервере в настоящее время: {1}. Напишите в чате !call или /call, чтобы пожаловаться на игрока"
-		"pl"		"Jest teraz {1} adminów na serwerze, wpisz !call lub /call na czacie aby zgłosić gracza"
-		"es"		"Hay {1} admins disponibles, escribe !call o /call en el chat para reportar a un jugador"
-		"pt"		"Há {1} admins disponíveis, digite !call ou /call no chat para denunciar um jogador"
 	}
 	"CallAdmin_OwnReason"
 	{
 		"en"		"Own reason"
 		"de"		"Eigener Grund"
 		"fr"		"Raison personnelle"
+		"lv"		"Paša Izvēlēts Iemesls"
 		"ru"		"Другая причина"
-		"pl"		"Własny powód"
-		"es"		"Otra razón"
-		"pt"		"Outra razão"
 	}
 	"CallAdmin_TypeOwnReason"
 	{
 		"en"		"You now can type your own banreason in the chat, please keep it short\nType '!noreason' or '!abort' to abort"
 		"de"		"Du kannst nun deinen eigenen Bangrund in den Chat schreiben, fasse dich bitte kurz\nSchreibe '!noreason' oder '!abort' um abzubrechen"
 		"fr"		"Vous pouvez maintenant écrire une raison personnelle dans le chat , écrivez une raison abrégée s'il vous plait\nEcrivez '!noreason' ou '!abort' pour annuler"
+		"lv"		"Tu tagad čatā vari rakstīt savu bana iemeslu. Lūdzu, neraksti gari\nRaksti '!noreason' vai '!abort' lai atceltu darbību"
 		"ru"		"Сейчас вы можете указать свою причину в чате. Будьте лаконичнее\nВведите '!noreason' или '!abort' для отмены"
-		"pl"		"Możesz teraz wpisać swój własny powód na czacie, Staraj się, by był krotki\n Wpisz '!noreason' or '!abort' aby odwołać zgłoszenie"
-		"es"		"Ahora puedes escribir tu propia razón en el chat, por favor, hazlo breve\nEscribe '!noreason' o '!abort' para abortar"
-		"pt"		"Agora você pode digitar sua própria razão no chat, por favor, seja breve\nDigite '!noreason' ou '!abort' para abortar"
 	}
 	"CallAdmin_CallAborted"
 	{
 		"en"		"Your call has been aborted"
 		"de"		"Der Meldevorgang wurde abgebrochen"
 		"fr"		"Votre appel à été annulé"
+		"lv"		"Tavs admina izsaukums tika atcelts"
 		"ru"		"Ваша жалоба была отменена"
-		"pl"		"Twoje zgłoszenie zostało odwołane"
-		"es"		"Tu reporte fue abortado"
-		"pt"		"Sua denúncia foi abortada"
 	}
 	"CallAdmin_OwnReasonTooShort"
 	{
 		"en"		"Your banreason is too short, please try it again"
 		"de"		"Dein Bangrund ist zu kurz, bitte versuche es erneut"
 		"fr"		"La raison du ban est trop courte , veuillez réessayer"
+		"lv"		"Izsaukuma iemesls parāk īss, mēģini vēlreiz"
 		"ru"		"Вы указали слишком короткую причину жалобы. Попробуйте ещё раз"
-		"pl"		"Twój powód jest zbyt krótki, spróbuj ponownie"
-		"es"		"Tu razón es muy corta, inténtalo de nuevo"
-		"pt"		"Sua razão é muito curta, tente novamente"
 	}
 	"CallAdmin_ConfirmCall"
 	{
 		"en"		"Are you sure you want to call an admin?, abuse will be punished"
 		"de"		"Bist du sicher dass du einen Admin rufen willst?, Missbrauch wird bestraft"
 		"fr"		"Voulez-vous vraiment appeler un admin ?, les abus seront sanctionnés"
+		"lv"		"Vai esi drošs ka vēlies izsaukt adminu?, par nepamatotiem izsaukumiem var saņemt sodu"
 		"ru"		"Вы уверены, что хотите отправить жалобу администратору? Помните, что существует наказание за ложные вызовы"
-		"pl"		"Czy na pewno chcesz zgłosić gracza?, nadużycie bedzie karane"
-		"es"		"¿Estás seguro de que deseas llamar a un admin? Abusar de esto resultará en un castigo"
-		"pt"		"Tem certeza de que deseja chamar um administrador? Abusar disso resultará em punição"
 	}
 	"CallAdmin_Yes"
 	{
 		"en"		"Yes"
 		"de"		"Ja"
 		"fr"		"Oui"
+		"lv"		"Jā"
 		"ru"		"Да"
-		"pl"		"Tak"
-		"es"		"Sí"
-		"pt"		"Sim"
 	}
 	"CallAdmin_No"
 	{
 		"en"		"No"
 		"de"		"Nein"
 		"fr"		"Non"
+		"lv"		"Nē"
 		"ru"		"Нет"
-		"pl"		"Nie"
-		"es"		"No"
-		"pt"		"Não"
 	}
 	"CallAdmin_AlreadyReported"
 	{
 		"en"		"Player was already reported"
 		"de"		"Spieler wurde bereits gemeldet"
 		"fr"		"Joueur déjà signalé"
+		"lv"		"Jau tika ziņots par spēlētāju"
 		"ru"		"На этого игрока уже пожаловались"
-		"pl"		"Gracz został już zgłoszony"
-		"es"		"Este jugador ya ha sido reportado"
-		"pt"		"O jogador já foi denunciado"
 	}
 	"CallAdmin_IngameAdminNotified"
 	{
 		"en"		"An admin in-game was notified about your report"
 		"de"		"Ein Admin in-game wurde über deine Meldung benachrichtigt"
 		"fr"		"Un admin en jeu a été notifié de votre signalement"
+		"lv"		"Admini/s spēlē saņēma tavu izsaukumu"
 		"ru"		"Администраторы, находящиеся на сервере, были проинформированы о вашей жалобе"
-		"pl"		"Aktywny admin został poinformowany o twoim zgłoszeniu"
-		"es"		"Un admin dentro del juego ha recibido tu reporte"
-		"pt"		"Um admin dentro do jogo recebeu sua denúncia"
 	}
 	"CallAdmin_AdminNotification"
 	{
@@ -193,55 +157,42 @@
 		"en"		"Player {1} reported {2} for {3}"
 		"de"		"Spieler {1} hat {2} wegen {3} gemeldet"
 		"fr"		"Le joueur {1} à signalé {2} pour {3}"
+		"lv"		"Spēlētājs {1} ziņoja {2} par {3}"
 		"ru"		"Игрок {1} пожаловался на {2} по причине {3}"
-		"pl"		"Gracz {1} zgłosił {2} za {3}"
-		"es"		"El jugador {1} reportó a {2} por {3}"
-		"pt"		"O jogador {1} denunciou {2} por {3}"
 	}
 	"CallAdmin_ReportAlreadyHandled"
 	{
 		"en"		"This report was already handled"
 		"de"		"Diese Meldung wurde bereits erledigt"
+		"lv"		"Šis izsaukums jau tiek apstrādāts"
 		"ru"		"Эта жалоба уже была рассмотрена"
-		"fr"		"Ce signalement a déjà été traité"
-		"pl"		"To zgłoszenie zostało już przyjęte"
-		"es"		"Este reporte ya se ha revisado"
-		"pt"		"Esta denúncia já foi revisada"
 	}
 	"CallAdmin_NoAdmin"
 	{
 		"en"		"Only admins have access to this command"
 		"de"		"Nur Admins können diesen Befehl ausführen"
+		"lv"		"Tikai adminiem ir piekļuve šai komandai"
 		"ru"		"Только администраторы имеют доступ к этой команде"
-		"fr"		"Seuls les administrateurs ont accès à cette commande"
-		"pl"		"Tylko admini mają dostęp do tej komendy"
-		"es"		"Sólo admins tienen acceso a este comando"
-		"pt"		"Somente admins têm acesso a este comando"
 	}
 	"CallAdmin_WrongNumberOfArguments"
 	{
 		"en"		"You've used a wrong number of arguments"
 		"de"		"Du hast eine falsche Anzahl an Argumenten benutzt"
+		"lv"		"Tu izmantoji nepareizus ciparus argumentiem"
 		"ru"		"Указано неправильное количество аргументов"
-		"fr"		"Vous avez utilisé un mauvais nombre d'arguments"
-		"pl"		"Użyłeś złej liczby argumentów"
-		"es"		"El número de argumentos es incorrecto"
-		"pt"		"O número de argumentos está errado"
 	}
 	"CallAdmin_WrongReportID"
 	{
 		"en"		"You've used a wrong report id"
 		"de"		"Du hast eine falsche Melde-id benutzt"
+		"lv"		"Tu izmantoji nepareizo ziņojuma id"
 		"ru"		"Указан неправильный ID жалобы"
-		"fr"		"Vous avez utilisé un mauvais identifiant de signalement"
-		"pl"		"Użyłeś złe ID zgłoszenia"
-		"es"		"Has usado un ID de reporte incorrecto"
-		"pt"		"Você usou um ID de denúncia errado"
 	}
 	"CallAdmin_RecentlyReported"
 	{
 		"en"		"Recently reported"
 		"de"		"Kürzlich gemeldet"
+		"lv"		"Nesen ziņots par"
 		"fr"		"Récemment signalé"
 		"pl"		"Ostatnio zgłoszony"
 		"es"		"Recientemente reportado"
