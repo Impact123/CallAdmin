@@ -2,13 +2,14 @@
 {
 	"CallAdmin_ClientBlacklistMute"
 	{
-		"en"		"You are now, because of muting, on the blacklist. You can't report players anymore!"
+		"en"		"You are on the blacklist now! Because you recieved mute/gag. You can't report players anymore!"
 		"de"		"Aufgrund eines Mutes bist du nun auf der Blacklist. Du kannst jetzt keine Spieler mehr reporten!"
 		"ru"		"Из-за того, что вам был отключён микрофон, вы попали в чёрный список и больше не можете жаловаться на других игроков!"
-		"chi"           "因你被静音或者在封禁名单,你不能报告其他玩家!"
+		"chi"       "因你被静音或者在封禁名单,你不能报告其他玩家!"
 		"fr"		"Vous êtes maintenant sur la liste noire car vous avez été muté. Vous ne pouvez plus report de joueurs."
 		"es" 		"Ahora estás en la blacklist por estar muteado. ¡No puedes reportar jugadores!"
 		"pt"		"Você está agora na blacklist por ter sido mutado. Você não pode denunciar jogadores!"
+		"lv"		"Tu tagad esi melnajā sarakstā! Jo tu saņēmi mute/gag. Tu vairāk nevari izmantot  admina izsaukšanas funkciju!"
 	}
 	"CallAdmin_ClientBlacklistGag"
 	{
@@ -19,6 +20,7 @@
 		"fr"		"Vous êtes maintenant sur la liste noire car vous avez été gag. Vous ne pouvez plus report de joueurs."
 		"es" 		"Ahora estás en la blacklist por estar gaggeado. ¡No puedes reportar jugadores!"
 		"pt"		"Você está agora na blacklist por ter sido gaggado. Você não pode denunciar jogadores!"
+		"lv"		"Tu tagad esi melnajā sarakstā! Jo tu saņēmi gag. Tu vairāk nevari izmantot  admina izsaukšanas funkciju!"
 	}
 	"CallAdmin_ClientBlacklistRemove"
 	{
@@ -29,6 +31,7 @@
 		"fr"		"Vous n'êtes plus sur la liste noire. Vous de nouveau pouvez report des joueurs."
 		"es" 		"Has sido removido de la blacklist. ¡Ya puedes reportar jugadores!"
 		"pt"		"Você foi removido da blacklist. Agora você pode denunciar jogadores!"
+		"lv"		"Tu tiki noņemts no melnā sarakstā! Tu atkal vari izmantot admina izsaukšanas funkciju!"
 	}
 	"CallAdmin_ClientOnBlacklist"
 	{
@@ -39,6 +42,7 @@
 		"fr"		"Vous êtes actuellement sur la liste noire. Vous ne pouvez plus report de joueurs."
 		"es"		"Estás en la blacklist. ¡No puedes reportar jugadores!"
 		"pt"		"Você está na blacklist. Você não pode denunciar jogadores!"
+		"lv"		"Tu šobrīd esi melnajā sarakstā! Tu nevari izmantot  admina izsaukšanas funkciju!"
 	}
 	"CallAdmin_TargetImmune"
 	{
@@ -50,5 +54,6 @@
 		"fr"		"Le joueur {1} est immunisé. Vous ne pouvez pas le report."
 		"es"		"El jugador {1} es inmune. No puedes reportarlo."
 		"pt"		"O jogador {1} é imune. Você não pode denunciá-lo."
+		"lv"		"Spēlētājam {1} ir imunitāte. Tu nevari ziņot par viņu."
 	}
 }
