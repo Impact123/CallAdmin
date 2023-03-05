@@ -10,6 +10,7 @@
 		"pl"		"Nie możesz użyć tej komendy przez {1} sekund"
 		"es"		"No tienes permitido utilizar este comando por los próximos {1} segundos"
 		"pt"		"Você não tem permissão para usar este comando nos próximos {1} segundos"
+		"lv"		"Tu nevari izmanto šo komandu nākamās {1} sekundes"
 	}
 	"CallAdmin_HasReported"
 	{
@@ -21,6 +22,7 @@
 		"pl"		"{1} zgłosił {2} za {3}"
 		"es"		"{1} reportó a {2} por {3}"
 		"pt"		"{1} denunciou {2} por {3}"
+		"lv"		"{1} Apsūdz {2} par {3}"
 	}
 	"CallAdmin_YouHaveReported"
 	{
@@ -32,6 +34,7 @@
 		"pl"		"Zgłosiłeś {1} za {2}"
 		"es"		"Has reportado a {1} por {2}"
 		"pt" 		"Você denunciou {1} por {2}"
+		"lv"		"Tu apsūdzi {1} par {2}"
 	}
 	"CallAdmin_NoPlayers"
 	{
@@ -42,6 +45,7 @@
 		"pl"		"Nie ma graczy, których możesz teraz zgłosić"
 		"es"		"No hay jugadores a los que puedas reportar en este momento"
 		"pt"		"Não há jogadores que você possa denunciar neste momento"
+		"lv"		"Šobrīd serverī nav neviena spēlētāja par kuru tu vari sūdzēties"
 	}
 	"CallAdmin_NotInGame"
 	{
@@ -52,6 +56,7 @@
 		"pl"		"Gracza nie ma już na serwerze"
 		"es"		"El jugador ya no está en el servidor"
 		"pt"		"O jogador não está mais no servidor"
+		"lv"		"Spēlētājs nav vairāk serverī"
 	}
 	"CallAdmin_SelectClient"
 	{
@@ -62,6 +67,7 @@
 		"pl"		"Wybierz gracza, którego chcesz zgłosić"
 		"es"		"Elige un cliente para reportar"
 		"pt"		"Selecione um cliente para denunciar"
+		"lv"		"Izvēlies spēlētāju kuru tu vēlies apsūdzēt"
 	}
 	"CallAdmin_SelectReason"
 	{
@@ -73,6 +79,7 @@
 		"pl"		"Wybierz powód, dla którego chcesz zgłosić {1}"
 		"es"		"Elige una razón para reportar a {1}"
 		"pt"		"Selecione um motivo para denunciar {1}"
+		"lv"		"Izvēlies iemeslu apsūdzībai {1}"
 	}
 	// Used when exactly 1 admin is available
 	"CallAdmin_AdvertMessageSingular"
@@ -85,6 +92,7 @@
 		"pl"		"Jest teraz dokładnie jeden admin na serwerze, wpisz !call lub /call na czacie aby zgłosić gracza"
 		"es"		"Hay {1} admin disponible, escribe !call o /call en el chat para reportar a un jugador"
 		"pt"		"Há {1} admin disponível, digite !call ou /call no chat para denunciar um jogador"
+		"lv"		"Serverī ir {1} admins, raksti čatā !call vai /call lai ziņotu par spēlētāju"
 	}
 	"CallAdmin_AdvertMessagePlural"
 	{
@@ -96,6 +104,7 @@
 		"pl"		"Jest teraz {1} adminów na serwerze, wpisz !call lub /call na czacie aby zgłosić gracza"
 		"es"		"Hay {1} admins disponibles, escribe !call o /call en el chat para reportar a un jugador"
 		"pt"		"Há {1} admins disponíveis, digite !call ou /call no chat para denunciar um jogador"
+		"lv"		"Serverī ir {1} admini, raksti čatā !call vai /call lai ziņotu par spēlētāju"
 	}
 	"CallAdmin_OwnReason"
 	{
@@ -106,6 +115,7 @@
 		"pl"		"Własny powód"
 		"es"		"Otra razón"
 		"pt"		"Outra razão"
+		"lv"		"Paša Izvēlēts Iemesls"
 	}
 	"CallAdmin_TypeOwnReason"
 	{
@@ -116,6 +126,7 @@
 		"pl"		"Możesz teraz wpisać swój własny powód na czacie, Staraj się, by był krotki\n Wpisz '!noreason' or '!abort' aby odwołać zgłoszenie"
 		"es"		"Ahora puedes escribir tu propia razón en el chat, por favor, hazlo breve\nEscribe '!noreason' o '!abort' para abortar"
 		"pt"		"Agora você pode digitar sua própria razão no chat, por favor, seja breve\nDigite '!noreason' ou '!abort' para abortar"
+		"lv"		"Tu tagad čatā vari rakstīt savu bana iemeslu. Lūdzu, neraksti gari\nRaksti '!noreason' vai '!abort' lai atceltu darbību"
 	}
 	"CallAdmin_CallAborted"
 	{
@@ -126,6 +137,7 @@
 		"pl"		"Twoje zgłoszenie zostało odwołane"
 		"es"		"Tu reporte fue abortado"
 		"pt"		"Sua denúncia foi abortada"
+		"lv"		"Tavs admina izsaukums tika atcelts"
 	}
 	"CallAdmin_OwnReasonTooShort"
 	{
@@ -136,6 +148,7 @@
 		"pl"		"Twój powód jest zbyt krótki, spróbuj ponownie"
 		"es"		"Tu razón es muy corta, inténtalo de nuevo"
 		"pt"		"Sua razão é muito curta, tente novamente"
+		"lv"		"Izsaukuma iemesls parāk īss, mēģini vēlreiz"
 	}
 	"CallAdmin_ConfirmCall"
 	{
@@ -146,6 +159,7 @@
 		"pl"		"Czy na pewno chcesz zgłosić gracza?, nadużycie bedzie karane"
 		"es"		"¿Estás seguro de que deseas llamar a un admin? Abusar de esto resultará en un castigo"
 		"pt"		"Tem certeza de que deseja chamar um administrador? Abusar disso resultará em punição"
+		"lv"		"Vai esi drošs ka vēlies izsaukt adminu?, par nepamatotiem izsaukumiem var saņemt sodu"
 	}
 	"CallAdmin_Yes"
 	{
@@ -156,6 +170,7 @@
 		"pl"		"Tak"
 		"es"		"Sí"
 		"pt"		"Sim"
+		"lv"		"Jā"
 	}
 	"CallAdmin_No"
 	{
@@ -166,6 +181,7 @@
 		"pl"		"Nie"
 		"es"		"No"
 		"pt"		"Não"
+		"lv"		"Nē"
 	}
 	"CallAdmin_AlreadyReported"
 	{
@@ -176,6 +192,7 @@
 		"pl"		"Gracz został już zgłoszony"
 		"es"		"Este jugador ya ha sido reportado"
 		"pt"		"O jogador já foi denunciado"
+		"lv"		"Jau tika ziņots par spēlētāju"
 	}
 	"CallAdmin_IngameAdminNotified"
 	{
@@ -186,6 +203,7 @@
 		"pl"		"Aktywny admin został poinformowany o twoim zgłoszeniu"
 		"es"		"Un admin dentro del juego ha recibido tu reporte"
 		"pt"		"Um admin dentro do jogo recebeu sua denúncia"
+		"lv"		"Admini/s spēlē saņēma tavu izsaukumu"
 	}
 	"CallAdmin_AdminNotification"
 	{
@@ -197,6 +215,7 @@
 		"pl"		"Gracz {1} zgłosił {2} za {3}"
 		"es"		"El jugador {1} reportó a {2} por {3}"
 		"pt"		"O jogador {1} denunciou {2} por {3}"
+		"lv"		"Spēlētājs {1} ziņoja {2} par {3}"
 	}
 	"CallAdmin_ReportAlreadyHandled"
 	{
@@ -207,6 +226,7 @@
 		"pl"		"To zgłoszenie zostało już przyjęte"
 		"es"		"Este reporte ya se ha revisado"
 		"pt"		"Esta denúncia já foi revisada"
+		"lv"		"Šis izsaukums jau tiek apstrādāts"
 	}
 	"CallAdmin_NoAdmin"
 	{
@@ -217,6 +237,7 @@
 		"pl"		"Tylko admini mają dostęp do tej komendy"
 		"es"		"Sólo admins tienen acceso a este comando"
 		"pt"		"Somente admins têm acesso a este comando"
+		"lv"		"Tikai adminiem ir piekļuve šai komandai"
 	}
 	"CallAdmin_WrongNumberOfArguments"
 	{
@@ -227,6 +248,7 @@
 		"pl"		"Użyłeś złej liczby argumentów"
 		"es"		"El número de argumentos es incorrecto"
 		"pt"		"O número de argumentos está errado"
+		"lv"		"Tu izmantoji nepareizus ciparus argumentiem"
 	}
 	"CallAdmin_WrongReportID"
 	{
@@ -237,6 +259,7 @@
 		"pl"		"Użyłeś złe ID zgłoszenia"
 		"es"		"Has usado un ID de reporte incorrecto"
 		"pt"		"Você usou um ID de denúncia errado"
+		"lv"		"Tu izmantoji nepareizo ziņojuma id"
 	}
 	"CallAdmin_RecentlyReported"
 	{
@@ -246,5 +269,6 @@
 		"pl"		"Ostatnio zgłoszony"
 		"es"		"Recientemente reportado"
 		"pt"		"Denunciado recentemente"
+		"lv"		"Nesen ziņots par"
 	}
 }
